@@ -49,8 +49,22 @@ export async function checkHealth() {
 }
 
 /**
+ * Fetch detailed player stats from the backend (which scrapes the profile page).
+ * @param {string} playerId - Numeric player ID
+ * @returns {Promise<Object>} Player stats including batting/bowling data
+ */
+export async function fetchPlayerStats(playerId) {
+  const response = await fetch(`${API_BASE}/api/sca/players/${encodeURIComponent(playerId)}/stats`);
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.error || error.message || `HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
  * Multi-platform search - currently only SCA is live.
- * Wraps SCA results in the multi-platform format the UI expects.
+ * Splits multi-word queries into firstName + lastName for better SCA matching.
  * @param {string} query - Search query (player name)
  * @returns {Promise<Object>} Aggregated results across platforms
  */
@@ -64,26 +78,38 @@ export async function searchAcrossPlatforms(query) {
 
   let totalFound = 0;
 
+  // Split "First Last" into separate fields for more accurate SCA matching
+  const parts = query.trim().split(/\s+/);
+  const searchParams = parts.length >= 2
+    ? { firstName: parts[0], lastName: parts.slice(1).join(' ') }
+    : { firstName: query };
+
   // SCA - LIVE
   try {
-    const scaResult = await searchSCAPlayers({ firstName: query });
+    const scaResult = await searchSCAPlayers(searchParams);
     if (scaResult.players && scaResult.players.length > 0) {
+      // Deduplicate by player ID to avoid showing the same player twice
+      const seen = new Set();
+      const uniquePlayers = scaResult.players.filter(p => {
+        if (!p.id || seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
+
       platforms['CricClubs (SCA)'] = {
         ...platforms['CricClubs (SCA)'],
-        count: scaResult.players.length,
-        players: scaResult.players.map(p => ({
-          id: p.id || `sca_${Math.random().toString(36).slice(2)}`,
+        count: uniquePlayers.length,
+        players: uniquePlayers.map(p => ({
+          id: p.id,
           name: p.name,
           team: p.teamName || 'Unknown',
           role: p.playerRole || 'Unknown',
           profileUrl: p.profileUrl,
           verified: p.verified,
-          overallStats: null,  // Stats require profile page scraping (Phase 2)
-          tournaments: [],
         })),
         noResults: false,
       };
-      totalFound += scaResult.players.length;
+      totalFound += uniquePlayers.length;
     }
   } catch (err) {
     platforms['CricClubs (SCA)'].error = err.message;

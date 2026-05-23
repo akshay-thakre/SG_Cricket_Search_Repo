@@ -132,7 +132,7 @@ export default function CricSearchApp() {
           }}>
             <div style={{ fontSize: '40px', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>🏏</div>
             <div style={{ fontSize: '16px', fontWeight: '500' }}>Searching live cricket databases...</div>
-            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: '#9ca3af' }}>Querying SCA (Singapore Cricket Association)</div>
+            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: '#9ca3af' }}>Querying SCA — stats will load automatically after results are found</div>
             <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
@@ -171,15 +171,7 @@ export default function CricSearchApp() {
 
         {/* Search Results */}
         {searchResults && !loading && (
-          <AggregatedResults
-            searchResults={searchResults}
-            onPlayerSelect={(player, platform) => {
-              console.log(`Selected ${player.name} from ${platform}`);
-              if (player.profileUrl) {
-                window.open(player.profileUrl, '_blank');
-              }
-            }}
-          />
+          <AggregatedResults searchResults={searchResults} />
         )}
       </div>
 

@@ -5,6 +5,7 @@
 
 const express = require('express');
 const { searchPlayers } = require('../services/sca/sca.service');
+const { fetchPlayerStats } = require('../services/sca/sca.profile');
 
 const router = express.Router();
 
@@ -134,6 +135,30 @@ router.post('/api/sca/players/search', async (req, res) => {
       error: 'Failed to fetch results from SCA.',
       message: err.message,
       source: 'sca',
+    });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/sca/players/:id/stats — Fetch detailed player stats from profile page
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/api/sca/players/:id/stats', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || !/^\d+$/.test(id)) {
+      return res.status(400).json({ error: 'Invalid player ID. Must be numeric.' });
+    }
+
+    const stats = await fetchPlayerStats(id);
+    return res.json(stats);
+  } catch (err) {
+    console.error('[SCA:stats] Error:', err.message);
+    return res.status(502).json({
+      error: 'Failed to fetch player statistics.',
+      message: err.message,
+      source: 'sca',
+      profileFetched: false,
     });
   }
 });
