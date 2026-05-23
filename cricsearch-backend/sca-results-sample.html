@@ -1,0 +1,496 @@
+<div class="holder point">
+    	<div class="container">
+        	<div class="point-table-all border">
+        	<form action="searchPlayer.do" method="post" id="searchPlayer">
+            <div class="series-drop">
+            	<div class="row">
+                	<div class="col-sm-12">
+                    	<div class="border-heading" style="margin-bottom: 0 !important;">
+                            <h5 style=" padding-bottom: 5px !important;">Search player</h5>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                	 <div style="padding-bottom:20px;color: #a0a0a0;" ><span > ** Enter at-least one.</span></div>
+                	 </div>
+                </div>
+               
+                <div class="row">
+                	<div class="col-lg-4">
+                	
+                    	<div class="row">
+                            <div class="col-lg-5">
+                                <div class="form-text">
+                                    <h5>Name <span style="color: brown">**</span></h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="form-in">
+                                   <input type="text" id="firstName" name="firstName" class="form-control" style="width:100%;" value="Kintul"
+                                   
+									onblur="if(this.value==='%')this.value='';"
+									
+                                   >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4" style="display:none">
+                    	<div class="row">
+                            <div class="col-lg-5">
+                                <div class="form-text">
+                                    <h5>Last name <span style="color: brown">**</span></h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="form-in">
+                                   <input type="text" id="lastName" name="lastName" class="form-control" style="width:100%;" value=""
+                                   
+									onblur="if(this.value==='%')this.value='';"
+									
+                                   >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                    	<div class="row">
+                            <div class="col-lg-5">
+                                <div class="form-text">
+                                    <h5>Team Name<span style="color: brown">**</span></h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="form-in">
+                                   <input type="text" id="teamName" name="teamName" class="form-control" style="width:100%;" value=""
+                                   
+									onblur="if(this.value==='%')this.value='';"
+									
+                                   >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                       <!--                      <div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+		                    	   <h5>Team Name<span style="color: brown">**</span></h5>
+                                </div>
+               				</div>
+               				<div class="col-lg-7">
+                                 <div class="form-in">
+               						<select name="teamName" id="teamName" class="form-control">
+               							<option value=""></option>
+               						</select>
+                                 </div>
+                             </div>
+               			 </div>
+               		</div> -->
+
+					</div>
+                
+                <div class="row">
+                
+                <div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+                                    <h5>CC Player ID<span style="color: brown">**</span></h5>
+                                </div>
+		                    </div>
+	               		 	 <div class="col-lg-7">
+                                 <div class="form-in">
+                                 	<input type="number" name="playerCCId" id="playerCCId" value="" class="form-control" style="width:100%;" >
+                                 </div>
+                             </div>
+	               		 </div>
+               		</div>
+               		
+               		<div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+                                    <h5>Email<span style="color: brown">**</span></h5>
+                                </div>
+		                    </div>
+	               		 	 <div class="col-lg-7">
+                                 <div class="form-in">
+                                 	<input type="email" name="emailId" id="emailId" value="" class="form-control" style="width:100%;" >
+                                 </div>
+                             </div>
+	               		 </div>
+               		</div>
+                
+                	<div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+                                    <h5>Gender</h5>
+                                </div>
+		                    </div>
+	               		 	 <div class="col-lg-7">
+                                 <div class="form-in">
+                                 	<select name="gender" id="gender" class="form-control">
+                                 		<option value="">All</option>
+                                        <option value="M" >Male</option>
+                                        <option value="F" >Female</option>
+									</select>
+									 <span class="caret" style="position: absolute;right: 20px;top: 18px;"></span>
+                                 </div>
+                             </div>
+	               		 </div>
+               		</div>
+               	</div>
+                
+                <div class="row">
+                <div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+		                    	   <h5>Club Name<span style="color: brown">**</span></h5>
+                                </div>
+               				</div>
+               				<div class="col-lg-7">
+                                 <div class="form-in">
+               						<select name="internalClub" id="internalClub" class="form-control">
+               						<option value = "" >All</option>
+               						<option value ="Andhra Cricket Club">Andhra Cricket Club</option>
+               							<option value ="ANZA CC">ANZA CC</option>
+               							<option value ="August International">August International</option>
+               							<option value ="Auto Deskers">Auto Deskers</option>
+               							<option value ="Avadh Cricket Club">Avadh Cricket Club</option>
+               							<option value ="Avensys Consulting">Avensys Consulting</option>
+               							<option value ="Bengal Cricket Club">Bengal Cricket Club</option>
+               							<option value ="Capgemini">Capgemini</option>
+               							<option value ="Central Skylines">Central Skylines</option>
+               							<option value ="Ceylon Sports Club">Ceylon Sports Club</option>
+               							<option value ="Challengers Cricket Club">Challengers Cricket Club</option>
+               							<option value ="Challengers United Cricket Club-UWCC">Challengers United Cricket Club-UWCC</option>
+               							<option value ="Champions Cricket Club">Champions Cricket Club</option>
+               							<option value ="Citi">Citi</option>
+               							<option value ="Cracking Willows Cricket Club">Cracking Willows Cricket Club</option>
+               							<option value ="DBS Bank">DBS Bank</option>
+               							<option value ="Deutsche Bank">Deutsche Bank</option>
+               							<option value ="Eastern Tridents">Eastern Tridents</option>
+               							<option value ="Eleven Rocks Cricket Club">Eleven Rocks Cricket Club</option>
+               							<option value ="Falcons Cricket Club">Falcons Cricket Club</option>
+               							<option value ="Golden Cricket Club">Golden Cricket Club</option>
+               							<option value ="Hawks Cricket Club">Hawks Cricket Club</option>
+               							<option value ="Himalayan Cricket Club">Himalayan Cricket Club</option>
+               							<option value ="Horizon Cricket Club">Horizon Cricket Club</option>
+               							<option value ="IBM">IBM</option>
+               							<option value ="IIT Alumini Association Singapore">IIT Alumini Association Singapore</option>
+               							<option value ="Indi Cricket Club">Indi Cricket Club</option>
+               							<option value ="Indian Association">Indian Association</option>
+               							<option value ="Island Cricket Club">Island Cricket Club</option>
+               							<option value ="Kairali Cricket Club">Kairali Cricket Club</option>
+               							<option value ="Kaybee">Kaybee</option>
+               							<option value ="KPMG">KPMG</option>
+               							<option value ="Lanka Lions">Lanka Lions</option>
+               							<option value ="Luxoft">Luxoft</option>
+               							<option value ="Marina Cricket Club">Marina Cricket Club</option>
+               							<option value ="Mariners Cricket Club">Mariners Cricket Club</option>
+               							<option value ="MDIS">MDIS</option>
+               							<option value ="Metro South Dockers ">Metro South Dockers </option>
+               							<option value ="Millenium United Cricket Club">Millenium United Cricket Club</option>
+               							<option value ="Nanyang Technological University">Nanyang Technological University</option>
+               							<option value ="Northern Stomers ">Northern Stomers </option>
+               							<option value ="NUS">NUS</option>
+               							<option value ="OCBC">OCBC</option>
+               							<option value ="Oracle Corporation">Oracle Corporation</option>
+               							<option value ="P&G">P&G</option>
+               							<option value ="PAY PAL Cricket Club">PAY PAL Cricket Club</option>
+               							<option value ="Pera Knight Riders">Pera Knight Riders</option>
+               							<option value ="Phoenix CC">Phoenix CC</option>
+               							<option value ="Sengkang Cricket Club">Sengkang Cricket Club</option>
+               							<option value ="Singapore Airlines Sports Club">Singapore Airlines Sports Club</option>
+               							<option value ="Singapore Cricket Club">Singapore Cricket Club</option>
+               							<option value ="Singapore Pakistani Association CC">Singapore Pakistani Association CC</option>
+               							<option value ="Singapore Police force">Singapore Police force</option>
+               							<option value ="Singapore Recreation Club">Singapore Recreation Club</option>
+               							<option value ="Singapore Swimming Club">Singapore Swimming Club</option>
+               							<option value ="Singtel Recreation Club">Singtel Recreation Club</option>
+               							<option value ="South East Zone">South East Zone</option>
+               							<option value ="Spartans">Spartans</option>
+               							<option value ="Standard Chartered Bank">Standard Chartered Bank</option>
+               							<option value ="Strikers Cricket Club">Strikers Cricket Club</option>
+               							<option value ="Team Spirit CC">Team Spirit CC</option>
+               							<option value ="TEST - Training">TEST - Training</option>
+               							<option value ="Thanjai Cricket Club">Thanjai Cricket Club</option>
+               							<option value ="Thirties Never Tire Cricket Club">Thirties Never Tire Cricket Club</option>
+               							<option value ="Tionale">Tionale</option>
+               							<option value ="Tuskers Eagles">Tuskers Eagles</option>
+               							<option value ="United Indians Cricket Club">United Indians Cricket Club</option>
+               							<option value ="Visa">Visa</option>
+               							<option value ="Wanderers Cricket Club">Wanderers Cricket Club</option>
+               							<option value ="Warriors Cricket Club">Warriors Cricket Club</option>
+               							<option value ="West Coast Warriors">West Coast Warriors</option>
+               							</select>
+									 <span class="caret" style="position: absolute;right: 20px;top: 18px;"></span>
+                                 </div>
+                             </div>
+               			 </div>
+               		</div>
+               		
+               		
+               		 <div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+                                    <h5>Batting Style</h5>
+                                </div>
+		                    </div>
+	               		 	 <div class="col-lg-7">
+                                 <div class="form-in">
+                                 	<select name="battingStyle" id="battingStyle" class="form-control">
+                                 	<option value="">All</option>
+										<option value="Right Handed Batsman"
+											>Right Handed Batter</option>
+										<option value="Left Handed Batsman"
+											>Left Handed Batter</option>
+									</select>
+									 <span class="caret" style="position: absolute;right: 20px;top: 18px;"></span>
+                                 </div>
+                             </div>
+	               		 </div>
+               		</div>
+                
+                <div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+                                    <h5>Bowling Style</h5>
+                                </div>
+		                    </div>
+	               		 	 <div class="col-lg-7">
+                                 <div class="form-in">
+                                 		
+                                        <select name="bowlingStyle" id="bowlingStyle" class="form-control">
+	                             			<option value="">All</option>
+											<option value="Right Arm Medium"
+												>Right Arm Medium</option>
+											<option value="Right Arm Fast"
+												>Right Arm Fast</option>
+											<option value="Right Arm Off Spin"
+												>Right Arm Off Spin</option>
+											<option value="Right Arm Leg Spin"
+												>Right Arm Leg Spin</option>
+											<option value="Left Arm Fast"
+												>Left Arm Fast</option>
+											<option value="Left Arm Medium"
+												>Left Arm Medium</option>
+											<option value="Left Arm Off Spin"
+												>Left Arm Off Spin</option>
+											<option value="Left Arm Leg Spin"
+												>Left Arm Leg Spin</option>
+										</select>
+									 <span class="caret" style="position: absolute;right: 20px;top: 18px;"></span>
+                                 </div>
+                             </div>
+	               		 </div>
+               		</div>
+               		</div>
+               	<div class="row">
+               	</div>
+               	<div class="row">
+               		<div class="col-lg-4">
+	               		 <div class="row">
+	               		 	<div class="col-lg-5">
+		                    	<div class="form-text">
+                                    <h5>Status</h5>
+                                </div>
+		                    </div>
+	               		 	 <div class="col-lg-7">
+                                 <div class="form-in">
+                                        <select name="playerStatus" id="playerStatus" class="form-control">
+	                             			<option value="">All</option>
+											<option value="1" >Active</option>
+											<option value="3" >In-Active</option>
+										</select>
+									 <span class="caret" style="position: absolute;right: 20px;top: 18px;"></span>
+                                 </div>
+                             </div>
+	               		 </div>
+               		</div>
+               		<!-- new role addn -->
+               		</div>
+               
+                <div class="series-drop">
+                    <div class="row">
+                        <div class="col-sm-12 mt-3">
+                            <div class="button-umpire text-center" style="margin-bottom: 3em;">
+                            <input type="submit" class="btn btn-form" value="Search" onclick="return verifyInput()" / style="margin: 0px auto;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                    	<div class="col-lg-12">
+                    		<div align="center" style="padding-top:0px;color: brown" ><span style="display:none" id="searchError"> Please enter at-least one search criteria.</span></div>
+                    		 </div>
+                    </div>
+            	</div>
+               
+            </div>
+            </form>
+            	         	<div class="sta-tables">	
+							<div class="flex-top">
+				<div class="filter-title"></div>
+				<div class="text-right">
+					<div class="btn-group btn-group-sm" role="group">
+						<img   alt="Download as PDF" title="Download as PDF" class="pdfBtn" style="cursor:pointer;" width="32" height="32" src="/utilsv2/images/pdf.png" />&nbsp;
+						<img   alt="Download as CSV" title="Download as CSV" class="csvBtn" style="cursor:pointer;" width="32" height="32" src="/utilsv2/images/csvicon.png" />&nbsp;
+				<img   alt="Download as Excel" title="Download as Excel" class="excelBtn" style="cursor:pointer;" width="32" height="32" src="/utilsv2/images/excel.png"/>	
+				<img   alt="Print" title="Print" class="printBtn" style="cursor:pointer;" width="32" height="32" src="/utilsv2/images/print.png" />&nbsp;
+					
+					<!-- 	<button type="btn" class="btn btn-primary pdfBtn">PDF</button>
+						<button type="btn" class="btn btn-primary csvBtn">CSV</button>
+						<button type="btn" class="btn btn-primary excelBtn">Excel</button>
+						<button type="btn" class="btn btn-primary printBtn">Print</button> -->
+					</div>
+				</div>
+			</div>
+						
+        	<div class="about-table table-responsive" id="tab1default">
+                <table class="table sortable table-striped" id="playersData"> 
+                    <thead> 
+                        <tr> 
+                            <th>No <span><a href="#"><img src="/utilsv2/img/others/table-head-icon.png" /></a></span></th> 
+                            <th style="text-align:left!important">Player Name <span><a href="#"><img src="/utilsv2/img/others/table-head-icon.png" /></a></span></th>
+                           <th >Player Role <span><a href="#"><img src="/utilsv2/img/others/table-head-icon.png" /></a></span></th>
+                            <th  class="spa">Team   <span><a href="#"><img src="/utilsv2/img/others/table-head-icon.png" /></a></span></th>
+                            </tr> 
+                    </thead> 
+                    <tbody>  
+                    <tr> 
+                        <th>1</th> 
+                        <th style="text-align:left!important"><a href="/SingaporeCricketAssoc/viewPlayer.do?playerId=1077340&clubId=7683"> Kintul Mistry (1077340) </a> <img alt="Verified" title="Verified" src="/utilsv2/images/ok.png" style="width: 16px;height: 16px;margin: 0px;">
+							</th>
+							<th >All Rounder</th>
+								<th><table>
+					<tr>
+						<td >
+						<img src="https://dlbdbr7dq37if.cloudfront.net/documentsRep/teamLogos/f029a49b-e8cc-49d2-8b1e-772012b79abd.jpg"
+								class="img-responsive img-circle"
+								style="width: 20px; height: 20px;" />
+								</td>
+									<td >&nbsp;IIT ALUMNI</td>
+								</tr>
+							</table></th>
+						</tr>
+                    <tr> 
+                        <th>2</th> 
+                        <th style="text-align:left!important"><a href="/SingaporeCricketAssoc/viewPlayer.do?playerId=1013948&clubId=7683"> Mist3331 Kintul Mistry (1013948) </a> <img alt="Not Verified" title="Not Verified" src="/utilsv2/images/question.png" style="width: 20px;height: 20px;margin: 0px;"> 
+							</th>
+							<th >All Rounder</th>
+								<th><table>
+					<tr>
+						<td >
+						<img src="https://dlbdbr7dq37if.cloudfront.net/documentsRep/teamLogos/37dd4b66-1183-4a23-9048-5ef8642a5bde.jpg"
+								class="img-responsive img-circle"
+								style="width: 20px; height: 20px;" />
+								</td>
+									<td >&nbsp;IIT ALUMNI ASSOCIATION SINGAPORE IIT Alumni</td>
+								</tr>
+							</table></th>
+						</tr>
+                    <tr> 
+                        <th>3</th> 
+                        <th style="text-align:left!important"><a href="/SingaporeCricketAssoc/viewPlayer.do?playerId=1013949&clubId=7683"> Mist3331mistry Kintul (1013949) </a> <img alt="Not Verified" title="Not Verified" src="/utilsv2/images/question.png" style="width: 20px;height: 20px;margin: 0px;"> 
+							</th>
+							<th >All Rounder</th>
+								<th><table>
+					<tr>
+						<td >
+						<img src="https://dlbdbr7dq37if.cloudfront.net/documentsRep/teamLogos/bff7fab5-9b16-4443-8ff8-7efad5efa2c4.jpg"
+								class="img-responsive img-circle"
+								style="width: 20px; height: 20px;" />
+								</td>
+									<td >&nbsp;Cognizant</td>
+								</tr>
+							</table></th>
+						</tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+            
+            </div>
+        </div>
+    </div>
+  
+    <script type="text/javascript">
+        
+    $(document).ready(function() {
+    	console.log("opern");
+        $('#playersData').DataTable( {
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "bPaginate": false,
+            "bFilter": false,
+            "bInfo": false,
+            iDisplayLength: -1
+            
+        });
+    });
+
+    $(document).on("click", ".pdfBtn", function(){
+    	console.log("opern");
+        $('.buttons-pdf').click();
+    });
+    $(document).on("click", ".excelBtn", function(){
+        $('.buttons-excel').click();
+    });
+    $(document).on("click", ".csvBtn", function(){
+        $('.buttons-csv').click();
+    });
+    $(document).on("click", ".printBtn", function(){
+        $('.buttons-print').click();
+    });
+</script>
+<style>
+    .footer-bottom {
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+    }
+</style>
+<footer>
+    <div class="container">
+        <div class="row footer-list">
+            <div class="col-sm-6 col-xs-12">
+                <div class="copy">
+                <p>&#169; 2026 Singapore Cricket Association. All Rights
+                        Reserved. </p>
+                    </div>
+            </div>
+            <div class="col-sm-6 col-xs-12 text-center">
+                <div class="social" style="display:flex; float: right; padding-right: 4em;">
+                    <ul class="list-inline">
+                        <li><a href="https://www.facebook.com/SingaporeCricket/" target="_new" class="icons_1"><img
+                                src="/utilsv2/img/icons/facebook1.png" class="img-responsive"/></a>
+                        </li>
+                        <li><a href="https://twitter.com/intent/tweet" target="_new" class="icons_1"><img
+                                src="/utilsv2/img/icons/twitterx1.png" class="img-responsive"/></a>
+                        </li>
+                        <li><a href="https://www.instagram.com/cricclubs_/" target="_new" class="icons_1"><img
+                                src="/utilsv2/img/icons/instagram1.png" class="img-responsive"/></a>
+                        </li>
+                        <li><a href="https://www.youtube.com/cricclubs" target="_new" class="icons_1"><img
+                                src="/utilsv2/img/icons/youtube1.svg" class="img-responsive"/></a>
+                        </li>
+                        <li><a href="https://in.linkedin.com/company/cricclubs" target="_new" class="icons_1"><img
+                                src="/utilsv2/img/icons/linkedIn1.png" class="img-responsive"/></a>
+                        </li>
+                        </ul>
+                </div>
+            </div>
+        </div>
+        </div>
+    <script>
+        function hideMergeModal() {
+            $("#displayMessage").remove();
+        }
+    </script>
+    

@@ -1,0 +1,82 @@
+# ===========================
+# Node.js / npm dependencies
+# ===========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===========================
+# Environment variables (NEVER commit)
+# ===========================
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.*.local
+
+# ===========================
+# Build outputs
+# ===========================
+build/
+dist/
+out/
+.next/
+coverage/
+
+# ===========================
+# Logs
+# ===========================
+logs/
+*.log
+
+# ===========================
+# Editor / IDE settings
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ===========================
+# Operating System files
+# ===========================
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ===========================
+# Cache & temporary files
+# ===========================
+.cache/
+.parcel-cache/
+.eslintcache
+.npm/
+*.tmp
+*.temp
+
+# ===========================
+# Certificates & keys
+# ===========================
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+*.p12
+
+# ===========================
+# Database files
+# ===========================
+*.sqlite
+*.sqlite3
+*.db
+*.dump
