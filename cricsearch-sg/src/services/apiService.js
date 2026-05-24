@@ -13,11 +13,12 @@ const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
  * @param {string} [params.playerStatus] - Status filter
  * @returns {Promise<Object>} Search results
  */
-export async function searchSCAPlayers(params) {
+export async function searchSCAPlayers(params, signal) {
   const response = await fetch(`${API_BASE}/api/sca/players/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
+    signal,
   });
   
   if (!response.ok) {
@@ -68,7 +69,7 @@ export async function fetchPlayerStats(playerId) {
  * @param {string} query - Search query (player name)
  * @returns {Promise<Object>} Aggregated results across platforms
  */
-export async function searchAcrossPlatforms(query) {
+export async function searchAcrossPlatforms(query, signal) {
   const platforms = {
     'CricClubs (SCA)': { platformName: 'CricClubs (SCA)', count: 0, players: [], icon: { emoji: '🏏', color: '#1e40af', code: 'CC' }, noResults: true, loading: false, error: null },
     'Stumps': { platformName: 'Stumps', count: 0, players: [], icon: { emoji: '🏑', color: '#2563eb', code: 'ST' }, noResults: true, loading: false, error: null, disabled: true, disabledReason: 'Coming soon' },
@@ -86,7 +87,7 @@ export async function searchAcrossPlatforms(query) {
 
   // SCA - LIVE
   try {
-    const scaResult = await searchSCAPlayers(searchParams);
+    const scaResult = await searchSCAPlayers(searchParams, signal);
     if (scaResult.players && scaResult.players.length > 0) {
       // Deduplicate by player ID to avoid showing the same player twice
       const seen = new Set();
@@ -112,6 +113,7 @@ export async function searchAcrossPlatforms(query) {
       totalFound += uniquePlayers.length;
     }
   } catch (err) {
+    if (err.name === 'AbortError') throw err; // let handleSearch ignore cancelled requests
     platforms['CricClubs (SCA)'].error = err.message;
     platforms['CricClubs (SCA)'].noResults = true;
   }
