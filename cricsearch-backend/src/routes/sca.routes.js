@@ -9,98 +9,6 @@ const { fetchPlayerStats } = require('../services/sca/sca.profile');
 
 const router = express.Router();
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MOCK_MODE — local dev/testing without live SCA network access
-// Set MOCK_MODE=true in cricsearch-backend/.env to enable
-// ─────────────────────────────────────────────────────────────────────────────
-const MOCK_MODE = process.env.MOCK_MODE === 'true';
-
-const MOCK_SEARCH_RESULT = {
-  source: 'sca',
-  query: {},
-  totalResults: 3,
-  players: [
-    {
-      id: '1077340',
-      name: 'Kintul Mistry',
-      profileUrl: 'https://scores.cricketsingapore.com/SingaporeCricketAssoc/viewPlayer.do?playerId=1077340&clubId=7683',
-      playerRole: 'All Rounder',
-      teamName: 'IIT ALUMNI',
-      verified: true,
-    },
-    {
-      id: '1013948',
-      name: 'Mist3331 Kintul Mistry',
-      profileUrl: 'https://scores.cricketsingapore.com/SingaporeCricketAssoc/viewPlayer.do?playerId=1013948&clubId=7683',
-      playerRole: 'All Rounder',
-      teamName: 'IIT ALUMNI ASSOCIATION SINGAPORE IIT Alumni',
-      verified: false,
-    },
-    {
-      id: '1013949',
-      name: 'Mist3331mistry Kintul',
-      profileUrl: 'https://scores.cricketsingapore.com/SingaporeCricketAssoc/viewPlayer.do?playerId=1013949&clubId=7683',
-      playerRole: 'All Rounder',
-      teamName: 'Cognizant',
-      verified: false,
-    },
-  ],
-  meta: {
-    method: 'mock',
-    upstreamUrl: 'mock',
-    responseStatus: 200,
-    blocked: false,
-    empty: false,
-    message: '[MOCK] Found 3 player(s).',
-    scrapedAt: new Date().toISOString(),
-  },
-};
-
-const MOCK_STATS = {
-  '1077340': {
-    playerId: '1077340',
-    playerName: 'Kintul Mistry',
-    teamName: 'IIT ALUMNI',
-    playerRole: 'All Rounder',
-    batting: {
-      matches: 55, innings: 50, notOuts: 7, runs: 1514, highestScore: '89*',
-      average: 35.21, strikeRate: 88.45, centuries: 0, fifties: 9, fours: 162, sixes: 38,
-    },
-    bowling: {
-      matches: 55, overs: 120, maidens: 14, runs: 892, wickets: 67,
-      average: 13.31, economy: 7.43, strikeRate: 10.75, bestBowling: '4/18',
-    },
-    competitions: [],
-    profileFetched: true,
-  },
-  '1013948': {
-    playerId: '1013948',
-    playerName: 'Mist3331 Kintul Mistry',
-    teamName: 'IIT ALUMNI ASSOCIATION SINGAPORE IIT Alumni',
-    playerRole: 'All Rounder',
-    batting: {
-      matches: 26, innings: 24, notOuts: 4, runs: 522, highestScore: '67',
-      average: 26.10, strikeRate: 82.34, centuries: 0, fifties: 3, fours: 58, sixes: 14,
-    },
-    bowling: {
-      matches: 26, overs: 48, maidens: 5, runs: 362, wickets: 23,
-      average: 15.74, economy: 7.54, strikeRate: 12.52, bestBowling: '3/28',
-    },
-    competitions: [],
-    profileFetched: true,
-  },
-  '1013949': {
-    playerId: '1013949',
-    playerName: 'Mist3331mistry Kintul',
-    teamName: 'Cognizant',
-    playerRole: 'All Rounder',
-    batting: null,
-    bowling: null,
-    competitions: [],
-    profileFetched: true,
-  },
-};
-
 /**
  * All recognised search field names.
  * @type {string[]}
@@ -219,11 +127,6 @@ router.post('/api/sca/players/search', async (req, res) => {
       });
     }
 
-    if (MOCK_MODE) {
-      console.log('[SCA:search] MOCK_MODE — returning pre-built player list');
-      return res.json({ ...MOCK_SEARCH_RESULT, query: params });
-    }
-
     const result = await searchPlayers(params);
     return res.json(result);
   } catch (err) {
@@ -245,15 +148,6 @@ router.get('/api/sca/players/:id/stats', async (req, res) => {
 
     if (!id || !/^\d+$/.test(id)) {
       return res.status(400).json({ error: 'Invalid player ID. Must be numeric.' });
-    }
-
-    if (MOCK_MODE) {
-      console.log(`[SCA:stats] MOCK_MODE — returning pre-built stats for player ${id}`);
-      const mockData = MOCK_STATS[id] || {
-        playerId: id, playerName: null, teamName: null, playerRole: null,
-        batting: null, bowling: null, competitions: [], profileFetched: true,
-      };
-      return res.json(mockData);
     }
 
     const stats = await fetchPlayerStats(id);

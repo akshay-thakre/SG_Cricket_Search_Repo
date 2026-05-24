@@ -71,9 +71,6 @@ app.listen(PORT, () => {
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📡 SCA: Active (Cheerio scraping)`);
   console.log(`🔒 CORS: ${allowedOrigins ? allowedOrigins.join(', ') : 'all origins allowed'}`);
-  if (process.env.MOCK_MODE === 'true') {
-    console.log('⚠️  MOCK_MODE=true — all SCA responses are pre-built (no live scraping)');
-  }
   console.log('');
   console.log('Endpoints:');
   console.log('  GET  /api/health');
