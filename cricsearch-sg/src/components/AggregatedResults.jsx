@@ -166,14 +166,11 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
 function PlayerCard({ player, platformName, isLast }) {
   const { id, name, team, role, profileUrl, verified } = player;
   const [stats, setStats] = useState(null);
-  const [statsLoading, setStatsLoading] = useState(false);
-  const [statsError, setStatsError] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(!!id); // true if we have an id to fetch
+  const [statsError, setStatsError] = useState(!id ? 'Player ID unavailable — cannot load stats.' : null);
 
   useEffect(() => {
-    if (!id) {
-      setStatsError('Player ID unavailable — cannot load stats.');
-      return;
-    }
+    if (!id) return;
 
     setStatsLoading(true);
     setStatsError(null);
@@ -239,82 +236,87 @@ function PlayerCard({ player, platformName, isLast }) {
 
         {/* Loading state */}
         {statsLoading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 0', color: '#64748b' }}>
-            <span style={{ fontSize: '20px', animation: 'statspin 1s linear infinite', display: 'inline-block' }}>⟳</span>
-            <span style={{ fontSize: '13px' }}>Loading player statistics from SCA...</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 0', color: '#64748b' }}>
+            <span style={{ fontSize: '18px', animation: 'statspin 1s linear infinite', display: 'inline-block' }}>⟳</span>
+            <span style={{ fontSize: '13px' }}>Loading stats...</span>
             <style>{`@keyframes statspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
 
-        {/* Error / no stats fallback */}
-        {!statsLoading && statsError && (
+        {/* ── KEY STATS SUMMARY ROW (always shown when loaded) ── */}
+        {!statsLoading && (
           <div style={{
-            padding: '0.75rem 1rem',
-            backgroundColor: '#fff7ed',
-            border: '1px solid #fed7aa',
-            borderRadius: '8px',
-            marginBottom: '0.75rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '0.5rem',
+            marginBottom: (hasBatting || hasBowling) ? '1rem' : 0,
           }}>
-            <div style={{ fontSize: '12px', color: '#9a3412', fontWeight: '600' }}>⚠️ Stats unavailable</div>
-            <div style={{ fontSize: '12px', color: '#7c2d12', marginTop: '2px' }}>
-              Basic player profile found, but detailed statistics could not be extracted.
-            </div>
+            <StatBox
+              label="Matches"
+              value={hasBatting ? stats.batting.matches : hasBowling ? stats.bowling.matches : null}
+              highlight
+            />
+            <StatBox
+              label="Runs"
+              value={hasBatting ? stats.batting.runs : null}
+              highlight
+            />
+            <StatBox
+              label="Average"
+              value={hasBatting ? fmt(stats.batting.average) : null}
+              highlight
+            />
+            <StatBox
+              label="Wickets"
+              value={hasBowling ? stats.bowling.wickets : null}
+              highlight
+              color="#7c3aed"
+            />
           </div>
         )}
 
-        {/* Stats fetched but no batting/bowling data */}
+        {/* No stats at all */}
         {!statsLoading && !statsError && stats && !hasBatting && !hasBowling && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            marginBottom: '0.75rem',
-          }}>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>
-              ℹ️ No match statistics recorded for this player yet.
-            </div>
+          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '0.5rem' }}>
+            No match statistics recorded for this player yet.
           </div>
         )}
 
-        {/* Batting stats */}
+        {/* Stats fetch error — summary row already shows N/A; just note the cause */}
+        {!statsLoading && statsError && (
+          <div style={{ fontSize: '11px', color: '#9a3412', marginBottom: '0.5rem' }}>
+            ⚠️ Could not load detailed stats — profile page unavailable.
+          </div>
+        )}
+
+        {/* ── DETAILED BATTING (collapsible) ── */}
         {!statsLoading && hasBatting && (
-          <div style={{ marginBottom: hasBowling ? '1rem' : 0 }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#0066cc', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
-              🏏 Batting
+          <ExpandableSection label="🏏 Full Batting" accentColor="#0066cc">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
+              <StatBox label="Innings" value={stats.batting.innings} small />
+              <StatBox label="NO" value={stats.batting.notOuts} small />
+              <StatBox label="HS" value={stats.batting.highestScore} small />
+              <StatBox label="SR" value={fmt(stats.batting.strikeRate)} small />
+              {stats.batting.fifties !== null && <StatBox label="50s" value={stats.batting.fifties} small />}
+              {stats.batting.centuries !== null && <StatBox label="100s" value={stats.batting.centuries} small />}
+              {stats.batting.fours !== null && <StatBox label="4s" value={stats.batting.fours} small />}
+              {stats.batting.sixes !== null && <StatBox label="6s" value={stats.batting.sixes} small />}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
-              <StatBox label="Matches" value={stats.batting.matches} />
-              <StatBox label="Innings" value={stats.batting.innings} />
-              <StatBox label="Runs" value={stats.batting.runs} highlight />
-              <StatBox label="Average" value={fmt(stats.batting.average)} />
-              <StatBox label="SR" value={fmt(stats.batting.strikeRate)} />
-              <StatBox label="HS" value={stats.batting.highestScore} />
-              {stats.batting.fifties !== null && <StatBox label="50s" value={stats.batting.fifties} />}
-              {stats.batting.centuries !== null && <StatBox label="100s" value={stats.batting.centuries} />}
-              {stats.batting.fours !== null && <StatBox label="4s" value={stats.batting.fours} />}
-              {stats.batting.sixes !== null && <StatBox label="6s" value={stats.batting.sixes} />}
-            </div>
-          </div>
+          </ExpandableSection>
         )}
 
-        {/* Bowling stats */}
+        {/* ── DETAILED BOWLING (collapsible) ── */}
         {!statsLoading && hasBowling && (
-          <div>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
-              ⚡ Bowling
+          <ExpandableSection label="⚡ Full Bowling" accentColor="#7c3aed">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
+              <StatBox label="Overs" value={stats.bowling.overs} small />
+              <StatBox label="Mdns" value={stats.bowling.maidens} small />
+              <StatBox label="Runs" value={stats.bowling.runs} small />
+              {stats.bowling.strikeRate !== null && <StatBox label="SR" value={fmt(stats.bowling.strikeRate)} small />}
+              {stats.bowling.economy !== null && <StatBox label="Eco" value={fmt(stats.bowling.economy)} small />}
+              {stats.bowling.bestBowling && <StatBox label="Best" value={stats.bowling.bestBowling} small />}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.5rem' }}>
-              <StatBox label="Matches" value={stats.bowling.matches} />
-              <StatBox label="Wickets" value={stats.bowling.wickets} highlight color="#7c3aed" />
-              <StatBox label="Average" value={fmt(stats.bowling.average)} />
-              <StatBox label="Economy" value={fmt(stats.bowling.economy)} />
-              {stats.bowling.strikeRate !== null && <StatBox label="SR" value={fmt(stats.bowling.strikeRate)} />}
-              {stats.bowling.bestBowling && <StatBox label="Best" value={stats.bowling.bestBowling} />}
-              {stats.bowling.overs !== null && <StatBox label="Overs" value={stats.bowling.overs} />}
-              {stats.bowling.maidens !== null && <StatBox label="Mdns" value={stats.bowling.maidens} />}
-            </div>
-          </div>
+          </ExpandableSection>
         )}
 
         {/* Competition breakdown (collapsible) */}
@@ -398,23 +400,46 @@ function CompetitionsPanel({ competitions }) {
   );
 }
 
+// ── Expandable section (for full batting/bowling details) ─────────────────────
+
+function ExpandableSection({ label, accentColor, children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginTop: '0.75rem' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 0.4rem 0',
+          fontSize: '11px', fontWeight: '700', color: accentColor,
+          textTransform: 'uppercase', letterSpacing: '0.08em',
+          display: 'flex', alignItems: 'center', gap: '0.35rem',
+        }}
+      >
+        <span style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.15s' }}>▶</span>
+        {label}
+      </button>
+      {open && <div style={{ marginTop: '0.25rem' }}>{children}</div>}
+    </div>
+  );
+}
+
 // ── Stat box ──────────────────────────────────────────────────────────────────
 
-function StatBox({ label, value, highlight = false, color = '#0066cc' }) {
-  const displayValue = value !== null && value !== undefined ? String(value) : '—';
+function StatBox({ label, value, highlight = false, color = '#0066cc', small = false }) {
+  const displayValue = value !== null && value !== undefined ? String(value) : 'N/A';
   return (
     <div style={{
       backgroundColor: highlight ? '#f0f6ff' : '#f8fafc',
-      padding: '0.6rem 0.5rem',
+      padding: small ? '0.4rem 0.35rem' : '0.65rem 0.5rem',
       borderRadius: '6px',
       textAlign: 'center',
       border: `1px solid ${highlight ? '#bcd0f0' : '#e2e8f0'}`,
-      minWidth: '60px',
+      minWidth: small ? '50px' : '60px',
     }}>
-      <div style={{ fontSize: '14px', fontWeight: '700', color: highlight ? color : '#1e293b' }}>
+      <div style={{ fontSize: small ? '12px' : '15px', fontWeight: '700', color: highlight ? color : '#1e293b' }}>
         {displayValue}
       </div>
-      <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: '600', marginTop: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: '600', marginTop: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {label}
       </div>
     </div>
