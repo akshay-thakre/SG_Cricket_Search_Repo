@@ -1,8 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' }) {
   const [query, setQuery] = useState(initialQuery);
 
+  // Live search: fire onSearch after 400ms of inactivity; clear when query is too short
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      onClear();
+      return;
+    }
+    const timer = setTimeout(() => {
+      onSearch(query);
+    }, 400);
+    return () => clearTimeout(timer);
+    // onSearch / onClear are stable across renders; omitting them avoids resetting
+    // the debounce timer on every parent re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  // Keep form submit as a fallback (Enter key / Search button click)
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {

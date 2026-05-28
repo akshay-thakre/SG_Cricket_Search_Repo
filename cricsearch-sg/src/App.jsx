@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { searchAcrossPlatforms, checkHealth } from './services/apiService';
 import { AggregatedResults } from './components/AggregatedResults';
 import { MultiPlatformSearchBar } from './components/MultiPlatformSearchBar';
@@ -9,6 +9,7 @@ export default function CricSearchApp() {
   const [error, setError] = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking'); // 'checking' | 'online' | 'offline'
   const [searchQuery, setSearchQuery] = useState('');
+  const abortControllerRef = useRef(null);
 
   // Check backend health on mount
   useEffect(() => {
@@ -17,18 +18,33 @@ export default function CricSearchApp() {
       .catch(() => setBackendStatus('offline'));
   }, []);
 
+  // Show spinner as soon as a valid query exists, before the async response lands
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2) {
+      setLoading(true);
+    }
+  }, [searchQuery]);
+
   const handleSearch = async (query) => {
     if (!query.trim()) return;
-    
+
+    // Cancel any in-flight request from the previous keystroke
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setSearchQuery(query);
     setLoading(true);
     setError(null);
     setSearchResults(null);
-    
+
     try {
-      const results = await searchAcrossPlatforms(query);
+      const results = await searchAcrossPlatforms(query, controller.signal);
       setSearchResults(results);
     } catch (err) {
+      if (err.name === 'AbortError') return; // request was superseded — ignore silently
       setError(err.message || 'Search failed. Please check if the backend server is running.');
     } finally {
       setLoading(false);

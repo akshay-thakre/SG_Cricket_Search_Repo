@@ -1,0 +1,61 @@
+# render.yaml — CricSearch SG production deployment
+#
+# This file defines TWO Render services:
+#
+#   1. cricsearch-backend  — Express/Node.js API (Web Service)
+#      Handles all scraping server-side. Cannot run in the browser due to CORS.
+#
+#   2. cricsearch-frontend — React SPA (Static Site)
+#      Built with Create React App and served from Render's CDN.
+#
+# IMPORTANT after first deploy:
+#   Step 1: Deploy cricsearch-backend first, note its URL (e.g. https://cricsearch-backend.onrender.com)
+#   Step 2: In the cricsearch-frontend service, set REACT_APP_API_URL to that URL
+#   Step 3: Trigger a redeploy of cricsearch-frontend
+#
+# Docs: https://render.com/docs/yaml-spec
+
+services:
+  # ── Backend API — Express Web Service ─────────────────────────────────────
+  - type: web
+    name: cricsearch-backend
+    env: node
+    rootDir: cricsearch-backend
+    region: singapore          # closest to SCA servers and your users
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEBUG_SCRAPER
+        value: "false"
+      # ALLOWED_ORIGIN — set in Render dashboard after the frontend URL is known.
+      # Example: https://cricsearch-frontend.onrender.com
+      # Leave unset to allow all origins (safe for a public read-only API).
+      - key: ALLOWED_ORIGIN
+        sync: false
+
+  # ── Frontend React App — Static Site ──────────────────────────────────────
+  - type: static
+    name: cricsearch-frontend
+    rootDir: cricsearch-sg
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    # SPA fallback: serve index.html for all routes so React handles routing
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Set this to your backend's Render URL after deploying cricsearch-backend.
+      # Example: https://cricsearch-backend.onrender.com
+      - key: REACT_APP_API_URL
+        sync: false
+      # Prevent CRA from treating ESLint warnings as build errors in CI
+      - key: CI
+        value: "false"
+      # Disable source maps in production to reduce build size
+      - key: GENERATE_SOURCEMAP
+        value: "false"
