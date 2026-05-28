@@ -202,7 +202,7 @@ export default function CricSearchApp() {
         textAlign: 'center'
       }}>
         <div>CricSearch SG • Singapore Cricket Search • Live data from SCA (CricClubs)</div>
-        <div style={{ marginTop: '0.25rem', fontSize: '11px' }}>Stumps, Last Man Stands, CricHeroes — coming in Phase 2</div>
+        <div style={{ marginTop: '0.25rem', fontSize: '11px' }}>Stumps, Last Man Stands — coming soon</div>
       </div>
     </div>
   );

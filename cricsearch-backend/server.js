@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const scaRoutes = require('./src/routes/sca.routes');
+const sportygoRoutes = require('./src/routes/sportygo.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +37,7 @@ app.use(express.json());
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use(scaRoutes);
+app.use(sportygoRoutes);
 
 // ── Global health check ───────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
@@ -45,7 +47,7 @@ app.get('/api/health', (_req, res) => {
     env: process.env.NODE_ENV || 'development',
     platforms: {
       sca: { status: 'active', method: 'cheerio' },
-      sportygo: { status: 'blocked', method: 'requires-playwright', note: 'Returns 403 - anti-bot protection' },
+      sportygo: { status: process.env.SPORTYGO_CLUB_ID ? 'active' : 'unconfigured', method: 'cheerio' },
     },
     timestamp: new Date().toISOString(),
   });
@@ -78,6 +80,10 @@ app.listen(PORT, () => {
   console.log('  GET  /api/sca/players/:id/stats');
   console.log('  GET  /api/sca/health');
   console.log('  GET  /api/sca/clubs');
+  console.log('  POST /api/sportygo/players/search');
+  console.log('  GET  /api/sportygo/players/:id/stats?clubId=XXX');
+  console.log('  GET  /api/sportygo/health');
+  console.log(`🏟️  Sportygo: ${process.env.SPORTYGO_CLUB_ID ? 'Configured ✅' : 'Not configured — set SPORTYGO_CLUB_ID'}`);
   console.log('========================================');
 });
 

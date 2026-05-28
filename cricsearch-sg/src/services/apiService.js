@@ -2,16 +2,6 @@ const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 /**
  * Search players on SCA platform via the backend proxy
- * @param {Object} params - Search parameters
- * @param {string} [params.firstName] - Player first name
- * @param {string} [params.teamName] - Team name
- * @param {string} [params.playerCCId] - CricClubs player ID
- * @param {string} [params.internalClub] - Club name
- * @param {string} [params.battingStyle] - Batting style
- * @param {string} [params.bowlingStyle] - Bowling style
- * @param {string} [params.gender] - Gender filter
- * @param {string} [params.playerStatus] - Status filter
- * @returns {Promise<Object>} Search results
  */
 export async function searchSCAPlayers(params, signal) {
   const response = await fetch(`${API_BASE}/api/sca/players/search`, {
@@ -20,18 +10,32 @@ export async function searchSCAPlayers(params, signal) {
     body: JSON.stringify(params),
     signal,
   });
-  
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Network error' }));
     throw new Error(error.error || error.message || `HTTP ${response.status}`);
   }
-  
+  return response.json();
+}
+
+/**
+ * Search players on Sportygo platform via the backend proxy
+ */
+export async function searchSportygoPlayers(params, signal) {
+  const response = await fetch(`${API_BASE}/api/sportygo/players/search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+    signal,
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.error || error.message || `HTTP ${response.status}`);
+  }
   return response.json();
 }
 
 /**
  * Fetch list of available SCA clubs
- * @returns {Promise<Object>} Club list
  */
 export async function fetchSCAClubs() {
   const response = await fetch(`${API_BASE}/api/sca/clubs`);
@@ -41,7 +45,6 @@ export async function fetchSCAClubs() {
 
 /**
  * Check backend API health
- * @returns {Promise<Object>} Health status
  */
 export async function checkHealth() {
   const response = await fetch(`${API_BASE}/api/health`);
@@ -50,9 +53,7 @@ export async function checkHealth() {
 }
 
 /**
- * Fetch detailed player stats from the backend (which scrapes the profile page).
- * @param {string} playerId - Numeric player ID
- * @returns {Promise<Object>} Player stats including batting/bowling data
+ * Fetch detailed player stats from SCA profile page.
  */
 export async function fetchPlayerStats(playerId) {
   const response = await fetch(`${API_BASE}/api/sca/players/${encodeURIComponent(playerId)}/stats`);
@@ -64,34 +65,79 @@ export async function fetchPlayerStats(playerId) {
 }
 
 /**
- * Multi-platform search - currently only SCA is live.
- * Splits multi-word queries into firstName + lastName for better SCA matching.
- * @param {string} query - Search query (player name)
- * @returns {Promise<Object>} Aggregated results across platforms
+ * Fetch detailed player stats from Sportygo profile page.
+ * @param {string} playerId - Numeric player ID
+ * @param {string} clubId   - Club ID extracted from the player's profileUrl
+ */
+export async function fetchSportygoPlayerStats(playerId, clubId) {
+  const url = `${API_BASE}/api/sportygo/players/${encodeURIComponent(playerId)}/stats?clubId=${encodeURIComponent(clubId)}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.error || error.message || `HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
+ * Route stats fetch to the correct backend endpoint based on player.source.
+ * @param {{ id: string, source: string, clubId?: string }} player
+ */
+export async function fetchAnyPlayerStats(player) {
+  if (player.source === 'sportygo') {
+    return fetchSportygoPlayerStats(player.id, player.clubId);
+  }
+  return fetchPlayerStats(player.id);
+}
+
+/**
+ * Multi-platform search — SCA (live) + Sportygo (live when SPORTYGO_CLUB_ID is set).
+ * Splits multi-word queries into firstName + lastName for better CricClubs matching.
  */
 export async function searchAcrossPlatforms(query, signal) {
   const platforms = {
-    'CricClubs (SCA)': { platformName: 'CricClubs (SCA)', count: 0, players: [], icon: { emoji: '🏏', color: '#1e40af', code: 'CC' }, noResults: true, loading: false, error: null },
-    'Stumps': { platformName: 'Stumps', count: 0, players: [], icon: { emoji: '🏑', color: '#2563eb', code: 'ST' }, noResults: true, loading: false, error: null, disabled: true, disabledReason: 'Coming soon' },
-    'Last Man Stands': { platformName: 'Last Man Stands', count: 0, players: [], icon: { emoji: '⚡', color: '#f59e0b', code: 'LMS' }, noResults: true, loading: false, error: null, disabled: true, disabledReason: 'Coming soon' },
-    'CricHeroes': { platformName: 'CricHeroes', count: 0, players: [], icon: { emoji: '🌟', color: '#ef4444', code: 'CH' }, noResults: true, loading: false, error: null, disabled: true, disabledReason: 'Coming soon' },
+    'CricClubs (SCA)': {
+      platformName: 'CricClubs (SCA)',
+      count: 0, players: [],
+      icon: { emoji: '🏏', color: '#1e40af', code: 'CC' },
+      noResults: true, loading: false, error: null,
+    },
+    'Sportygo': {
+      platformName: 'Sportygo',
+      count: 0, players: [],
+      icon: { emoji: '🏟️', color: '#16a34a', code: 'SY' },
+      noResults: true, loading: false, error: null,
+    },
+    'Stumps': {
+      platformName: 'Stumps',
+      count: 0, players: [],
+      icon: { emoji: '🏑', color: '#2563eb', code: 'ST' },
+      noResults: true, loading: false, error: null,
+      disabled: true, disabledReason: 'Coming soon',
+    },
+    'Last Man Stands': {
+      platformName: 'Last Man Stands',
+      count: 0, players: [],
+      icon: { emoji: '⚡', color: '#f59e0b', code: 'LMS' },
+      noResults: true, loading: false, error: null,
+      disabled: true, disabledReason: 'Coming soon',
+    },
   };
 
   let totalFound = 0;
 
-  // Split "First Last" into separate fields for more accurate SCA matching
+  // Split "First Last" into separate fields for more accurate CricClubs matching
   const parts = query.trim().split(/\s+/);
   const searchParams = parts.length >= 2
     ? { firstName: parts[0], lastName: parts.slice(1).join(' ') }
     : { firstName: query };
 
-  // SCA - LIVE
+  // ── SCA — LIVE ──────────────────────────────────────────────────
   try {
     const scaResult = await searchSCAPlayers(searchParams, signal);
     if (scaResult.players && scaResult.players.length > 0) {
-      // Deduplicate by player ID to avoid showing the same player twice
       const seen = new Set();
-      const uniquePlayers = scaResult.players.filter(p => {
+      const uniquePlayers = scaResult.players.filter((p) => {
         if (!p.id || seen.has(p.id)) return false;
         seen.add(p.id);
         return true;
@@ -100,22 +146,57 @@ export async function searchAcrossPlatforms(query, signal) {
       platforms['CricClubs (SCA)'] = {
         ...platforms['CricClubs (SCA)'],
         count: uniquePlayers.length,
-        players: uniquePlayers.map(p => ({
+        players: uniquePlayers.map((p) => ({
           id: p.id,
           name: p.name,
           team: p.teamName || 'Unknown',
           role: p.playerRole || 'Unknown',
           profileUrl: p.profileUrl,
           verified: p.verified,
+          source: 'sca',
         })),
         noResults: false,
       };
       totalFound += uniquePlayers.length;
     }
   } catch (err) {
-    if (err.name === 'AbortError') throw err; // let handleSearch ignore cancelled requests
+    if (err.name === 'AbortError') throw err;
     platforms['CricClubs (SCA)'].error = err.message;
     platforms['CricClubs (SCA)'].noResults = true;
+  }
+
+  // ── Sportygo — LIVE ─────────────────────────────────────────────
+  try {
+    const sgResult = await searchSportygoPlayers(searchParams, signal);
+    if (sgResult.players && sgResult.players.length > 0) {
+      const seen = new Set();
+      const uniquePlayers = sgResult.players.filter((p) => {
+        if (!p.id || seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
+
+      platforms['Sportygo'] = {
+        ...platforms['Sportygo'],
+        count: uniquePlayers.length,
+        players: uniquePlayers.map((p) => ({
+          id: p.id,
+          name: p.name,
+          team: p.teamName || 'Unknown',
+          role: p.playerRole || 'Unknown',
+          profileUrl: p.profileUrl,
+          verified: p.verified,
+          source: 'sportygo',
+          clubId: p.clubId,
+        })),
+        noResults: false,
+      };
+      totalFound += uniquePlayers.length;
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') throw err;
+    platforms['Sportygo'].error = err.message;
+    platforms['Sportygo'].noResults = true;
   }
 
   return {
@@ -123,6 +204,9 @@ export async function searchAcrossPlatforms(query, signal) {
     results: platforms,
     totalFound,
     platforms: Object.keys(platforms),
-    meta: { live: ['CricClubs (SCA)'], disabled: ['Stumps', 'Last Man Stands', 'CricHeroes'] },
+    meta: {
+      live: ['CricClubs (SCA)', 'Sportygo'],
+      disabled: ['Stumps', 'Last Man Stands'],
+    },
   };
 }
