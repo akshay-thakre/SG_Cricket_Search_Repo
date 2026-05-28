@@ -18,28 +18,59 @@ const COMMON_HEADERS = {
   'Accept-Language': 'en-US,en;q=0.9',
 };
 
-function extractJSessionId(setCookieHeaders) {
-  if (!setCookieHeaders) return null;
-  const headers = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
-  for (const h of headers) {
-    const m = h.match(/JSESSIONID=([^;]+)/);
-    if (m) return m[1];
+/** Follow redirects manually, accumulating Set-Cookie from every hop. */
+async function acquireSessionCookies(startUrl) {
+  let url = startUrl;
+  const cookies = {};
+
+  for (let hop = 0; hop < 6; hop++) {
+    let res;
+    try {
+      res = await axios.get(url, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...(Object.keys(cookies).length
+            ? { Cookie: Object.entries(cookies).map(([k, v]) => `${k}=${v}`).join('; ') }
+            : {}),
+        },
+        timeout: TIMEOUT_MS,
+        maxRedirects: 0,
+        validateStatus: () => true,
+      });
+    } catch (_) { break; }
+
+    const arr = res.headers['set-cookie']
+      ? (Array.isArray(res.headers['set-cookie']) ? res.headers['set-cookie'] : [res.headers['set-cookie']])
+      : [];
+    arr.forEach((c) => {
+      const kv = c.split(';')[0];
+      const eqIdx = kv.indexOf('=');
+      if (eqIdx > 0) cookies[kv.slice(0, eqIdx).trim()] = kv.slice(eqIdx + 1).trim();
+    });
+
+    if (cookies['JSESSIONID']) break;
+
+    if ((res.status === 301 || res.status === 302 || res.status === 303) && res.headers['location']) {
+      const loc = res.headers['location'];
+      url = loc.startsWith('http') ? loc : `https://cricclubs.com${loc}`;
+    } else {
+      break;
+    }
   }
-  return null;
+
+  return cookies['JSESSIONID'] || null;
 }
 
 /**
  * Fetch and parse a Sportygo player's profile page.
- *
- * @param {string} playerId - Numeric player ID
- * @param {string} clubId   - Numeric club ID (extracted from search result profileUrl)
- * @returns {Promise<object>}
+ * @param {string} playerId
+ * @param {string} clubId
  */
 async function fetchSportygoPlayerStats(playerId, clubId) {
   const profileUrl = `${BASE_URL}/viewPlayer.do?playerId=${playerId}&clubId=${clubId}`;
-  const searchPageUrl = `${BASE_URL}/searchPlayer.do?clubId=${clubId}`;
+  const sessionUrl = `${BASE_URL}/searchPlayer.do`;
 
-  // ── Attempt 1: direct GET ────────────────────────────────────────
+  // ── Attempt 1: direct GET (no session needed for public profiles) ──
   try {
     const res = await axios.get(profileUrl, {
       headers: COMMON_HEADERS,
@@ -48,41 +79,26 @@ async function fetchSportygoPlayerStats(playerId, clubId) {
       validateStatus: () => true,
     });
 
-    if (res.status === 200 && typeof res.data === 'string' && res.data.length > 2000) {
+    if (
+      res.status === 200 &&
+      typeof res.data === 'string' &&
+      res.data.length > 2000 &&
+      !res.data.includes('loginForm') &&
+      !res.data.includes('login.do')
+    ) {
       const parsed = parsePlayerProfile(res.data, playerId);
-      if (parsed.batting || parsed.bowling || parsed.playerName) {
-        return parsed;
-      }
+      if (parsed.batting || parsed.bowling || parsed.playerName) return parsed;
     }
-  } catch (_) {
-    // fall through to session-based fetch
-  }
+  } catch (_) {}
 
-  // ── Attempt 2: session-based GET (maxRedirects:0 captures cookie from first response) ──
-  const sessionUrl = `${BASE_URL}/searchPlayer.do`;
-  const getRes = await axios.get(sessionUrl, {
-    headers: COMMON_HEADERS,
-    timeout: TIMEOUT_MS,
-    maxRedirects: 0,
-    validateStatus: () => true,
-  });
-
-  let jsessionId = extractJSessionId(getRes.headers['set-cookie']);
-
-  if (!jsessionId && getRes.headers['location']) {
-    const redirectUrl = getRes.headers['location'];
-    const redirectRes = await axios.get(
-      redirectUrl.startsWith('http') ? redirectUrl : `https://cricclubs.com${redirectUrl}`,
-      { headers: COMMON_HEADERS, timeout: TIMEOUT_MS, maxRedirects: 0, validateStatus: () => true }
-    );
-    jsessionId = extractJSessionId(redirectRes.headers['set-cookie']);
-  }
+  // ── Attempt 2: session-based GET via manual redirect chain ──────
+  const jsessionId = await acquireSessionCookies(sessionUrl);
 
   const profileRes = await axios.get(profileUrl, {
     headers: {
       ...COMMON_HEADERS,
       ...(jsessionId ? { Cookie: `JSESSIONID=${jsessionId}` } : {}),
-      Referer: searchPageUrl,
+      Referer: `${BASE_URL}/searchPlayer.do?clubId=${clubId}`,
     },
     timeout: TIMEOUT_MS,
     maxRedirects: 5,
