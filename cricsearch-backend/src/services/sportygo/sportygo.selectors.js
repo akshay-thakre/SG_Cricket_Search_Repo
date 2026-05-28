@@ -30,7 +30,7 @@ module.exports = {
   PLAYER_ID_REGEX: /playerId=(\d+)/,
   CLUB_ID_REGEX: /clubId=(\d+)/,
 
-  BASE_URL: 'https://cricclubs.com/sportygo',
+  BASE_URL: 'https://scores.cricclubs.com/sportygo',
   SEARCH_PATH: '/searchPlayer.do',
   VIEW_PLAYER_PATH: '/viewPlayer.do',
 };

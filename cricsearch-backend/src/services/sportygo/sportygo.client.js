@@ -65,8 +65,8 @@ function buildPostBody(params = {}) {
 function createSportygoClient() {
   async function search(params) {
     const clubId = process.env.SPORTYGO_CLUB_ID || '';
-    // Use the main page for session acquisition — the search URL with an empty
-    // clubId redirects to an error page and never sets JSESSIONID.
+    // scores.cricclubs.com is the Java app that sets JSESSIONID.
+    // Use the org root page for session acquisition.
     const sessionUrl = `${selectors.BASE_URL}/`;
     const searchPageUrl = clubId
       ? `${selectors.BASE_URL}${selectors.SEARCH_PATH}?clubId=${clubId}`
