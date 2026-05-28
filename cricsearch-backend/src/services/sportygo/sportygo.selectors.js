@@ -31,6 +31,7 @@ module.exports = {
   CLUB_ID_REGEX: /clubId=(\d+)/,
 
   BASE_URL: 'https://cricclubs.com/sportygo',
+  CLUB_ID: process.env.SPORTYGO_CLUB_ID || '4263',
   SEARCH_PATH: '/searchPlayer.do',
   VIEW_PLAYER_PATH: '/viewPlayer.do',
 };

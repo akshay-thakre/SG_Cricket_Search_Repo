@@ -126,15 +126,18 @@ export async function searchAcrossPlatforms(query, signal) {
 
   let totalFound = 0;
 
-  // Split "First Last" into separate fields for more accurate CricClubs matching
+  // SCA has separate firstName/lastName fields — split the query
   const parts = query.trim().split(/\s+/);
-  const searchParams = parts.length >= 2
+  const scaParams = parts.length >= 2
     ? { firstName: parts[0], lastName: parts.slice(1).join(' ') }
     : { firstName: query };
 
+  // Sportygo has a single "Name" field mapped to firstName — send full query
+  const sportygoParams = { firstName: query.trim() };
+
   // ── SCA — LIVE ──────────────────────────────────────────────────
   try {
-    const scaResult = await searchSCAPlayers(searchParams, signal);
+    const scaResult = await searchSCAPlayers(scaParams, signal);
     if (scaResult.players && scaResult.players.length > 0) {
       const seen = new Set();
       const uniquePlayers = scaResult.players.filter((p) => {
@@ -167,7 +170,7 @@ export async function searchAcrossPlatforms(query, signal) {
 
   // ── Sportygo — LIVE ─────────────────────────────────────────────
   try {
-    const sgResult = await searchSportygoPlayers(searchParams, signal);
+    const sgResult = await searchSportygoPlayers(sportygoParams, signal);
     if (sgResult.players && sgResult.players.length > 0) {
       const seen = new Set();
       const uniquePlayers = sgResult.players.filter((p) => {
