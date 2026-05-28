@@ -1,8 +1,10 @@
 /**
  * @module sportygo.client
- * @description HTTP client with cookie-jar support for Sportygo on CricClubs.
- * SPORTYGO_CLUB_ID is read from the environment at call time so it can be set
- * via Render/Heroku environment variables without restarting the module cache.
+ * @description HTTP client for Sportygo on CricClubs (https://cricclubs.com/sportygo).
+ * Strategy:
+ *   1. Try a direct POST without any session (works if server is stateless for searches).
+ *   2. If that yields no results, acquire a session via a manual redirect chain that
+ *      accumulates Set-Cookie headers from every hop, then POST with the session.
  */
 
 const axios = require('axios');
@@ -31,16 +33,6 @@ const COMMON_HEADERS = {
   'Accept-Language': 'en-US,en;q=0.9',
 };
 
-function extractJSessionId(setCookieHeaders) {
-  if (!setCookieHeaders) return null;
-  const headers = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
-  for (const header of headers) {
-    const match = header.match(/JSESSIONID=([^;]+)/);
-    if (match) return match[1];
-  }
-  return null;
-}
-
 function buildPostBody(params = {}) {
   const clubId = process.env.SPORTYGO_CLUB_ID || '';
   const fields = {
@@ -56,22 +48,78 @@ function buildPostBody(params = {}) {
     playerStatus: params.playerStatus || '',
     clubId,
   };
-
   return Object.entries(fields)
-    .map(([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
     .join('&');
+}
+
+/**
+ * Follow redirects manually, collecting Set-Cookie from every hop.
+ * Returns the accumulated cookie string (e.g. "JSESSIONID=abc123").
+ */
+async function acquireSessionCookies(startUrl) {
+  let url = startUrl;
+  const cookies = {};
+
+  for (let hop = 0; hop < 6; hop++) {
+    debug(`Session hop ${hop}: GET ${url}`);
+    let res;
+    try {
+      res = await axios.get(url, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...(Object.keys(cookies).length
+            ? { Cookie: Object.entries(cookies).map(([k, v]) => `${k}=${v}`).join('; ') }
+            : {}),
+        },
+        timeout: TIMEOUT_MS,
+        maxRedirects: 0,
+        validateStatus: () => true,
+      });
+    } catch (err) {
+      debug(`Hop ${hop} error:`, err.message);
+      break;
+    }
+
+    // Collect all Set-Cookie values from this hop
+    const setCookieHeaders = res.headers['set-cookie'];
+    if (setCookieHeaders) {
+      const arr = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
+      arr.forEach((c) => {
+        const kv = c.split(';')[0];
+        const eqIdx = kv.indexOf('=');
+        if (eqIdx > 0) {
+          const k = kv.slice(0, eqIdx).trim();
+          const v = kv.slice(eqIdx + 1).trim();
+          cookies[k] = v;
+        }
+      });
+    }
+
+    debug(`Hop ${hop} status: ${res.status}, cookies so far:`, Object.keys(cookies));
+
+    if (cookies['JSESSIONID']) break;
+
+    // Follow redirect if present
+    if ((res.status === 301 || res.status === 302 || res.status === 303) && res.headers['location']) {
+      const loc = res.headers['location'];
+      url = loc.startsWith('http') ? loc : `https://cricclubs.com${loc}`;
+    } else {
+      break; // No redirect, no more hops
+    }
+  }
+
+  return cookies['JSESSIONID'] || null;
 }
 
 function createSportygoClient() {
   async function search(params) {
     const clubId = process.env.SPORTYGO_CLUB_ID || '';
-    // cricclubs.com may redirect the first GET, so use maxRedirects:0 to
-    // capture the Set-Cookie from the initial response before any redirect.
-    const sessionUrl = `${selectors.BASE_URL}${selectors.SEARCH_PATH}`;
     const searchPageUrl = clubId
       ? `${selectors.BASE_URL}${selectors.SEARCH_PATH}?clubId=${clubId}`
       : `${selectors.BASE_URL}${selectors.SEARCH_PATH}`;
 
+    const postBody = buildPostBody(params);
     let lastError = null;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -81,55 +129,60 @@ function createSportygoClient() {
           await sleep(RETRY_DELAY_MS);
         }
 
-        // Step 1: GET session — no redirect following so we catch Set-Cookie
-        // from the very first response (302 redirects still carry cookies)
-        debug('GET (session)', sessionUrl);
-        const getRes = await axios.get(sessionUrl, {
-          headers: { ...COMMON_HEADERS },
-          timeout: TIMEOUT_MS,
-          maxRedirects: 0,
-          validateStatus: () => true,
-        });
-
-        let jsessionId = extractJSessionId(getRes.headers['set-cookie']);
-
-        // Fallback: if first response has no cookie, follow one redirect manually
-        if (!jsessionId && getRes.headers['location']) {
-          const redirectUrl = getRes.headers['location'];
-          const redirectRes = await axios.get(
-            redirectUrl.startsWith('http') ? redirectUrl : `https://cricclubs.com${redirectUrl}`,
-            { headers: { ...COMMON_HEADERS }, timeout: TIMEOUT_MS, maxRedirects: 0, validateStatus: () => true }
-          );
-          jsessionId = extractJSessionId(redirectRes.headers['set-cookie']);
-        }
-
-        debug('JSESSIONID:', jsessionId ? `${jsessionId.slice(0, 8)}…` : 'none');
-
-        if (!jsessionId) {
-          throw new Error('Failed to obtain JSESSIONID from Sportygo');
-        }
-
-        const postBody = buildPostBody(params);
-        debug('POST', searchPageUrl, '| body length:', postBody.length);
-
-        const postRes = await axios.post(searchPageUrl, postBody, {
+        // ── Strategy A: direct POST without session ───────────────
+        // Sportygo may not require CSRF/session for read-only searches.
+        debug('Strategy A: direct POST to', searchPageUrl);
+        const directRes = await axios.post(searchPageUrl, postBody, {
           headers: {
             ...COMMON_HEADERS,
             'Content-Type': 'application/x-www-form-urlencoded',
-            Cookie: `JSESSIONID=${jsessionId}`,
-            Referer: sessionUrl,
+            Referer: searchPageUrl,
           },
           timeout: TIMEOUT_MS,
           maxRedirects: 5,
           validateStatus: () => true,
         });
 
-        debug('Response status:', postRes.status, '| size:', postRes.data?.length);
+        debug('Strategy A status:', directRes.status, '| size:', directRes.data?.length);
 
-        return { html: postRes.data, status: postRes.status };
+        // If we got a real HTML page back (not a login redirect), use it
+        if (
+          directRes.status === 200 &&
+          typeof directRes.data === 'string' &&
+          directRes.data.length > 500 &&
+          !directRes.data.includes('loginForm') &&
+          !directRes.data.includes('login.do')
+        ) {
+          return { html: directRes.data, status: directRes.status };
+        }
+
+        // ── Strategy B: acquire session via manual hop chain, then POST ──
+        debug('Strategy B: acquiring session cookies from', searchPageUrl);
+        const jsessionId = await acquireSessionCookies(searchPageUrl);
+        debug('JSESSIONID:', jsessionId ? `${jsessionId.slice(0, 8)}…` : 'none');
+
+        if (!jsessionId) {
+          throw new Error('Failed to obtain JSESSIONID from Sportygo');
+        }
+
+        const sessionRes = await axios.post(searchPageUrl, postBody, {
+          headers: {
+            ...COMMON_HEADERS,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Cookie: `JSESSIONID=${jsessionId}`,
+            Referer: searchPageUrl,
+          },
+          timeout: TIMEOUT_MS,
+          maxRedirects: 5,
+          validateStatus: () => true,
+        });
+
+        debug('Strategy B status:', sessionRes.status, '| size:', sessionRes.data?.length);
+        return { html: sessionRes.data, status: sessionRes.status };
+
       } catch (err) {
         lastError = err;
-        debug('Request error:', err.message);
+        debug('Attempt error:', err.message);
       }
     }
 
