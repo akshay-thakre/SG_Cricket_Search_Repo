@@ -7,7 +7,7 @@
 const axios = require('axios');
 const { parsePlayerProfile } = require('../sca/sca.profile');
 
-const BASE_URL = 'https://cricclubs.com/sportygo';
+const BASE_URL = 'https://scores.cricclubs.com/sportygo';
 const TIMEOUT_MS = 15000;
 
 const COMMON_HEADERS = {
