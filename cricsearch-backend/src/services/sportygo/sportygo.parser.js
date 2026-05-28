@@ -8,7 +8,7 @@
 const { parsePlayerResults: scaParse } = require('../sca/sca.parser');
 
 const SCA_ORIGIN = 'https://scores.cricketsingapore.com';
-const SPORTYGO_ORIGIN = 'https://scores.cricclubs.com';
+const SPORTYGO_ORIGIN = 'https://cricclubs.com';
 
 /**
  * Parse Sportygo search result HTML.
