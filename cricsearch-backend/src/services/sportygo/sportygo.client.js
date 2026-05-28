@@ -65,7 +65,12 @@ function buildPostBody(params = {}) {
 function createSportygoClient() {
   async function search(params) {
     const clubId = process.env.SPORTYGO_CLUB_ID || '';
-    const searchPageUrl = `${selectors.BASE_URL}${selectors.SEARCH_PATH}?clubId=${clubId}`;
+    // Use the main page for session acquisition — the search URL with an empty
+    // clubId redirects to an error page and never sets JSESSIONID.
+    const sessionUrl = `${selectors.BASE_URL}/`;
+    const searchPageUrl = clubId
+      ? `${selectors.BASE_URL}${selectors.SEARCH_PATH}?clubId=${clubId}`
+      : `${selectors.BASE_URL}${selectors.SEARCH_PATH}`;
 
     let lastError = null;
 
@@ -76,8 +81,9 @@ function createSportygoClient() {
           await sleep(RETRY_DELAY_MS);
         }
 
-        debug('GET', searchPageUrl);
-        const getRes = await axios.get(searchPageUrl, {
+        // Step 1: GET main page to reliably obtain JSESSIONID
+        debug('GET (session)', sessionUrl);
+        const getRes = await axios.get(sessionUrl, {
           headers: { ...COMMON_HEADERS },
           timeout: TIMEOUT_MS,
           maxRedirects: 5,
@@ -88,7 +94,7 @@ function createSportygoClient() {
         debug('JSESSIONID:', jsessionId ? `${jsessionId.slice(0, 8)}…` : 'none');
 
         if (!jsessionId) {
-          throw new Error('Failed to obtain JSESSIONID from Sportygo search page');
+          throw new Error('Failed to obtain JSESSIONID from Sportygo');
         }
 
         const postBody = buildPostBody(params);
@@ -99,7 +105,7 @@ function createSportygoClient() {
             ...COMMON_HEADERS,
             'Content-Type': 'application/x-www-form-urlencoded',
             Cookie: `JSESSIONID=${jsessionId}`,
-            Referer: searchPageUrl,
+            Referer: sessionUrl,
           },
           timeout: TIMEOUT_MS,
           maxRedirects: 5,
