@@ -195,13 +195,7 @@ export async function searchAcrossPlatforms(query, signal) {
     }
   } catch (err) {
     if (err.name === 'AbortError') throw err;
-    // 503 = not configured yet — show as "Coming soon" rather than an error
-    if (err.message && err.message.includes('SPORTYGO_CLUB_ID')) {
-      platforms['Sportygo'].disabled = true;
-      platforms['Sportygo'].disabledReason = 'Coming soon';
-    } else {
-      platforms['Sportygo'].error = err.message;
-    }
+    platforms['Sportygo'].error = err.message;
     platforms['Sportygo'].noResults = true;
   }
 

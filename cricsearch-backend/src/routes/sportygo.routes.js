@@ -26,13 +26,6 @@ const SEARCH_FIELDS = [
 // POST /api/sportygo/players/search
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/api/sportygo/players/search', async (req, res) => {
-  if (!process.env.SPORTYGO_CLUB_ID) {
-    return res.status(503).json({
-      error: 'Sportygo not configured. Set the SPORTYGO_CLUB_ID environment variable.',
-      source: 'sportygo',
-    });
-  }
-
   try {
     const params = {};
     for (const field of SEARCH_FIELDS) {
