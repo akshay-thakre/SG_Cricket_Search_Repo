@@ -165,7 +165,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           <PlatformBadge code="CC" label="CricClubs" />
           <PlatformBadge code="LMS" label="Last Man Stands" />
           <PlatformBadge code="ST" label="Stumps" />
-          <PlatformBadge code="CH" label="CricHeroes" />
+          <PlatformBadge code="SY" label="Sportygo" />
         </div>
       </div>
     </div>
