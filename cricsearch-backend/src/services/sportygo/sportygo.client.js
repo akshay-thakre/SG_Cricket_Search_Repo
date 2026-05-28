@@ -65,9 +65,9 @@ function buildPostBody(params = {}) {
 function createSportygoClient() {
   async function search(params) {
     const clubId = process.env.SPORTYGO_CLUB_ID || '';
-    // scores.cricclubs.com is the Java app that sets JSESSIONID.
-    // Use the org root page for session acquisition.
-    const sessionUrl = `${selectors.BASE_URL}/`;
+    // cricclubs.com may redirect the first GET, so use maxRedirects:0 to
+    // capture the Set-Cookie from the initial response before any redirect.
+    const sessionUrl = `${selectors.BASE_URL}${selectors.SEARCH_PATH}`;
     const searchPageUrl = clubId
       ? `${selectors.BASE_URL}${selectors.SEARCH_PATH}?clubId=${clubId}`
       : `${selectors.BASE_URL}${selectors.SEARCH_PATH}`;
@@ -81,16 +81,28 @@ function createSportygoClient() {
           await sleep(RETRY_DELAY_MS);
         }
 
-        // Step 1: GET main page to reliably obtain JSESSIONID
+        // Step 1: GET session — no redirect following so we catch Set-Cookie
+        // from the very first response (302 redirects still carry cookies)
         debug('GET (session)', sessionUrl);
         const getRes = await axios.get(sessionUrl, {
           headers: { ...COMMON_HEADERS },
           timeout: TIMEOUT_MS,
-          maxRedirects: 5,
+          maxRedirects: 0,
           validateStatus: () => true,
         });
 
-        const jsessionId = extractJSessionId(getRes.headers['set-cookie']);
+        let jsessionId = extractJSessionId(getRes.headers['set-cookie']);
+
+        // Fallback: if first response has no cookie, follow one redirect manually
+        if (!jsessionId && getRes.headers['location']) {
+          const redirectUrl = getRes.headers['location'];
+          const redirectRes = await axios.get(
+            redirectUrl.startsWith('http') ? redirectUrl : `https://cricclubs.com${redirectUrl}`,
+            { headers: { ...COMMON_HEADERS }, timeout: TIMEOUT_MS, maxRedirects: 0, validateStatus: () => true }
+          );
+          jsessionId = extractJSessionId(redirectRes.headers['set-cookie']);
+        }
+
         debug('JSESSIONID:', jsessionId ? `${jsessionId.slice(0, 8)}…` : 'none');
 
         if (!jsessionId) {
