@@ -48,8 +48,8 @@ async function fetchSportygoPlayerStats(playerId, clubId) {
     // fall through to session-based fetch
   }
 
-  // ── Attempt 2: session-based GET ────────────────────────────────
-  const getRes = await axios.get(searchPageUrl, {
+  // ── Attempt 2: session-based GET (use main page for reliable JSESSIONID) ──
+  const getRes = await axios.get(`${BASE_URL}/`, {
     headers: COMMON_HEADERS,
     timeout: TIMEOUT_MS,
     maxRedirects: 5,
