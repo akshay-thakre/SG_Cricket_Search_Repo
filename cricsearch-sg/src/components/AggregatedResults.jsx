@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchPlayerStats } from '../services/apiService';
+import { fetchAnyPlayerStats } from '../services/apiService';
 
 // ── Main aggregated results component ────────────────────────────────────────
 
@@ -143,7 +143,7 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
         <div style={{ padding: '1.25rem', borderTop: '1px solid #d0dae8' }}>
           {players.map((player, idx) => (
             <PlayerCard
-              key={player.id || idx}
+              key={`${player.source || 'p'}-${player.id || idx}`}
               player={player}
               platformName={platformName}
               isLast={idx === players.length - 1}
@@ -166,7 +166,7 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
 function PlayerCard({ player, platformName, isLast }) {
   const { id, name, team, role, profileUrl, verified } = player;
   const [stats, setStats] = useState(null);
-  const [statsLoading, setStatsLoading] = useState(!!id); // true if we have an id to fetch
+  const [statsLoading, setStatsLoading] = useState(!!id);
   const [statsError, setStatsError] = useState(!id ? 'Player ID unavailable — cannot load stats.' : null);
 
   useEffect(() => {
@@ -175,7 +175,7 @@ function PlayerCard({ player, platformName, isLast }) {
     setStatsLoading(true);
     setStatsError(null);
 
-    fetchPlayerStats(id)
+    fetchAnyPlayerStats(player)
       .then((data) => {
         setStats(data);
         setStatsLoading(false);
@@ -184,6 +184,7 @@ function PlayerCard({ player, platformName, isLast }) {
         setStatsError(err.message || 'Could not load player statistics.');
         setStatsLoading(false);
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const hasBatting = stats?.batting && stats.batting.matches !== null;

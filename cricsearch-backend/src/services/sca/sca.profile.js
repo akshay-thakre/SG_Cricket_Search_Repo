@@ -176,14 +176,14 @@ function extractBowling(tableData) {
 function extractCompetitions(tableData, statType) {
   if (!tableData || tableData.rows.length === 0) return [];
   const hasCompCol = tableData.headers.some((h) =>
-    ['competition', 'comp', 'tournament', 'season', 'league'].includes(h.replace(/_\d+$/, ''))
+    ['competition', 'comp', 'tournament', 'season', 'league', 'year', 'yr'].includes(h.replace(/_\d+$/, ''))
   );
   if (!hasCompCol) return [];
 
   return tableData.rows
     .map((r) => {
       const compName =
-        getField(r, 'competition', 'comp', 'tournament', 'season', 'league') || 'Unknown';
+        getField(r, 'competition', 'comp', 'tournament', 'season', 'league', 'year', 'yr') || 'Unknown';
       if (statType === 'batting') {
         return {
           competition: compName,
