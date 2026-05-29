@@ -23,7 +23,7 @@ services:
     rootDir: cricsearch-backend
     region: singapore          # closest to SCA servers and your users
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npx playwright install --with-deps chromium
     startCommand: node server.js
     healthCheckPath: /api/health
     envVars:
