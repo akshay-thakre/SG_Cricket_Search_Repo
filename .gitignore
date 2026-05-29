@@ -88,6 +88,13 @@ ehthumbs.db
 # Add other generated HTML dumps here if needed
 
 # ===========================
+# Playwright browser binaries
+# ===========================
+# Downloaded at build/install time — never commit (130 MB+)
+.playwright-browsers/
+*/.playwright-browsers/
+
+# ===========================
 # Render
 # ===========================
 # render.yaml is intentionally committed (it defines the deployment)
