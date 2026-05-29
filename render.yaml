@@ -23,6 +23,9 @@ services:
     rootDir: cricsearch-backend
     region: singapore          # closest to SCA servers and your users
     plan: free
+    # PLAYWRIGHT_BROWSERS_PATH pins the browser install location to a path inside
+    # the project directory (/opt/render/project/src). This survives from build
+    # to runtime — unlike $HOME/.cache which can differ between the two phases.
     buildCommand: npm install && npx playwright install --with-deps chromium
     startCommand: node server.js
     healthCheckPath: /api/health
@@ -31,6 +34,10 @@ services:
         value: production
       - key: DEBUG_SCRAPER
         value: "false"
+      # Pin Playwright browser storage to a stable project-relative path so the
+      # binary installed during build is found at exactly the same path at runtime.
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/src/.playwright-browsers
       # ALLOWED_ORIGIN — set in Render dashboard after the frontend URL is known.
       # Example: https://cricsearch-frontend.onrender.com
       # Leave unset to allow all origins (safe for a public read-only API).
