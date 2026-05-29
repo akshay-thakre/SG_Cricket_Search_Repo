@@ -1,122 +1,73 @@
 /**
  * @module sportygo.client
- * @description HTTP client for Sportygo on CricClubs (https://cricclubs.com/sportygo).
- * Uses CLUB_ID=4263 (Sportygo's org ID on CricClubs) so the session URL resolves
- * to a real page that sets JSESSIONID — same two-step flow as the SCA client.
+ * @description Playwright browser lifecycle for Sportygo scraping.
+ * Maintains a singleton Chromium instance reused across requests.
+ * Configure PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH for custom installs.
  */
 
-const axios = require('axios');
-const selectors = require('./sportygo.selectors');
+const { chromium } = require('playwright');
 
-const TIMEOUT_MS = 15000;
-const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 1000;
+let _browser = null;
 
 function debug(...args) {
-  if (process.env.DEBUG_SCRAPER === 'true') {
-    console.log('[Sportygo:client]', ...args);
-  }
+  if (process.env.DEBUG_SCRAPER === 'true') console.log('[Sportygo:client]', ...args);
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+async function getBrowser() {
+  if (_browser && _browser.isConnected()) return _browser;
 
-const COMMON_HEADERS = {
-  'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-    '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-  Accept:
-    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-  'Accept-Language': 'en-US,en;q=0.9',
-};
-
-function extractJSessionId(setCookieHeaders) {
-  if (!setCookieHeaders) return null;
-  const headers = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
-  for (const h of headers) {
-    const m = h.match(/JSESSIONID=([^;]+)/);
-    if (m) return m[1];
-  }
-  return null;
-}
-
-function buildPostBody(params = {}) {
-  const clubId = selectors.CLUB_ID;
-  const fields = {
-    firstName: params.firstName || '',
-    lastName: params.lastName || '',
-    teamName: params.teamName || '',
-    playerCCId: params.playerCCId || '',
-    emailId: params.emailId || '',
-    gender: params.gender || '',
-    internalClub: params.internalClub || '',
-    battingStyle: params.battingStyle || '',
-    bowlingStyle: params.bowlingStyle || '',
-    playerStatus: params.playerStatus || '',
-    clubId,
+  const opts = {
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   };
-  return Object.entries(fields)
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-    .join('&');
-}
 
-function createSportygoClient() {
-  async function search(params) {
-    const clubId = selectors.CLUB_ID;
-    const searchPageUrl = `${selectors.BASE_URL}${selectors.SEARCH_PATH}?clubId=${clubId}`;
-    let lastError = null;
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        if (attempt > 0) {
-          debug(`Retry attempt ${attempt}/${MAX_RETRIES}`);
-          await sleep(RETRY_DELAY_MS);
-        }
-
-        // Step 1: GET search page with valid clubId to obtain JSESSIONID
-        debug('GET (session)', searchPageUrl);
-        const getRes = await axios.get(searchPageUrl, {
-          headers: { ...COMMON_HEADERS },
-          timeout: TIMEOUT_MS,
-          maxRedirects: 5,
-          validateStatus: () => true,
-        });
-
-        let jsessionId = extractJSessionId(getRes.headers['set-cookie']);
-        debug('JSESSIONID:', jsessionId ? `${jsessionId.slice(0, 8)}…` : 'none');
-
-        // Step 2: POST search form with session cookie
-        const postBody = buildPostBody(params);
-        debug('POST', searchPageUrl, '| body length:', postBody.length);
-
-        const postRes = await axios.post(searchPageUrl, postBody, {
-          headers: {
-            ...COMMON_HEADERS,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            ...(jsessionId ? { Cookie: `JSESSIONID=${jsessionId}` } : {}),
-            Referer: searchPageUrl,
-          },
-          timeout: TIMEOUT_MS,
-          maxRedirects: 5,
-          validateStatus: () => true,
-        });
-
-        debug('Response status:', postRes.status, '| size:', postRes.data?.length);
-        return { html: postRes.data, status: postRes.status };
-
-      } catch (err) {
-        lastError = err;
-        debug('Attempt error:', err.message);
-      }
-    }
-
-    throw new Error(
-      `Sportygo search failed after ${MAX_RETRIES + 1} attempts: ${lastError?.message}`
-    );
+  const exe = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  if (exe) {
+    opts.executablePath = exe;
+    debug('Using Chromium at', exe);
   }
 
-  return { search };
+  debug('Launching browser');
+  _browser = await chromium.launch(opts);
+  debug('Browser ready');
+  return _browser;
 }
 
-module.exports = { createSportygoClient };
+/**
+ * Run `fn(page)` inside an isolated browser context.
+ * The context (and its cookies/storage) is destroyed after fn resolves or rejects.
+ * @template T
+ * @param {(page: import('playwright').Page) => Promise<T>} fn
+ * @returns {Promise<T>}
+ */
+async function withPage(fn) {
+  const browser = await getBrowser();
+  const ctx = await browser.newContext({
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+      '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    viewport: { width: 1280, height: 800 },
+    extraHTTPHeaders: { 'Accept-Language': 'en-US,en;q=0.9' },
+    ignoreHTTPSErrors: true,
+  });
+  const page = await ctx.newPage();
+  try {
+    return await fn(page);
+  } finally {
+    await ctx.close().catch(() => {});
+  }
+}
+
+async function closeBrowser() {
+  if (_browser) {
+    try { await _browser.close(); } catch (_) {}
+    _browser = null;
+    debug('Browser closed');
+  }
+}
+
+['exit', 'SIGTERM', 'SIGINT'].forEach((sig) => {
+  process.on(sig, () => closeBrowser().catch(() => {}));
+});
+
+module.exports = { withPage, closeBrowser };

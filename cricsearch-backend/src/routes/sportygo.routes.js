@@ -6,6 +6,7 @@
 const express = require('express');
 const { searchPlayers } = require('../services/sportygo/sportygo.service');
 const { fetchSportygoPlayerStats } = require('../services/sportygo/sportygo.profile');
+const selectors = require('../services/sportygo/sportygo.selectors');
 
 const router = express.Router();
 
@@ -66,10 +67,10 @@ router.get('/api/sportygo/players/:id/stats', async (req, res) => {
       return res.status(400).json({ error: 'Invalid player ID. Must be numeric.' });
     }
 
-    const resolvedClubId = clubId || process.env.SPORTYGO_CLUB_ID;
+    const resolvedClubId = clubId || process.env.SPORTYGO_CLUB_ID || selectors.CLUB_ID;
     if (!resolvedClubId || !/^\d+$/.test(resolvedClubId)) {
       return res.status(400).json({
-        error: 'clubId query param is required (or set SPORTYGO_CLUB_ID env var).',
+        error: 'Invalid clubId. Provide clubId query param or set SPORTYGO_CLUB_ID env var.',
       });
     }
 
@@ -93,8 +94,8 @@ router.get('/api/sportygo/health', (_req, res) => {
   res.json({
     status: 'ok',
     source: 'sportygo',
-    method: 'cheerio',
-    configured: !!process.env.SPORTYGO_CLUB_ID,
+    method: 'playwright',
+    clubId: process.env.SPORTYGO_CLUB_ID || selectors.CLUB_ID,
     timestamp: new Date().toISOString(),
   });
 });

@@ -1,40 +1,77 @@
 /**
  * @module sportygo.service
- * @description Orchestration service for Sportygo player search.
+ * @description Playwright-based search orchestration for Sportygo (cricclubs.com/sportygo).
+ * Automates the search form, waits for results, and extracts player data from the DOM.
  */
 
-const { createSportygoClient } = require('./sportygo.client');
-const { parsePlayerResults } = require('./sportygo.parser');
+const { withPage } = require('./sportygo.client');
+const { extractSearchResults } = require('./sportygo.parser');
 const selectors = require('./sportygo.selectors');
 
+function debug(...args) {
+  if (process.env.DEBUG_SCRAPER === 'true') console.log('[Sportygo:search]', ...args);
+}
+
 /**
- * Search for players on the Sportygo platform.
- * @param {object} params - Search parameters (firstName, lastName, etc.)
+ * Search for players on Sportygo using Playwright.
+ * @param {object} params - Search parameters. `firstName` is the main field.
+ * @returns {Promise<object>}
  */
 async function searchPlayers(params = {}) {
-  const client = createSportygoClient();
-  const { html, status } = await client.search(params);
-  const result = parsePlayerResults(html);
+  const clubId = selectors.CLUB_ID;
+  const searchUrl = selectors.searchUrl(clubId);
 
-  const message = result.empty
-    ? 'No players found matching the search criteria.'
-    : `Found ${result.totalResults} player(s).`;
+  debug('Searching at:', searchUrl, '| params:', JSON.stringify(params));
 
-  return {
-    source: 'sportygo',
-    query: params,
-    totalResults: result.totalResults,
-    players: result.players,
-    meta: {
-      method: 'cheerio',
-      upstreamUrl: `${selectors.BASE_URL}${selectors.SEARCH_PATH}`,
-      responseStatus: status,
-      blocked: false,
-      empty: result.empty,
-      message,
-      scrapedAt: new Date().toISOString(),
-    },
-  };
+  return withPage(async (page) => {
+    page.setDefaultTimeout(selectors.NAV_TIMEOUT);
+
+    // Navigate to the Sportygo search page
+    await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: selectors.NAV_TIMEOUT });
+    debug('Search page loaded');
+
+    // Wait for the firstName input field
+    await page.waitForSelector(selectors.FIRSTNAME_INPUT, { timeout: selectors.SELECTOR_TIMEOUT });
+    await page.fill(selectors.FIRSTNAME_INPUT, params.firstName || '');
+    debug('Filled firstName:', params.firstName);
+
+    // Submit the form; CricClubs does a full-page POST, so we wait for navigation
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: selectors.NAV_TIMEOUT }).catch(() => {}),
+      page.click(selectors.SEARCH_SUBMIT),
+    ]);
+    debug('Form submitted');
+
+    // Wait for the results table or the "no results" placeholder
+    await page
+      .waitForSelector(`${selectors.RESULTS_TABLE}, ${selectors.NO_RESULTS}`, {
+        timeout: selectors.SELECTOR_TIMEOUT,
+      })
+      .catch(() => {});
+    debug('Results ready');
+
+    // Extract player rows using the browser-side parser
+    const players = await page.evaluate(extractSearchResults);
+    debug('Players found:', players.length);
+
+    return {
+      source: 'sportygo',
+      query: params,
+      totalResults: players.length,
+      players,
+      meta: {
+        method: 'playwright',
+        upstreamUrl: searchUrl,
+        blocked: false,
+        empty: players.length === 0,
+        message:
+          players.length === 0
+            ? 'No players found matching the search criteria.'
+            : `Found ${players.length} player(s).`,
+        scrapedAt: new Date().toISOString(),
+      },
+    };
+  });
 }
 
 module.exports = { searchPlayers };

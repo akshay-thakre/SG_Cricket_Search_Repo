@@ -1,6 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAnyPlayerStats } from '../services/apiService';
 
+// ── Stats format normalizer ───────────────────────────────────────────────────
+// SCA returns batting/bowling as plain objects.
+// Sportygo returns them as arrays of per-series rows + player.totals.
+// This function converts Sportygo format to the SCA shape so the card renders identically.
+function normalizeStats(raw) {
+  if (!raw) return raw;
+  if (!Array.isArray(raw.batting) && !Array.isArray(raw.bowling)) return raw; // already SCA shape
+
+  const battingRow = (raw.batting || [])[0] || null;
+  const bowlingRow = (raw.bowling || [])[0] || null;
+  const totals = (raw.player && raw.player.totals) || {};
+
+  return {
+    ...raw,
+    playerName: raw.player ? raw.player.name : raw.playerName,
+    teamName:   raw.player ? raw.player.teamName : raw.teamName,
+    playerRole: raw.player ? raw.player.playerRole : raw.playerRole,
+    batting: battingRow ? {
+      matches:      totals.matches     ?? battingRow.mat,
+      innings:      battingRow.inns,
+      notOuts:      battingRow.no,
+      runs:         totals.runs        ?? battingRow.runs,
+      highestScore: battingRow.hs,
+      average:      battingRow.ave,
+      strikeRate:   battingRow.sr,
+      centuries:    battingRow['100s'],
+      fifties:      battingRow['50s'],
+      fours:        battingRow['4s'],
+      sixes:        battingRow['6s'],
+    } : null,
+    bowling: bowlingRow ? {
+      matches:     totals.matches      ?? bowlingRow.mat,
+      overs:       bowlingRow.overs,
+      maidens:     bowlingRow.mdns,
+      runs:        bowlingRow.runs,
+      wickets:     totals.wickets      ?? bowlingRow.wkts,
+      average:     bowlingRow.ave,
+      economy:     bowlingRow.eco,
+      strikeRate:  bowlingRow.sr,
+      bestBowling: bowlingRow.bbi,
+    } : null,
+  };
+}
+
 // ── Main aggregated results component ────────────────────────────────────────
 
 export function AggregatedResults({ searchResults }) {
@@ -177,7 +221,7 @@ function PlayerCard({ player, platformName, isLast }) {
 
     fetchAnyPlayerStats(player)
       .then((data) => {
-        setStats(data);
+        setStats(normalizeStats(data));
         setStatsLoading(false);
       })
       .catch((err) => {
