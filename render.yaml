@@ -23,14 +23,7 @@ services:
     rootDir: cricsearch-backend
     region: singapore          # closest to SCA servers and your users
     plan: free
-    # PLAYWRIGHT_BROWSERS_PATH is set inline so the browser is installed into
-    # the project directory (.playwright-browsers/) during build.  That directory
-    # IS part of the deployed image; $HOME/.cache is NOT.
-    # The runtime code (sportygo.client.js) also sets this env var via __dirname
-    # so it works even if this build command is overridden in the dashboard.
-    buildCommand: >-
-      PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers npm install &&
-      PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers npx playwright install --with-deps chromium
+    buildCommand: npm install
     startCommand: node server.js
     healthCheckPath: /api/health
     envVars:
