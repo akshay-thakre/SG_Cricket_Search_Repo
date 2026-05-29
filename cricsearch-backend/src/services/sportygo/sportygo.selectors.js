@@ -40,15 +40,25 @@ module.exports = {
   BATTING_BTN:     'text=BATTING STATISTICS',
   BOWLING_BTN:     'text=Bowling STATISTICS',
 
-  // Expand "+" toggle button on a series row (e.g. T20 ⊙ → + )
-  ROW_EXPAND_BTN:  'tbody tr td:last-child button, tbody tr th:last-child button, ' +
-                   'tbody tr [class*="expand"], tbody tr [class*="toggle"]',
+  // Expand "+" toggle button on a series row.
+  // CricClubs renders these in many ways — cover all common patterns.
+  ROW_EXPAND_BTN: [
+    'table tbody tr td:last-child button',
+    'table tbody tr th:last-child button',
+    'table tbody tr td:last-child a',
+    'table tbody tr td [class*="expand"]',
+    'table tbody tr td [class*="toggle"]',
+    'table tbody tr td [class*="plus"]',
+    'table tbody tr td [onclick]',
+    'table tbody tr td [data-toggle]',
+  ].join(', '),
 
-  // Year select dropdown that appears after expanding
-  YEAR_SELECT:     'select',
+  // Year select dropdown that appears after clicking "+"
+  YEAR_SELECT: 'select',
 
   // ── Timeouts ──────────────────────────────────────────────────────────────
   NAV_TIMEOUT:      30_000,
   SELECTOR_TIMEOUT: 10_000,
-  ACTION_DELAY:      1_000,   // ms to wait after clicks before reading DOM
+  ACTION_DELAY:      1_000,   // ms to wait after tab clicks / year changes
+  EXPAND_DELAY:        600,   // ms to wait after clicking "+" before reading dropdown
 };

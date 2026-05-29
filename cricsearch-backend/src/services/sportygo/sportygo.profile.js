@@ -1,12 +1,16 @@
 /**
  * @module sportygo.profile
- * @description Playwright-based profile scraper for Sportygo player pages.
- * Navigates to the player profile, clicks the BATTING/Bowling tab buttons,
- * and extracts structured stats from the tables.
+ * @description Axios+cheerio profile scraper for Sportygo player pages.
+ *
+ * CricClubs (Java/JSP) pre-renders all stats into the initial HTML.
+ * The "+" expand button and year dropdown are client-side UI toggles only —
+ * no data is fetched via AJAX. A single GET is sufficient to capture all stats.
  */
 
-const { withPage } = require('./sportygo.client');
-const { extractPlayerInfo, extractBattingStats, extractBowlingStats } = require('./sportygo.parser');
+'use strict';
+
+const { getSession, fetchProfile } = require('./sportygo.client');
+const { parseProfileHtml } = require('./sportygo.parser');
 const selectors = require('./sportygo.selectors');
 
 function debug(...args) {
@@ -63,11 +67,11 @@ function normalizeBowlingRow(r) {
 }
 
 /**
- * Fetch and parse a Sportygo player's profile page with Playwright.
+ * Fetch and parse a Sportygo player's profile page.
  *
  * @param {string} playerId
  * @param {string} [clubId] - defaults to selectors.CLUB_ID (4263)
- * @returns {Promise<object>} Structured player stats in the Sportygo output contract format
+ * @returns {Promise<object>}
  */
 async function fetchSportygoPlayerStats(playerId, clubId) {
   const resolvedClubId = clubId || selectors.CLUB_ID;
@@ -75,95 +79,56 @@ async function fetchSportygoPlayerStats(playerId, clubId) {
 
   debug('Fetching profile:', profileUrl);
 
-  return withPage(async (page) => {
-    page.setDefaultTimeout(selectors.NAV_TIMEOUT);
+  const { cookieStr } = await getSession();
+  const { html, status } = await fetchProfile(playerId, resolvedClubId, cookieStr);
 
-    await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: selectors.NAV_TIMEOUT });
-    debug('Profile page loaded');
+  debug('Profile response status:', status, '| html length:', html?.length);
 
-    // Wait for meaningful content
-    await page
-      .waitForSelector('h3, h2, .player-name, table', { timeout: selectors.SELECTOR_TIMEOUT })
-      .catch(() => {});
+  const { playerInfo, batting: rawBatting, bowling: rawBowling } = parseProfileHtml(html, playerId, resolvedClubId);
 
-    // ── Player info ─────────────────────────────────────────────────
-    const playerInfo = await page.evaluate(extractPlayerInfo);
-    debug('Player info:', JSON.stringify(playerInfo));
+  debug('Player info:', JSON.stringify(playerInfo));
+  debug('Raw batting rows:', rawBatting.length, '| raw bowling rows:', rawBowling.length);
 
-    // ── Batting stats ───────────────────────────────────────────────
-    let rawBatting = [];
-    try {
-      // Click the BATTING STATISTICS tab if present
-      const battingTab = page.locator(selectors.BATTING_BTN).first();
-      if (await battingTab.count() > 0) {
-        await battingTab.click({ timeout: selectors.SELECTOR_TIMEOUT });
-        await page.waitForTimeout(selectors.ACTION_DELAY);
-        debug('Clicked BATTING STATISTICS tab');
-      }
-      rawBatting = await page.evaluate(extractBattingStats);
-      debug('Raw batting rows:', rawBatting.length);
-    } catch (e) {
-      debug('Batting extraction error:', e.message);
-    }
+  const batting = rawBatting.map(normalizeBattingRow);
+  const bowling = rawBowling.map(normalizeBowlingRow);
 
-    // ── Bowling stats ───────────────────────────────────────────────
-    let rawBowling = [];
-    try {
-      const bowlingTab = page.locator(selectors.BOWLING_BTN).first();
-      if (await bowlingTab.count() > 0) {
-        await bowlingTab.click({ timeout: selectors.SELECTOR_TIMEOUT });
-        await page.waitForTimeout(selectors.ACTION_DELAY);
-        debug('Clicked Bowling STATISTICS tab');
-      }
-      rawBowling = await page.evaluate(extractBowlingStats);
-      debug('Raw bowling rows:', rawBowling.length);
-    } catch (e) {
-      debug('Bowling extraction error:', e.message);
-    }
+  const totalMatches =
+    batting.length > 0
+      ? Math.max(...batting.map((r) => r.mat || 0))
+      : bowling.length > 0
+      ? Math.max(...bowling.map((r) => r.mat || 0))
+      : null;
 
-    // ── Normalize ───────────────────────────────────────────────────
-    const batting  = rawBatting.map(normalizeBattingRow);
-    const bowling  = rawBowling.map(normalizeBowlingRow);
+  const totalRuns    = batting.reduce((s, r) => s + (r.runs || 0), 0) || null;
+  const totalWickets = bowling.reduce((s, r) => s + (r.wkts || 0), 0) || null;
 
-    // Totals — aggregate across all series types
-    const totalMatches =
-      batting.length > 0
-        ? Math.max(...batting.map((r) => r.mat || 0))
-        : bowling.length > 0
-        ? Math.max(...bowling.map((r) => r.mat || 0))
-        : null;
+  const isEmpty = batting.length === 0 && bowling.length === 0 && !playerInfo.name;
 
-    const totalRuns    = batting.reduce((s, r) => s + (r.runs || 0), 0) || null;
-    const totalWickets = bowling.reduce((s, r) => s + (r.wkts || 0), 0) || null;
-
-    const isEmpty = batting.length === 0 && bowling.length === 0 && !playerInfo.name;
-
-    return {
-      source: 'sportygo',
-      player: {
-        id: playerId,
-        name: playerInfo.name,
-        teamName: playerInfo.teamName,
-        playerRole: playerInfo.playerRole,
-        battingStyle: playerInfo.battingStyle,
-        bowlingStyle: playerInfo.bowlingStyle,
-        totals: {
-          matches: totalMatches,
-          runs: totalRuns,
-          wickets: totalWickets,
-        },
+  return {
+    source: 'sportygo',
+    player: {
+      id: playerId,
+      name: playerInfo.name,
+      teamName: playerInfo.teamName,
+      playerRole: playerInfo.playerRole,
+      battingStyle: playerInfo.battingStyle,
+      bowlingStyle: playerInfo.bowlingStyle,
+      totals: {
+        matches: totalMatches,
+        runs: totalRuns,
+        wickets: totalWickets,
       },
-      batting,
-      bowling,
-      meta: {
-        upstreamUrl: profileUrl,
-        scrapedAt: new Date().toISOString(),
-        blocked: false,
-        empty: isEmpty,
-        message: isEmpty ? 'No statistics found for this player.' : null,
-      },
-    };
-  });
+    },
+    batting,
+    bowling,
+    meta: {
+      upstreamUrl: profileUrl,
+      scrapedAt: new Date().toISOString(),
+      blocked: status === 403 || status === 429,
+      empty: isEmpty,
+      message: isEmpty ? 'No statistics found for this player.' : null,
+    },
+  };
 }
 
 module.exports = { fetchSportygoPlayerStats };
