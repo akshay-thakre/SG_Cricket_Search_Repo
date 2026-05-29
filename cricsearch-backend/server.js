@@ -47,7 +47,7 @@ app.get('/api/health', (_req, res) => {
     env: process.env.NODE_ENV || 'development',
     platforms: {
       sca: { status: 'active', method: 'cheerio' },
-      sportygo: { status: process.env.SPORTYGO_CLUB_ID ? 'active' : 'unconfigured', method: 'cheerio' },
+      sportygo: { status: 'active', method: 'playwright' },
     },
     timestamp: new Date().toISOString(),
   });
@@ -83,7 +83,7 @@ app.listen(PORT, () => {
   console.log('  POST /api/sportygo/players/search');
   console.log('  GET  /api/sportygo/players/:id/stats?clubId=XXX');
   console.log('  GET  /api/sportygo/health');
-  console.log(`🏟️  Sportygo: ${process.env.SPORTYGO_CLUB_ID ? 'Configured ✅' : 'Not configured — set SPORTYGO_CLUB_ID'}`);
+  console.log(`🏟️  Sportygo: Active (Playwright, clubId=${process.env.SPORTYGO_CLUB_ID || '4263'})`);
   console.log('========================================');
 });
 
