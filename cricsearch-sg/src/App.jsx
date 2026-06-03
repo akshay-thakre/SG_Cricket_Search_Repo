@@ -2,36 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import { searchAcrossPlatforms, checkHealth } from './services/apiService';
 import { AggregatedResults } from './components/AggregatedResults';
 import { MultiPlatformSearchBar } from './components/MultiPlatformSearchBar';
+import YPLStats from './components/YPLStats';
+
+const TABS = [
+  { id: 'search', label: '🔍 Player Search' },
+  { id: 'ypl',    label: '🏏 YPL' },
+];
 
 export default function CricSearchApp() {
+  const [activeTab, setActiveTab]       = useState('search');
   const [searchResults, setSearchResults] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [backendStatus, setBackendStatus] = useState('checking'); // 'checking' | 'online' | 'offline'
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState(null);
+  const [backendStatus, setBackendStatus] = useState('checking');
+  const [searchQuery, setSearchQuery]   = useState('');
   const abortControllerRef = useRef(null);
 
-  // Check backend health on mount
   useEffect(() => {
     checkHealth()
       .then(() => setBackendStatus('online'))
       .catch(() => setBackendStatus('offline'));
   }, []);
 
-  // Show spinner as soon as a valid query exists, before the async response lands
   useEffect(() => {
-    if (searchQuery.trim().length >= 2) {
-      setLoading(true);
-    }
+    if (searchQuery.trim().length >= 2) setLoading(true);
   }, [searchQuery]);
 
   const handleSearch = async (query) => {
     if (!query.trim()) return;
-
-    // Cancel any in-flight request from the previous keystroke
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    if (abortControllerRef.current) abortControllerRef.current.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
@@ -44,7 +43,7 @@ export default function CricSearchApp() {
       const results = await searchAcrossPlatforms(query, controller.signal);
       setSearchResults(results);
     } catch (err) {
-      if (err.name === 'AbortError') return; // request was superseded — ignore silently
+      if (err.name === 'AbortError') return;
       setError(err.message || 'Search failed. Please check if the backend server is running.');
     } finally {
       setLoading(false);
@@ -64,8 +63,7 @@ export default function CricSearchApp() {
         backgroundColor: '#f5f8fc',
         borderBottom: '1px solid #d0dae8',
         padding: '1.5rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(6, 28, 84, 0.06)'
+        boxShadow: '0 2px 8px rgba(6, 28, 84, 0.06)',
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -79,14 +77,9 @@ export default function CricSearchApp() {
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
               <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
                 backgroundColor: backendStatus === 'online' ? '#f0fdf4' : backendStatus === 'offline' ? '#fef2f2' : '#fefce8',
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: '600',
+                padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '12px', fontWeight: '600',
                 color: backendStatus === 'online' ? '#16a34a' : backendStatus === 'offline' ? '#dc2626' : '#ca8a04',
                 border: `1px solid ${backendStatus === 'online' ? '#bbf7d0' : backendStatus === 'offline' ? '#fecaca' : '#fef08a'}`,
               }}>
@@ -94,115 +87,107 @@ export default function CricSearchApp() {
                 {backendStatus === 'online' ? 'API Online' : backendStatus === 'offline' ? 'API Offline' : 'Checking...'}
               </div>
               <div style={{
-                backgroundColor: '#e8f1ff',
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#0066cc',
-                border: '1px solid #d0dae8'
+                backgroundColor: '#e8f1ff', padding: '0.5rem 1rem', borderRadius: '6px',
+                fontSize: '12px', fontWeight: '600', color: '#0066cc', border: '1px solid #d0dae8',
               }}>
                 🇸🇬 SG Only
               </div>
             </div>
           </div>
+
+          {/* Tab navigation */}
+          <div style={{ display: 'flex', gap: '0.25rem', marginTop: '1.25rem' }}>
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  border: 'none',
+                  borderRadius: '6px 6px 0 0',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  transition: 'background 0.15s',
+                  backgroundColor: activeTab === tab.id ? '#0066cc' : '#e2eaf5',
+                  color: activeTab === tab.id ? '#fff' : '#475569',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem 2rem' }}>
-        <MultiPlatformSearchBar
-          onSearch={handleSearch}
-          onClear={handleClear}
-          initialQuery={searchQuery}
-        />
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1.5rem 2rem' }}>
 
         {/* Backend Offline Warning */}
         {backendStatus === 'offline' && (
           <div style={{
-            padding: '1.25rem',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '10px',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem'
+            padding: '1.25rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca',
+            borderRadius: '10px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
           }}>
             <span style={{ fontSize: '20px' }}>⚠️</span>
             <div>
               <div style={{ fontWeight: '600', color: '#dc2626', fontSize: '14px' }}>Backend API is offline</div>
               <div style={{ color: '#7f1d1d', fontSize: '13px', marginTop: '2px' }}>
-                Start the backend server: <code style={{ backgroundColor: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>cd cricsearch-backend && npm start</code>
+                Start the backend: <code style={{ backgroundColor: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>cd cricsearch-backend && npm start</code>
               </div>
             </div>
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <div style={{
-            padding: '3rem',
-            textAlign: 'center',
-            color: '#64748b'
-          }}>
-            <div style={{ fontSize: '40px', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>🏏</div>
-            <div style={{ fontSize: '16px', fontWeight: '500' }}>Searching live cricket databases...</div>
-            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: '#9ca3af' }}>Querying SCA — stats will load automatically after results are found</div>
-            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-          </div>
+        {/* ── Player Search tab ── */}
+        {activeTab === 'search' && (
+          <>
+            <MultiPlatformSearchBar onSearch={handleSearch} onClear={handleClear} initialQuery={searchQuery} />
+
+            {loading && (
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+                <div style={{ fontSize: '40px', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>🏏</div>
+                <div style={{ fontSize: '16px', fontWeight: '500' }}>Searching live cricket databases...</div>
+                <div style={{ fontSize: '13px', marginTop: '0.5rem', color: '#9ca3af' }}>Querying SCA — stats will load automatically after results are found</div>
+                <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+              </div>
+            )}
+
+            {error && (
+              <div style={{
+                padding: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca',
+                borderRadius: '10px', marginTop: '1.5rem', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '28px', marginBottom: '0.5rem' }}>❌</div>
+                <div style={{ fontWeight: '600', color: '#dc2626', marginBottom: '0.5rem' }}>Search Error</div>
+                <div style={{ color: '#7f1d1d', fontSize: '14px' }}>{error}</div>
+                <button
+                  onClick={() => handleSearch(searchQuery)}
+                  style={{
+                    marginTop: '1rem', padding: '0.5rem 1.5rem', backgroundColor: '#dc2626',
+                    color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
+                  }}
+                >
+                  Retry Search
+                </button>
+              </div>
+            )}
+
+            {searchResults && !loading && <AggregatedResults searchResults={searchResults} />}
+          </>
         )}
 
-        {/* Error State */}
-        {error && (
-          <div style={{
-            padding: '1.5rem',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '10px',
-            marginTop: '1.5rem',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '28px', marginBottom: '0.5rem' }}>❌</div>
-            <div style={{ fontWeight: '600', color: '#dc2626', marginBottom: '0.5rem' }}>Search Error</div>
-            <div style={{ color: '#7f1d1d', fontSize: '14px' }}>{error}</div>
-            <button
-              onClick={() => handleSearch(searchQuery)}
-              style={{
-                marginTop: '1rem',
-                padding: '0.5rem 1.5rem',
-                backgroundColor: '#dc2626',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: '600'
-              }}
-            >
-              Retry Search
-            </button>
-          </div>
-        )}
-
-        {/* Search Results */}
-        {searchResults && !loading && (
-          <AggregatedResults searchResults={searchResults} />
-        )}
+        {/* ── YPL tab ── */}
+        {activeTab === 'ypl' && <YPLStats />}
       </div>
 
       {/* Footer */}
       <div style={{
-        backgroundColor: '#f5f8fc',
-        borderTop: '1px solid #d0dae8',
-        padding: '1.5rem',
-        marginTop: '3rem',
-        fontSize: '12px',
-        color: '#64748b',
-        textAlign: 'center'
+        backgroundColor: '#f5f8fc', borderTop: '1px solid #d0dae8',
+        padding: '1.5rem', marginTop: '3rem', fontSize: '12px', color: '#64748b', textAlign: 'center',
       }}>
-        <div>CricSearch SG • Singapore Cricket Search • Live data from SCA (CricClubs)</div>
-        <div style={{ marginTop: '0.25rem', fontSize: '11px' }}>Stumps, Last Man Stands — coming soon</div>
+        <div>CricSearch SG • Singapore Cricket Search • Live data from SCA</div>
+        <div style={{ marginTop: '0.25rem', fontSize: '11px' }}>YPL Batting Stats • Stumps, Last Man Stands — coming soon</div>
       </div>
     </div>
   );

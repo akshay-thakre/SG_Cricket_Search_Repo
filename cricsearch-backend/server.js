@@ -2,8 +2,9 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const scaRoutes = require('./src/routes/sca.routes');
+const scaRoutes     = require('./src/routes/sca.routes');
 const sportygoRoutes = require('./src/routes/sportygo.routes');
+const yplRoutes     = require('./src/routes/ypl.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +39,7 @@ app.use(express.json());
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use(scaRoutes);
 app.use(sportygoRoutes);
+app.use(yplRoutes);
 
 // ── Global health check ───────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
@@ -46,8 +48,9 @@ app.get('/api/health', (_req, res) => {
     message: 'CricSearch SG backend API is running',
     env: process.env.NODE_ENV || 'development',
     platforms: {
-      sca: { status: 'active', method: 'cheerio' },
+      sca:     { status: 'active', method: 'cheerio' },
       sportygo: { status: 'active', method: 'axios-cheerio' },
+      ypl:     { status: 'active', method: 'static-json', displayName: 'YPL' },
     },
     timestamp: new Date().toISOString(),
   });
@@ -83,7 +86,11 @@ app.listen(PORT, () => {
   console.log('  POST /api/sportygo/players/search');
   console.log('  GET  /api/sportygo/players/:id/stats?clubId=XXX');
   console.log('  GET  /api/sportygo/health');
+  console.log('  GET  /api/ypl/batting?year=YYYY&team=211|120|consolidated');
+  console.log('  GET  /api/ypl/years');
+  console.log('  GET  /api/ypl/health');
   console.log(`🏟️  Sportygo: Active (axios+cheerio, clubId=${process.env.SPORTYGO_CLUB_ID || '4263'})`);
+  console.log(`🏏  YPL: Active (static JSON, Sportygo/YPL league)`);
   console.log('========================================');
 });
 
