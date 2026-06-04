@@ -193,6 +193,12 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
                 player={player}
                 isLast={idx === players.length - 1}
               />
+            ) : player.source === 'sgia-static' ? (
+              <SGIAPlayerCard
+                key={player.id || idx}
+                player={player}
+                isLast={idx === players.length - 1}
+              />
             ) : (
               <PlayerCard
                 key={`${player.source || 'p'}-${player.id || idx}`}
@@ -692,6 +698,171 @@ const expandBtnStyle = (color) => ({
 const arrowStyle = {
   display: 'inline-block', transition: 'transform 0.15s',
 };
+
+// ── SG IA Static player card ──────────────────────────────────────────────────
+// Renders per-tournament batting + bowling stats from the SG IA static dataset.
+// No API call — all data is bundled in player.entries[].
+
+function SGIAPlayerCard({ player, isLast }) {
+  const { name, team, lastUpdated, entries } = player;
+
+  const fmtDate = (iso) => {
+    try {
+      return new Date(iso).toLocaleString('en-SG', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  const d = (v, dec = 0) => (v === null || v === undefined ? '--' : dec > 0 ? Number(v).toFixed(dec) : String(v));
+
+  return (
+    <div style={{
+      marginBottom: isLast ? 0 : '1.5rem',
+      backgroundColor: '#fff',
+      border: '1px solid #d0dae8',
+      borderRadius: '10px',
+      overflow: 'hidden',
+      boxShadow: '0 1px 4px rgba(6,28,84,0.06)',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '1rem 1.25rem',
+        background: 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)',
+        borderBottom: '1px solid #fecaca',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      }}>
+        <div>
+          <h4 style={{ margin: '0 0 0.25rem', fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
+            {name}
+          </h4>
+          <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+            {team}
+            <span style={{ margin: '0 0.4rem', color: '#d0dae8' }}>·</span>
+            <span style={{ color: '#dc2626', fontWeight: '600' }}>SG IA</span>
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <span style={{
+            backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
+            padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '11px', fontWeight: '600',
+          }}>🇸🇬 SIA</span>
+          <div style={{ marginTop: '0.4rem', fontSize: '10px', color: '#94a3b8' }}>
+            Updated: {fmtDate(lastUpdated)}
+          </div>
+        </div>
+      </div>
+
+      {/* Tournament entries */}
+      <div style={{ padding: '1rem 1.25rem' }}>
+        {entries.map((entry, ei) => (
+          <SGIATournamentEntry key={entry.tournamentId} entry={entry} isLast={ei === entries.length - 1} d={d} />
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: '0.5rem 1.25rem',
+        background: 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)',
+        borderTop: '1px solid #fecaca',
+        fontSize: '11px', color: '#dc2626',
+      }}>
+        Singapore Indian Association · Season 2025 · Static Data (updated ~15 days)
+      </div>
+    </div>
+  );
+}
+
+function SGIATournamentEntry({ entry, isLast, d }) {
+  const { tournamentName, year, status, batting: b, bowling: bwl } = entry;
+  const [battingOpen, setBattingOpen] = useState(false);
+  const [bowlingOpen, setBowlingOpen] = useState(false);
+
+  const hasBatting = !!b;
+  const hasBowling = !!bwl;
+
+  return (
+    <div style={{
+      marginBottom: isLast ? 0 : '1rem',
+      paddingBottom: isLast ? 0 : '1rem',
+      borderBottom: isLast ? 'none' : '1px solid #f1f5f9',
+    }}>
+      {/* Tournament badge row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+        <span style={{
+          backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
+          padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '11px', fontWeight: '700',
+        }}>{tournamentName}</span>
+        <span style={{
+          backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0',
+          padding: '0.2rem 0.5rem', borderRadius: '5px', fontSize: '10px', fontWeight: '600',
+        }}>{year}</span>
+        <span style={{
+          backgroundColor: status === 'completed' ? '#f0fdf4' : '#fefce8',
+          color: status === 'completed' ? '#15803d' : '#a16207',
+          border: `1px solid ${status === 'completed' ? '#bbf7d0' : '#fef08a'}`,
+          padding: '0.2rem 0.5rem', borderRadius: '5px', fontSize: '10px', fontWeight: '600',
+        }}>{status === 'completed' ? '✓ Completed' : '⏳ In Progress'}</span>
+      </div>
+
+      {/* Summary stat boxes */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.5rem' }}>
+        <StatBox label="Matches" value={hasBatting ? b.mat : hasBowling ? bwl.mat : null} highlight />
+        <StatBox label="Runs" value={hasBatting ? b.runs : null} highlight />
+        <StatBox label="Bat Avg" value={hasBatting ? d(b.avg, 2) : '--'} highlight />
+        <StatBox label="Wickets" value={hasBowling ? bwl.wickets : '--'} highlight color="#dc2626" />
+      </div>
+
+      {/* Batting detail */}
+      {hasBatting && (
+        <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
+          <button onClick={() => setBattingOpen((o) => !o)} style={expandBtnStyle('#dc2626')}>
+            <span style={{ ...arrowStyle, transform: battingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+            🏏 Batting (Rank #{b.rank})
+          </button>
+          {battingOpen && (
+            <div style={{ marginTop: '0.6rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(68px,1fr))', gap: '0.4rem' }}>
+              <StatBox label="Inns" value={b.inns} small />
+              <StatBox label="Balls" value={b.balls} small />
+              <StatBox label="HS" value={b.highest} small />
+              <StatBox label="NO" value={b.no} small />
+              <StatBox label="SR" value={d(b.sr, 2)} small />
+              <StatBox label="50s" value={b.fifties} small />
+              <StatBox label="100s" value={b.hundreds} small />
+              <StatBox label="4s" value={b.fours} small />
+              <StatBox label="6s" value={b.sixes} small />
+              <StatBox label="Hand" value={b.hand} small />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bowling detail */}
+      {hasBowling && (
+        <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
+          <button onClick={() => setBowlingOpen((o) => !o)} style={expandBtnStyle('#7c3aed')}>
+            <span style={{ ...arrowStyle, transform: bowlingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+            ⚡ Bowling (Rank #{bwl.rank})
+          </button>
+          {bowlingOpen && (
+            <div style={{ marginTop: '0.6rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(68px,1fr))', gap: '0.4rem' }}>
+              <StatBox label="Overs" value={bwl.overs} small />
+              <StatBox label="Runs" value={bwl.runs} small />
+              <StatBox label="Best" value={`${bwl.highest}`} small />
+              <StatBox label="Mdns" value={bwl.maidens} small />
+              <StatBox label="Avg" value={d(bwl.avg, 2)} small />
+              <StatBox label="Econ" value={d(bwl.econ, 2)} small />
+              <StatBox label="Style" value={bwl.style?.replace('Right-arm ', 'RA ').replace('Left-arm ', 'LA ')} small />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,5 @@
 import { searchAssasinsStats } from '../utils/yplStaticSearch';
+import { searchSGIAStats } from '../utils/sgiaStaticSearch';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -147,6 +148,12 @@ export async function searchAcrossPlatforms(query, signal) {
       icon: { emoji: '🏆', color: '#b45309', code: 'YPL' },
       noResults: true, loading: false, error: null,
     },
+    'SG IA': {
+      platformName: 'SG IA',
+      count: 0, players: [],
+      icon: { emoji: '🇸🇬', color: '#dc2626', code: 'SIA' },
+      noResults: true, loading: false, error: null,
+    },
   };
 
   let totalFound = 0;
@@ -202,6 +209,18 @@ export async function searchAcrossPlatforms(query, signal) {
     totalFound += yplMatches.length;
   }
 
+  // ── SG IA — STATIC (client-side, no network call) ────────────────
+  const sgiaMatches = searchSGIAStats(query);
+  if (sgiaMatches.length > 0) {
+    platforms['SG IA'] = {
+      ...platforms['SG IA'],
+      count: sgiaMatches.length,
+      players: sgiaMatches,
+      noResults: false,
+    };
+    totalFound += sgiaMatches.length;
+  }
+
   return {
     query,
     results: platforms,
@@ -209,7 +228,7 @@ export async function searchAcrossPlatforms(query, signal) {
     platforms: Object.keys(platforms),
     meta: {
       live:     ['CricClubs (SCA)'],
-      static:   ['YPL'],
+      static:   ['YPL', 'SG IA'],
       disabled: ['Stumps', 'Last Man Stands'],
     },
   };
