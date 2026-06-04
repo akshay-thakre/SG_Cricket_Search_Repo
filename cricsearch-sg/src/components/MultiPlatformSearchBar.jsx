@@ -163,8 +163,6 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           marginTop: '2.5rem'
         }}>
           <PlatformBadge code="CC" label="CricClubs" />
-          <PlatformBadge code="LMS" label="Last Man Stands" />
-          <PlatformBadge code="ST" label="Stumps" />
           <PlatformBadge code="YPL" label="YPL" />
           <PlatformBadge code="SIA" label="SG IA" />
         </div>

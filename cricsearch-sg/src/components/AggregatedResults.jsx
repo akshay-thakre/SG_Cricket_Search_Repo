@@ -92,21 +92,22 @@ export function AggregatedResults({ searchResults }) {
           Found <strong style={{ color: '#0066cc' }}>{totalFound}</strong> player{totalFound !== 1 ? 's' : ''} across platforms
           {meta?.live && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#16a34a' }}>● {meta.live.length} live</span>}
           {meta?.static && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#b45309' }}>● {meta.static.length} static</span>}
-          {meta?.disabled && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#9ca3af' }}>● {meta.disabled.length} coming soon</span>}
         </div>
       </div>
 
       <div style={{ display: 'grid', gap: '1.5rem' }}>
-        {Object.entries(results).map(([platformKey, platformData]) => (
-          <PlatformSection
-            key={platformKey}
-            platformData={platformData}
-            isExpanded={expandedPlatform === platformKey}
-            onToggle={() =>
-              setExpandedPlatform(expandedPlatform === platformKey ? null : platformKey)
-            }
-          />
-        ))}
+        {Object.entries(results)
+          .filter(([, p]) => !p.noResults || p.error)
+          .map(([platformKey, platformData]) => (
+            <PlatformSection
+              key={platformKey}
+              platformData={platformData}
+              isExpanded={expandedPlatform === platformKey}
+              onToggle={() =>
+                setExpandedPlatform(expandedPlatform === platformKey ? null : platformKey)
+              }
+            />
+          ))}
       </div>
     </div>
   );
