@@ -2,15 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { searchAcrossPlatforms, checkHealth } from './services/apiService';
 import { AggregatedResults } from './components/AggregatedResults';
 import { MultiPlatformSearchBar } from './components/MultiPlatformSearchBar';
-import YPLStats from './components/YPLStats';
-
-const TABS = [
-  { id: 'search', label: '🔍 Player Search' },
-  { id: 'ypl',    label: '🏏 YPL' },
-];
 
 export default function CricSearchApp() {
-  const [activeTab, setActiveTab]       = useState('search');
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState(null);
@@ -95,28 +88,6 @@ export default function CricSearchApp() {
             </div>
           </div>
 
-          {/* Tab navigation */}
-          <div style={{ display: 'flex', gap: '0.25rem', marginTop: '1.25rem' }}>
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  padding: '0.5rem 1.25rem',
-                  border: 'none',
-                  borderRadius: '6px 6px 0 0',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  transition: 'background 0.15s',
-                  backgroundColor: activeTab === tab.id ? '#0066cc' : '#e2eaf5',
-                  color: activeTab === tab.id ? '#fff' : '#475569',
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -139,46 +110,38 @@ export default function CricSearchApp() {
           </div>
         )}
 
-        {/* ── Player Search tab ── */}
-        {activeTab === 'search' && (
-          <>
-            <MultiPlatformSearchBar onSearch={handleSearch} onClear={handleClear} initialQuery={searchQuery} />
+        <MultiPlatformSearchBar onSearch={handleSearch} onClear={handleClear} initialQuery={searchQuery} />
 
-            {loading && (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
-                <div style={{ fontSize: '40px', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>🏏</div>
-                <div style={{ fontSize: '16px', fontWeight: '500' }}>Searching live cricket databases...</div>
-                <div style={{ fontSize: '13px', marginTop: '0.5rem', color: '#9ca3af' }}>Querying SCA — stats will load automatically after results are found</div>
-                <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-              </div>
-            )}
-
-            {error && (
-              <div style={{
-                padding: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca',
-                borderRadius: '10px', marginTop: '1.5rem', textAlign: 'center',
-              }}>
-                <div style={{ fontSize: '28px', marginBottom: '0.5rem' }}>❌</div>
-                <div style={{ fontWeight: '600', color: '#dc2626', marginBottom: '0.5rem' }}>Search Error</div>
-                <div style={{ color: '#7f1d1d', fontSize: '14px' }}>{error}</div>
-                <button
-                  onClick={() => handleSearch(searchQuery)}
-                  style={{
-                    marginTop: '1rem', padding: '0.5rem 1.5rem', backgroundColor: '#dc2626',
-                    color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-                  }}
-                >
-                  Retry Search
-                </button>
-              </div>
-            )}
-
-            {searchResults && !loading && <AggregatedResults searchResults={searchResults} />}
-          </>
+        {loading && (
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+            <div style={{ fontSize: '40px', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>🏏</div>
+            <div style={{ fontSize: '16px', fontWeight: '500' }}>Searching live cricket databases...</div>
+            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: '#9ca3af' }}>Querying SCA — stats will load automatically after results are found</div>
+            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+          </div>
         )}
 
-        {/* ── YPL tab ── */}
-        {activeTab === 'ypl' && <YPLStats />}
+        {error && (
+          <div style={{
+            padding: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca',
+            borderRadius: '10px', marginTop: '1.5rem', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '0.5rem' }}>❌</div>
+            <div style={{ fontWeight: '600', color: '#dc2626', marginBottom: '0.5rem' }}>Search Error</div>
+            <div style={{ color: '#7f1d1d', fontSize: '14px' }}>{error}</div>
+            <button
+              onClick={() => handleSearch(searchQuery)}
+              style={{
+                marginTop: '1rem', padding: '0.5rem 1.5rem', backgroundColor: '#dc2626',
+                color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
+              }}
+            >
+              Retry Search
+            </button>
+          </div>
+        )}
+
+        {searchResults && !loading && <AggregatedResults searchResults={searchResults} />}
       </div>
 
       {/* Footer */}
