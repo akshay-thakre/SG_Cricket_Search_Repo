@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAnyPlayerStats } from '../services/apiService';
-import { aggregateAllStats } from '../utils/aggregatePlayerStats';
+import { calculatePerformanceAcrossAllLeagues } from '../utils/aggregatePlayerStats';
 
 // ── Stats format normalizer ───────────────────────────────────────────────────
 // SCA returns batting/bowling as plain objects.
@@ -52,8 +52,11 @@ export function AggregatedResults({ searchResults }) {
   const { query, results, totalFound, meta } = searchResults;
 
   const [expandedPlatform, setExpandedPlatform] = useState(null);
-  const [scaLiveStatsArray, setScaLiveStatsArray] = useState([]);
-  const [scaLiveLoading, setScaLiveLoading] = useState(false);
+
+  // Track SCA live stats together with the query they belong to so we never
+  // show stale stats from a previous search during the brief gap before the
+  // new query's useEffect fires.
+  const [scaLiveState, setScaLiveState] = useState({ fetchedQuery: null, loading: false, stats: [] });
 
   useEffect(() => {
     let cancelled = false;
@@ -61,13 +64,13 @@ export function AggregatedResults({ searchResults }) {
     const livePlayers = scaPlatform?.players?.filter((p) => p.source === 'sca') || [];
 
     if (livePlayers.length === 0) {
-      setScaLiveStatsArray([]);
-      setScaLiveLoading(false);
+      setScaLiveState({ fetchedQuery: query, loading: false, stats: [] });
       return () => { cancelled = true; };
     }
 
-    setScaLiveLoading(true);
-    setScaLiveStatsArray([]);
+    // Mark in-flight — fetchedQuery intentionally left as previous value so
+    // the stale-check below triggers the loading indicator immediately.
+    setScaLiveState((prev) => ({ ...prev, loading: true }));
 
     Promise.allSettled(
       livePlayers.map((p) => fetchAnyPlayerStats(p).then((data) => normalizeStats(data)))
@@ -76,14 +79,24 @@ export function AggregatedResults({ searchResults }) {
       const resolved = outcomes
         .filter((o) => o.status === 'fulfilled' && o.value)
         .map((o) => o.value);
-      setScaLiveStatsArray(resolved);
-      setScaLiveLoading(false);
+      setScaLiveState({ fetchedQuery: query, loading: false, stats: resolved });
     });
 
     return () => { cancelled = true; };
-  // results is stable for a given query; re-fetching on every parent re-render would thrash the API.
+  // results is stable for a given query; omitting it avoids re-fetching on every parent re-render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
+
+  // Derive loading state and stats for the current query.
+  // If fetchedQuery !== query the previous search's data is stale — treat as loading.
+  const hasScaLivePlayers = !!(
+    results?.['SCA'] &&
+    !results['SCA'].noResults &&
+    results['SCA'].players?.some((p) => p.source === 'sca')
+  );
+  const scaIsStale        = scaLiveState.fetchedQuery !== query;
+  const scaLiveLoading    = hasScaLivePlayers && (scaIsStale || scaLiveState.loading);
+  const scaLiveStatsArray = scaIsStale ? [] : scaLiveState.stats;
 
   if (!results || Object.keys(results).length === 0) return null;
 
@@ -1263,14 +1276,12 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
   );
   const awaitingSca = hasScaLivePlayers && scaLiveLoading;
 
-  const agg = awaitingSca ? null : aggregateAllStats(results, scaLiveStatsArray);
+  const agg = awaitingSca ? null : calculatePerformanceAcrossAllLeagues(results, scaLiveStatsArray);
 
-  const safe = (v) => (v === null || v === undefined || Number.isNaN(Number(v)) ? 0 : Number(v));
-
-  const totalRuns    = safe(agg?.batting?.runs);
-  const totalMatches = safe(agg?.batting?.matches ?? agg?.bowling?.matches);
-  const totalInnings = safe(agg?.batting?.innings);
-  const totalWickets = safe(agg?.bowling?.wickets);
+  const totalRuns    = agg?.totalRuns    ?? 0;
+  const totalMatches = agg?.totalMatches ?? 0;
+  const totalInnings = agg?.totalInnings ?? 0;
+  const totalWickets = agg?.totalWickets ?? 0;
 
   const hasAnyData = totalRuns > 0 || totalMatches > 0 || totalInnings > 0 || totalWickets > 0;
 
@@ -1336,7 +1347,7 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
 
         {!awaitingSca && agg?.leaguesContributed?.length > 0 && (
           <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8' }}>
-            Data from: {agg.leaguesContributed.join(' · ')}
+            Leagues contributing: {agg.leaguesContributed.join(' · ')}
           </div>
         )}
       </div>
