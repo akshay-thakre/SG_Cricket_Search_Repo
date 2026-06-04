@@ -46,18 +46,20 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
         <div
           className="search-title"
           style={{
-            fontSize: '36px',
+            fontSize: '28px',
             fontWeight: 'bold',
             marginBottom: '0.75rem',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '1rem'
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            lineHeight: '1.3',
           }}
         >
-          <span style={{ fontSize: '44px' }}>🏏</span>
-          <span>CricSearch SG</span>
+          <span style={{ fontSize: '40px', flexShrink: 0 }}>🏏</span>
+          <span>Changi Risers Cricket Search SG</span>
         </div>
 
         <div style={{

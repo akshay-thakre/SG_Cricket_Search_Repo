@@ -61,8 +61,8 @@ export default function CricSearchApp() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="app-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#0066cc' }}>
-                🏏 CricSearch SG
+              <h1 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: '#0066cc', lineHeight: '1.3' }}>
+                🏏 Changi Risers Cricket Search SG
               </h1>
               <div style={{ fontSize: '13px', color: '#64748b', marginTop: '0.25rem' }}>
                 Singapore Cricket Player Search — Live Data
@@ -147,11 +147,16 @@ export default function CricSearchApp() {
       {/* Footer */}
       <div style={{
         backgroundColor: '#f5f8fc', borderTop: '1px solid #d0dae8',
-        padding: '1.5rem', marginTop: '3rem', fontSize: '12px', color: '#64748b', textAlign: 'center',
+        padding: '2rem 1.5rem', marginTop: '3rem', textAlign: 'center',
       }}>
-        <div>CricSearch SG • Singapore Cricket Search • Live data from SCA</div>
-        <div style={{ marginTop: '0.5rem', fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
+        <div style={{ fontSize: '12px', color: '#64748b' }}>
+          Changi Risers Cricket Search SG &bull; Singapore Cricket Search &bull; Live data from SCA
+        </div>
+        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', maxWidth: '700px', margin: '0.75rem auto 0' }}>
           Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
+        </div>
+        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8', maxWidth: '700px', margin: '0.75rem auto 0', lineHeight: '1.7' }}>
+          The purpose of this site is to learn, adapt and implement using AI knowledge; reduce debates around player stats; improve trust, bonding and transparency; help the skipper take rational calls; and foster healthy competition so Risers can win more matches. 1, 2, 3 Go Risers.
         </div>
       </div>
     </div>
