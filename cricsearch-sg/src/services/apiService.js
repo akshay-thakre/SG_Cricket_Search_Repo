@@ -1,3 +1,5 @@
+import { searchAssasinsStats } from '../utils/yplStaticSearch';
+
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // ── YPL (Sportygo) batting stats ─────────────────────────────────────────────
@@ -145,6 +147,12 @@ export async function searchAcrossPlatforms(query, signal) {
       noResults: true, loading: false, error: null,
       disabled: true, disabledReason: 'Coming soon',
     },
+    'YPL Elite': {
+      platformName: 'YPL Elite — Assasins CC',
+      count: 0, players: [],
+      icon: { emoji: '🏆', color: '#b45309', code: 'YPL' },
+      noResults: true, loading: false, error: null,
+    },
   };
 
   let totalFound = 0;
@@ -225,13 +233,26 @@ export async function searchAcrossPlatforms(query, signal) {
     platforms['Sportygo'].noResults = true;
   }
 
+  // ── YPL Elite — STATIC (client-side, no network call) ───────────────────
+  const yplMatches = searchAssasinsStats(query);
+  if (yplMatches.length > 0) {
+    platforms['YPL Elite'] = {
+      ...platforms['YPL Elite'],
+      count: yplMatches.length,
+      players: yplMatches,
+      noResults: false,
+    };
+    totalFound += yplMatches.length;
+  }
+
   return {
     query,
     results: platforms,
     totalFound,
     platforms: Object.keys(platforms),
     meta: {
-      live: ['CricClubs (SCA)', 'Sportygo'],
+      live:     ['CricClubs (SCA)', 'Sportygo'],
+      static:   ['YPL Elite'],
       disabled: ['Stumps', 'Last Man Stands'],
     },
   };
