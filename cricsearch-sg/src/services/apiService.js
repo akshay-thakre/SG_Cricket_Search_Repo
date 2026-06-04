@@ -1,5 +1,6 @@
 import { searchAssasinsStats } from '../utils/yplStaticSearch';
 import { searchSGIAStats } from '../utils/sgiaStaticSearch';
+import { searchSCACorporateStats } from '../utils/scaCorporateSearch';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -122,10 +123,10 @@ export async function fetchAnyPlayerStats(player) {
  */
 export async function searchAcrossPlatforms(query, signal) {
   const platforms = {
-    'CricClubs (SCA)': {
-      platformName: 'CricClubs (SCA)',
+    'SCA': {
+      platformName: 'SCA',
       count: 0, players: [],
-      icon: { emoji: '🏏', color: '#1e40af', code: 'CC' },
+      icon: { emoji: '🏏', color: '#1e40af', code: 'SCA' },
       noResults: true, loading: false, error: null,
     },
     'YPL': {
@@ -151,20 +152,18 @@ export async function searchAcrossPlatforms(query, signal) {
     : { firstName: query };
 
   // ── SCA — LIVE ──────────────────────────────────────────────────
+  let scaLivePlayers = [];
   try {
     const scaResult = await searchSCAPlayers(scaParams, signal);
     if (scaResult.players && scaResult.players.length > 0) {
       const seen = new Set();
-      const uniquePlayers = scaResult.players.filter((p) => {
-        if (!p.id || seen.has(p.id)) return false;
-        seen.add(p.id);
-        return true;
-      });
-
-      platforms['CricClubs (SCA)'] = {
-        ...platforms['CricClubs (SCA)'],
-        count: uniquePlayers.length,
-        players: uniquePlayers.map((p) => ({
+      scaLivePlayers = scaResult.players
+        .filter((p) => {
+          if (!p.id || seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        })
+        .map((p) => ({
           id: p.id,
           name: p.name,
           team: p.teamName || 'Unknown',
@@ -172,15 +171,25 @@ export async function searchAcrossPlatforms(query, signal) {
           profileUrl: p.profileUrl,
           verified: p.verified,
           source: 'sca',
-        })),
-        noResults: false,
-      };
-      totalFound += uniquePlayers.length;
+        }));
     }
   } catch (err) {
     if (err.name === 'AbortError') throw err;
-    platforms['CricClubs (SCA)'].error = err.message;
-    platforms['CricClubs (SCA)'].noResults = true;
+    platforms['SCA'].error = err.message;
+  }
+
+  // ── SCA Corporate — STATIC (client-side) ────────────────────────
+  const scaCorpMatches = searchSCACorporateStats(query);
+
+  const allScaPlayers = [...scaLivePlayers, ...scaCorpMatches];
+  if (allScaPlayers.length > 0) {
+    platforms['SCA'] = {
+      ...platforms['SCA'],
+      count: allScaPlayers.length,
+      players: allScaPlayers,
+      noResults: false,
+    };
+    totalFound += allScaPlayers.length;
   }
 
   // ── YPL — STATIC (client-side, no network call) ─────────────────
@@ -213,7 +222,7 @@ export async function searchAcrossPlatforms(query, signal) {
     totalFound,
     platforms: Object.keys(platforms),
     meta: {
-      live:   ['CricClubs (SCA)'],
+      live:   ['SCA'],
       static: ['YPL', 'SG IA'],
     },
   };
