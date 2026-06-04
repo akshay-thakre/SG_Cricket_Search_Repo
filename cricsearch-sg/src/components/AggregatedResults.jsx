@@ -819,11 +819,16 @@ function SGIATournamentEntry({ entry, isLast, d }) {
           padding: '0.2rem 0.5rem', borderRadius: '5px', fontSize: '10px', fontWeight: '600',
         }}>{year}</span>
         <span style={{
-          backgroundColor: status === 'completed' ? '#f0fdf4' : '#fefce8',
-          color: status === 'completed' ? '#15803d' : '#a16207',
-          border: `1px solid ${status === 'completed' ? '#bbf7d0' : '#fef08a'}`,
+          backgroundColor: status === 'completed' ? '#f0fdf4' : status === 'on-going' ? '#eff6ff' : '#fefce8',
+          color: status === 'completed' ? '#15803d' : status === 'on-going' ? '#1d4ed8' : '#a16207',
+          border: `1px solid ${status === 'completed' ? '#bbf7d0' : status === 'on-going' ? '#bfdbfe' : '#fef08a'}`,
           padding: '0.2rem 0.5rem', borderRadius: '5px', fontSize: '10px', fontWeight: '600',
-        }}>{status === 'completed' ? '✓ Completed' : '⏳ In Progress'}</span>
+        }}>{status === 'completed' ? '✓ Completed' : status === 'on-going' ? '● On-going' : '⏳ In Progress'}</span>
+        {status === 'on-going' && (
+          <span style={{
+            fontSize: '10px', color: '#64748b', fontStyle: 'italic', marginLeft: '0.25rem',
+          }}>Stats updated every 15 days. Last update: 4th June.</span>
+        )}
       </div>
 
       {/* Summary stat boxes */}
