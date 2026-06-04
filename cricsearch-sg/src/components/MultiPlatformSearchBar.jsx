@@ -18,7 +18,6 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
-  // Keep form submit as a fallback (Enter key / Search button click)
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
@@ -32,28 +31,31 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
   };
 
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      padding: '3.5rem 1.5rem',
-      textAlign: 'center',
-      marginBottom: '2rem',
-      borderRadius: '16px',
-      boxShadow: '0 10px 28px rgba(0, 102, 204, 0.16)'
-    }}>
-      <div style={{
-        maxWidth: '700px',
-        margin: '0 auto'
-      }}>
-        <div style={{
-          fontSize: '36px',
-          fontWeight: 'bold',
-          marginBottom: '0.75rem',
-          color: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '1rem'
-        }}>
+    <div
+      className="search-hero"
+      style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        padding: '3.5rem 1.5rem',
+        textAlign: 'center',
+        marginBottom: '2rem',
+        borderRadius: '16px',
+        boxShadow: '0 10px 28px rgba(0, 102, 204, 0.16)'
+      }}
+    >
+      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+        <div
+          className="search-title"
+          style={{
+            fontSize: '36px',
+            fontWeight: 'bold',
+            marginBottom: '0.75rem',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem'
+          }}
+        >
           <span style={{ fontSize: '44px' }}>🏏</span>
           <span>CricSearch SG</span>
         </div>
@@ -67,16 +69,17 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           Search cricket player stats across Singapore platforms — aggregated in one place
         </div>
 
-        <form onSubmit={handleSearch} style={{
-          display: 'flex',
-          gap: '0.75rem',
-          marginBottom: '2rem'
-        }}>
+        <form
+          onSubmit={handleSearch}
+          className="search-form"
+          style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem' }}
+        >
           <input
             type="text"
             placeholder="Enter player name..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            className="search-input"
             style={{
               flex: 1,
               padding: '1rem 1.25rem',
@@ -87,7 +90,8 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
               color: '#1e293b',
               outline: 'none',
               fontWeight: '500',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              minWidth: 0,
             }}
             onFocus={(e) => {
               e.target.style.borderColor = '#003d99';
@@ -101,6 +105,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           <button
             type="submit"
             disabled={!query.trim()}
+            className="search-btn search-btn-submit"
             style={{
               padding: '1rem 2rem',
               backgroundColor: '#0066cc',
@@ -111,7 +116,8 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
               fontSize: '15px',
               fontWeight: '600',
               opacity: query.trim() ? 1 : 0.6,
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
             }}
             onMouseEnter={(e) => {
               if (query.trim()) {
@@ -131,6 +137,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
             <button
               type="button"
               onClick={handleClear}
+              className="search-btn search-btn-clear"
               style={{
                 padding: '1rem 1.5rem',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -140,7 +147,8 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
                 cursor: 'pointer',
                 fontSize: '15px',
                 fontWeight: '600',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
               }}
               onMouseEnter={(e) => {
                 e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
@@ -156,15 +164,19 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           )}
         </form>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-          gap: '1.25rem',
-          marginTop: '2.5rem'
-        }}>
+        <div
+          className="platform-badge-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gap: '1rem',
+            marginTop: '2.5rem'
+          }}
+        >
           <PlatformBadge code="SCA" label="SCA" />
           <PlatformBadge code="YPL" label="YPL" />
           <PlatformBadge code="SIA" label="SG IA" />
+          <PlatformBadge code="BPL" label="BPL 2025" />
         </div>
       </div>
     </div>
@@ -173,38 +185,30 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
 
 function PlatformBadge({ code, label }) {
   return (
-    <div style={{
-      padding: '1.25rem',
-      backgroundColor: 'rgba(0, 102, 204, 0.08)',
-      border: '1.5px solid rgba(0, 102, 204, 0.2)',
-      borderRadius: '10px',
-      textAlign: 'center',
-      color: '#ffffff',
-      transition: 'all 0.3s',
-      cursor: 'default'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.backgroundColor = 'rgba(0, 102, 204, 0.15)';
-      e.currentTarget.style.borderColor = '#0066cc';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.backgroundColor = 'rgba(0, 102, 204, 0.08)';
-      e.currentTarget.style.borderColor = 'rgba(0, 102, 204, 0.2)';
-    }}
+    <div
+      style={{
+        padding: '1rem',
+        backgroundColor: 'rgba(0, 102, 204, 0.08)',
+        border: '1.5px solid rgba(0, 102, 204, 0.2)',
+        borderRadius: '10px',
+        textAlign: 'center',
+        color: '#ffffff',
+        transition: 'all 0.3s',
+        cursor: 'default'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(0, 102, 204, 0.15)';
+        e.currentTarget.style.borderColor = '#0066cc';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(0, 102, 204, 0.08)';
+        e.currentTarget.style.borderColor = 'rgba(0, 102, 204, 0.2)';
+      }}
     >
-      <div style={{
-        fontSize: '24px',
-        fontWeight: 'bold',
-        marginBottom: '0.5rem',
-        opacity: 0.95
-      }}>
+      <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '0.35rem', opacity: 0.95 }}>
         {code}
       </div>
-      <div style={{
-        fontSize: '12px',
-        opacity: 0.8,
-        fontWeight: '500'
-      }}>
+      <div style={{ fontSize: '11px', opacity: 0.8, fontWeight: '500' }}>
         {label}
       </div>
     </div>

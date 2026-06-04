@@ -211,6 +211,12 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
                 player={player}
                 isLast={idx === players.length - 1}
               />
+            ) : player.source === 'bpl-static' ? (
+              <BPLPlayerCard
+                key={player.id || idx}
+                player={player}
+                isLast={idx === players.length - 1}
+              />
             ) : (
               <PlayerCard
                 key={`${player.source || 'p'}-${player.id || idx}`}
@@ -882,6 +888,143 @@ function fmt(val) {
   if (val === null || val === undefined) return null;
   const n = Number(val);
   return isNaN(n) ? val : n.toFixed(2).replace(/\.?0+$/, '');
+}
+
+// ── BPL 2025 player card (static, no API fetch) ───────────────────────────────
+
+function BPLPlayerCard({ player, isLast }) {
+  const { name, team, batting, bowling, lastUpdated } = player;
+  const [expanded, setExpanded] = useState(false);
+
+  const hasBatting = batting && batting.innings > 0;
+  const hasBowling = bowling && bowling.innings > 0;
+
+  return (
+    <div style={{
+      marginBottom: isLast ? 0 : '1.5rem',
+      backgroundColor: '#ffffff',
+      border: '1px solid #d0dae8',
+      borderRadius: '10px',
+      overflow: 'hidden',
+      boxShadow: '0 1px 4px rgba(6, 28, 84, 0.06)',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '1rem 1.25rem',
+        background: 'linear-gradient(135deg, #3b0764 0%, #7c3aed 100%)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <div>
+          <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '16px', fontWeight: '700', color: '#ffffff' }}>
+            {name}
+          </h4>
+          <div style={{ fontSize: '12px', color: '#e9d5ff', fontWeight: '500' }}>
+            {team}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
+          <span style={{
+            backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
+            padding: '0.2rem 0.6rem', borderRadius: '4px',
+            fontSize: '10px', fontWeight: '700',
+          }}>BPL 2025</span>
+          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {lastUpdated}</span>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div style={{ padding: '1rem 1.25rem' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+          {hasBatting && (
+            <div style={{ fontSize: '12px', color: '#374151' }}>
+              🏏 <strong>{batting.runs}</strong> runs
+              {batting.average != null && <span style={{ color: '#64748b' }}> · avg {fmt(batting.average)}</span>}
+              {batting.highest_score > 0 && <span style={{ color: '#64748b' }}> · HS {batting.highest_score}</span>}
+              <span style={{ color: '#64748b' }}> · {batting.matches}M</span>
+              {batting.batting_hand && <span style={{ color: '#9ca3af' }}> · {batting.batting_hand}</span>}
+            </div>
+          )}
+          {hasBowling && (
+            <div style={{ fontSize: '12px', color: '#374151' }}>
+              ⚽ <strong>{bowling.wickets}</strong> wkts
+              {bowling.economy != null && <span style={{ color: '#64748b' }}> · econ {fmt(bowling.economy)}</span>}
+              {bowling.bowling_style && <span style={{ color: '#9ca3af' }}> · {bowling.bowling_style}</span>}
+            </div>
+          )}
+          {!hasBatting && !hasBowling && (
+            <span style={{ fontSize: '12px', color: '#9ca3af' }}>No innings data yet</span>
+          )}
+        </div>
+
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            width: '100%', padding: '0.5rem',
+            backgroundColor: expanded ? '#f3e8ff' : '#f5f8fc',
+            border: '1px solid #d0dae8', borderRadius: '6px',
+            cursor: 'pointer', fontSize: '12px', color: '#7c3aed', fontWeight: '600',
+          }}
+        >
+          {expanded ? '▲ Hide stats' : '▼ Show full stats'}
+        </button>
+
+        {expanded && (
+          <div style={{ marginTop: '1rem' }}>
+            {hasBatting && (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BATTING</div>
+                <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
+                  {[
+                    ['Mat', batting.matches], ['Inns', batting.innings], ['NO', batting.not_outs],
+                    ['Runs', batting.runs], ['Balls', batting.balls_faced], ['Avg', fmt(batting.average)],
+                    ['SR', fmt(batting.strike_rate)], ['HS', batting.highest_score],
+                    ['50s', batting.fifties], ['100s', batting.hundreds],
+                    ['4s', batting.fours], ['6s', batting.sixes],
+                  ].map(([label, val]) => val != null && (
+                    <div key={label} style={{
+                      backgroundColor: '#f5f8fc', borderRadius: '4px',
+                      padding: '0.3rem 0.4rem', textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {hasBowling && (
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BOWLING</div>
+                <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
+                  {[
+                    ['Mat', bowling.matches], ['Inns', bowling.innings], ['Overs', bowling.overs],
+                    ['Runs', bowling.runs_conceded], ['Wkts', bowling.wickets],
+                    ['BB', bowling.best_wickets], ['Econ', fmt(bowling.economy)],
+                    ['Ave', fmt(bowling.average)], ['SR', fmt(bowling.strike_rate)],
+                    ['Mdns', bowling.maidens], ['Dots', bowling.dot_balls],
+                  ].map(([label, val]) => val != null && (
+                    <div key={label} style={{
+                      backgroundColor: '#f5f8fc', borderRadius: '4px',
+                      padding: '0.3rem 0.4rem', textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
+                    </div>
+                  ))}
+                </div>
+                {bowling.bowling_style && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '11px', color: '#64748b' }}>
+                    Style: {bowling.bowling_style}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ── SCA Corporate player card (static, no API fetch) ─────────────────────────
