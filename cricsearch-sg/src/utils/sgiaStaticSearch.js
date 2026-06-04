@@ -8,7 +8,8 @@ import sgiaStats from '../data/sgiaStats.json';
  */
 export function searchSGIAStats(query) {
   if (!query || query.trim().length < 2) return [];
-  const q = query.trim().toLowerCase();
+  const words = query.trim().toLowerCase().split(/\s+/);
+  const matches = (name) => words.every((w) => name.toLowerCase().includes(w));
 
   const matchMap = new Map(); // key: normalized player name → aggregated entry
 
@@ -16,7 +17,7 @@ export function searchSGIAStats(query) {
     const { tournamentName, tournamentId, year, status } = tournament;
 
     for (const batter of tournament.batting) {
-      if (!batter.player.toLowerCase().includes(q)) continue;
+      if (!matches(batter.player)) continue;
       const key = batter.player.toLowerCase();
       if (!matchMap.has(key)) {
         matchMap.set(key, {
@@ -39,7 +40,7 @@ export function searchSGIAStats(query) {
     }
 
     for (const bowler of tournament.bowling) {
-      if (!bowler.player.toLowerCase().includes(q)) continue;
+      if (!matches(bowler.player)) continue;
       const key = bowler.player.toLowerCase();
       if (!matchMap.has(key)) {
         matchMap.set(key, {

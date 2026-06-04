@@ -8,10 +8,13 @@ import assasinsStats from '../data/assasinsStats.json';
  */
 export function searchAssasinsStats(query) {
   if (!query || query.trim().length < 2) return [];
-  const q = query.trim().toLowerCase();
+  const words = query.trim().toLowerCase().split(/\s+/);
 
   return assasinsStats.players
-    .filter((p) => p.player.toLowerCase().includes(q))
+    .filter((p) => {
+      const name = p.player.toLowerCase();
+      return words.every((w) => name.includes(w));
+    })
     .map((p) => ({
       // Stable ID so React keys don't collide across re-renders
       id: `ypl-assassins-${p.player.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`,
