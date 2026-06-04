@@ -764,6 +764,9 @@ function SGIAPlayerCard({ player, isLast }) {
             backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
             padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '11px', fontWeight: '600',
           }}>🇸🇬 SIA</span>
+          <div style={{ marginTop: '0.4rem', fontSize: '10px', color: '#94a3b8' }}>
+            Updated: {fmtDate(lastUpdated)}
+          </div>
         </div>
       </div>
 
@@ -926,10 +929,10 @@ function BPLPlayerCard({ player, isLast }) {
             padding: '0.2rem 0.6rem', borderRadius: '4px',
             fontSize: '10px', fontWeight: '700',
           }}>BPL 2025</span>
+          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {lastUpdated}</span>
+          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>Updated daily at 6:00 AM SGT</span>
         </div>
       </div>
-
-      {/* Summary */}
       <div style={{ padding: '1rem 1.25rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
           {hasBatting && (
