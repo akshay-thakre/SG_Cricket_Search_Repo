@@ -200,6 +200,12 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
                 player={player}
                 isLast={idx === players.length - 1}
               />
+            ) : player.source === 'sca-corporate' ? (
+              <SCACorpPlayerCard
+                key={player.id || idx}
+                player={player}
+                isLast={idx === players.length - 1}
+              />
             ) : (
               <PlayerCard
                 key={`${player.source || 'p'}-${player.id || idx}`}
@@ -871,4 +877,185 @@ function fmt(val) {
   if (val === null || val === undefined) return null;
   const n = Number(val);
   return isNaN(n) ? val : n.toFixed(2).replace(/\.?0+$/, '');
+}
+
+// ── SCA Corporate player card (static, no API fetch) ─────────────────────────
+
+function SCACorpPlayerCard({ player, isLast }) {
+  const { name, team, seasons = [] } = player;
+  const [expanded, setExpanded] = useState(false);
+
+  const sortedSeasons = [...seasons].sort((a, b) => b.year - a.year);
+
+  return (
+    <div style={{
+      marginBottom: isLast ? 0 : '1.5rem',
+      backgroundColor: '#ffffff',
+      border: '1px solid #d0dae8',
+      borderRadius: '10px',
+      overflow: 'hidden',
+      boxShadow: '0 1px 4px rgba(6, 28, 84, 0.06)',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '1rem 1.25rem',
+        background: 'linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%)',
+        borderBottom: '1px solid #1e3a5f',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <div>
+          <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '16px', fontWeight: '700', color: '#ffffff' }}>
+            {name}
+          </h4>
+          <div style={{ fontSize: '12px', color: '#93c5fd', fontWeight: '500' }}>
+            {team} · SCA Corporate League
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{
+            backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
+            padding: '0.2rem 0.6rem', borderRadius: '4px',
+            fontSize: '10px', fontWeight: '600',
+          }}>
+            STATIC
+          </span>
+          <span style={{
+            backgroundColor: 'rgba(255,255,255,0.15)', color: '#93c5fd',
+            padding: '0.2rem 0.6rem', borderRadius: '4px',
+            fontSize: '10px', fontWeight: '600',
+          }}>
+            {sortedSeasons.map(s => s.year).join(' · ')}
+          </span>
+        </div>
+      </div>
+
+      {/* Season entries */}
+      <div style={{ padding: '1rem 1.25rem' }}>
+        {sortedSeasons.map((season, si) => (
+          <SCACorpSeasonEntry
+            key={season.year}
+            season={season}
+            isLast={si === sortedSeasons.length - 1}
+          />
+        ))}
+
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            marginTop: '0.75rem', width: '100%',
+            padding: '0.5rem', backgroundColor: expanded ? '#e8f1ff' : '#f5f8fc',
+            border: '1px solid #d0dae8', borderRadius: '6px',
+            cursor: 'pointer', fontSize: '12px', color: '#0066cc', fontWeight: '600',
+          }}
+        >
+          {expanded ? '▲ Hide detailed stats' : '▼ Show detailed stats'}
+        </button>
+
+        {expanded && (
+          <div style={{ marginTop: '1rem' }}>
+            {sortedSeasons.map((season) => (
+              <SCACorpSeasonDetail key={season.year} season={season} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SCACorpSeasonEntry({ season, isLast }) {
+  const { year, competition, batting, bowling } = season;
+  return (
+    <div style={{
+      marginBottom: isLast ? 0 : '1rem',
+      paddingBottom: isLast ? 0 : '1rem',
+      borderBottom: isLast ? 'none' : '1px solid #e2e8f0',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+        <span style={{
+          backgroundColor: '#1e3a5f', color: '#ffffff',
+          padding: '0.15rem 0.6rem', borderRadius: '4px',
+          fontSize: '11px', fontWeight: '700',
+        }}>{year}</span>
+        <span style={{ fontSize: '12px', color: '#64748b' }}>{competition}</span>
+      </div>
+
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        {batting && (
+          <div style={{ fontSize: '12px', color: '#374151' }}>
+            🏏 <strong>{batting.runs}</strong> runs
+            {batting.avg != null && <span style={{ color: '#64748b' }}> · avg {fmt(batting.avg)}</span>}
+            {batting.hs > 0 && <span style={{ color: '#64748b' }}> · HS {batting.hs}</span>}
+            {batting.mat > 0 && <span style={{ color: '#64748b' }}> · {batting.mat}M</span>}
+          </div>
+        )}
+        {bowling && bowling.wkts > 0 && (
+          <div style={{ fontSize: '12px', color: '#374151' }}>
+            ⚽ <strong>{bowling.wkts}</strong> wkts
+            {bowling.bbf && <span style={{ color: '#64748b' }}> · BB {bowling.bbf}</span>}
+            {bowling.econ != null && <span style={{ color: '#64748b' }}> · econ {fmt(bowling.econ)}</span>}
+          </div>
+        )}
+        {!batting && !bowling && (
+          <span style={{ fontSize: '12px', color: '#9ca3af' }}>No stats available</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SCACorpSeasonDetail({ season }) {
+  const { year, batting, bowling } = season;
+  return (
+    <div style={{ marginBottom: '1rem' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e3a5f', marginBottom: '0.5rem' }}>
+        {year} — Detailed
+      </div>
+
+      {batting && (
+        <div style={{ marginBottom: '0.75rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BATTING</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '0.4rem' }}>
+            {[
+              ['Mat', batting.mat], ['Inns', batting.inns], ['NO', batting.not_outs],
+              ['Runs', batting.runs], ['Balls', batting.balls], ['Avg', fmt(batting.avg)],
+              ['SR', fmt(batting.sr)], ['HS', batting.hs],
+              ['100s', batting.hundreds], ['50s', batting.fifties], ['25s', batting.twenty_fives],
+              ['Ducks', batting.ducks], ['6s', batting.sixes], ['4s', batting.fours],
+            ].map(([label, val]) => val != null && (
+              <div key={label} style={{
+                backgroundColor: '#f5f8fc', borderRadius: '4px',
+                padding: '0.3rem 0.5rem', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {bowling && bowling.inns > 0 && (
+        <div>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BOWLING</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '0.4rem' }}>
+            {[
+              ['Mat', bowling.mat], ['Inns', bowling.inns], ['Overs', bowling.overs],
+              ['Runs', bowling.runs], ['Wkts', bowling.wkts], ['BB', bowling.bbf],
+              ['Econ', fmt(bowling.econ)], ['Ave', fmt(bowling.ave)], ['SR', fmt(bowling.sr)],
+              ['Mdns', bowling.mdns],
+            ].map(([label, val]) => val != null && (
+              <div key={label} style={{
+                backgroundColor: '#f5f8fc', borderRadius: '4px',
+                padding: '0.3rem 0.5rem', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
