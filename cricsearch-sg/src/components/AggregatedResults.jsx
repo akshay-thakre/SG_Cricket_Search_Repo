@@ -91,6 +91,7 @@ export function AggregatedResults({ searchResults }) {
         <div style={{ fontSize: '14px', color: '#64748b' }}>
           Found <strong style={{ color: '#0066cc' }}>{totalFound}</strong> player{totalFound !== 1 ? 's' : ''} across platforms
           {meta?.live && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#16a34a' }}>● {meta.live.length} live</span>}
+          {meta?.static && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#b45309' }}>● {meta.static.length} static</span>}
           {meta?.disabled && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#9ca3af' }}>● {meta.disabled.length} coming soon</span>}
         </div>
       </div>
@@ -185,14 +186,22 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
 
       {isExpanded && !noResults && !disabled && (
         <div style={{ padding: '1.25rem', borderTop: '1px solid #d0dae8' }}>
-          {players.map((player, idx) => (
-            <PlayerCard
-              key={`${player.source || 'p'}-${player.id || idx}`}
-              player={player}
-              platformName={platformName}
-              isLast={idx === players.length - 1}
-            />
-          ))}
+          {players.map((player, idx) =>
+            player.source === 'ypl-static' ? (
+              <YPLPlayerCard
+                key={player.id || idx}
+                player={player}
+                isLast={idx === players.length - 1}
+              />
+            ) : (
+              <PlayerCard
+                key={`${player.source || 'p'}-${player.id || idx}`}
+                player={player}
+                platformName={platformName}
+                isLast={idx === players.length - 1}
+              />
+            )
+          )}
         </div>
       )}
 
@@ -490,6 +499,199 @@ function StatBox({ label, value, highlight = false, color = '#0066cc', small = f
     </div>
   );
 }
+
+// ── YPL Static player card ────────────────────────────────────────────────────
+// Renders pre-loaded batting + bowling stats from the Assasins CC static dataset.
+// No API call is made — all data is bundled in player.inlineStats.
+
+function YPLPlayerCard({ player, isLast }) {
+  const { name, team, seasons, competition, inlineStats } = player;
+  const { batting: b, bowling: bwl } = inlineStats || {};
+  const [battingOpen, setBattingOpen] = useState(false);
+  const [bowlingOpen, setBowlingOpen] = useState(false);
+
+  const d = (v, decimals = 0) => {
+    if (v === null || v === undefined) return '--';
+    return decimals > 0 ? Number(v).toFixed(decimals) : String(v);
+  };
+
+  const hasBatting = b && (b.innings > 0 || b.runs > 0);
+  const hasBowling = bwl !== null && bwl !== undefined;
+
+  return (
+    <div style={{
+      marginBottom: isLast ? 0 : '1.5rem',
+      backgroundColor: '#fff',
+      border: '1px solid #d0dae8',
+      borderRadius: '10px',
+      overflow: 'hidden',
+      boxShadow: '0 1px 4px rgba(6,28,84,0.06)',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '1rem 1.25rem',
+        backgroundColor: '#fdf8f0',
+        borderBottom: '1px solid #f0d9a8',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      }}>
+        <div>
+          <h4 style={{ margin: '0 0 0.25rem', fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
+            {name}
+          </h4>
+          <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+            {team}
+            <span style={{ margin: '0 0.4rem', color: '#d0dae8' }}>·</span>
+            <span style={{ color: '#b45309' }}>YPL Elite</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {seasons.map((s) => (
+            <span key={s} style={{
+              backgroundColor: '#fef3c7', color: '#92400e',
+              padding: '0.2rem 0.6rem', borderRadius: '5px',
+              fontSize: '11px', fontWeight: '600',
+            }}>{s}</span>
+          ))}
+          <span style={{
+            backgroundColor: '#e8f1ff', color: '#0066cc',
+            padding: '0.2rem 0.6rem', borderRadius: '5px',
+            fontSize: '11px', fontWeight: '600',
+          }}>{competition}</span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '1rem 1.25rem' }}>
+
+        {/* Summary row */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '0.5rem', marginBottom: '0.75rem',
+        }}>
+          <StatBox label="Matches"  value={b?.matches}  highlight />
+          <StatBox label="Runs"     value={b?.runs}     highlight />
+          <StatBox label="Bat Avg"  value={d(b?.average, 2)} highlight />
+          <StatBox label="Wickets"  value={hasBowling ? bwl.wickets : '--'} highlight color="#7c3aed" />
+        </div>
+
+        {/* Batting details */}
+        {hasBatting && (
+          <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
+            <button
+              onClick={() => setBattingOpen((o) => !o)}
+              style={expandBtnStyle('#0066cc')}
+            >
+              <span style={{ ...arrowStyle, transform: battingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+              🏏 Batting Stats
+            </button>
+
+            {battingOpen && (
+              <div style={{ marginTop: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                  <div>
+                    <BattingRow label="Innings"       value={d(b.innings)} />
+                    <BattingRow label="Not Outs"      value={d(b.not_outs)} />
+                    <BattingRow label="Balls"         value={d(b.balls)} />
+                    <BattingRow label="Strike Rate"   value={d(b.strike_rate, 2)} />
+                    <BattingRow label="Highest Score" value={d(b.highest_score)} />
+                  </div>
+                  <div>
+                    <BattingRow label="100s"   value={d(b.hundreds)} />
+                    <BattingRow label="75s"    value={d(b.seventy_fives)} />
+                    <BattingRow label="50s"    value={d(b.fifties)} />
+                    <BattingRow label="25s"    value={d(b.twenty_fives)} />
+                    <BattingRow label="Ducks"  value={d(b.ducks)} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bowling details */}
+        <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
+          {hasBowling ? (
+            <>
+              <button
+                onClick={() => setBowlingOpen((o) => !o)}
+                style={expandBtnStyle('#7c3aed')}
+              >
+                <span style={{ ...arrowStyle, transform: bowlingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+                ⚡ Bowling Stats
+              </button>
+
+              {bowlingOpen && (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                    <div>
+                      <BattingRow label="Innings"        value={d(bwl.innings)} />
+                      <BattingRow label="Overs"          value={d(bwl.overs)} />
+                      <BattingRow label="Runs Conceded"  value={d(bwl.runs_conceded)} />
+                      <BattingRow label="Best Bowling"   value={bwl.best_bowling || '--'} />
+                      <BattingRow label="Maidens"        value={d(bwl.maidens)} />
+                    </div>
+                    <div>
+                      <BattingRow label="Economy"        value={d(bwl.economy, 2)} />
+                      <BattingRow label="Average"        value={d(bwl.average, 2)} />
+                      <BattingRow label="Strike Rate"    value={d(bwl.strike_rate, 2)} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
+              No bowling record available
+            </div>
+          )}
+        </div>
+
+        {/* All-round summary when player has both */}
+        {hasBatting && hasBowling && bwl.wickets > 0 && (
+          <div style={{
+            marginTop: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem',
+            fontSize: '12px', color: '#64748b',
+          }}>
+            <strong style={{ color: '#1e293b' }}>All-Round:</strong>
+            {' '}{b.runs} runs · {bwl.wickets} wickets
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: '0.5rem 1.25rem',
+        backgroundColor: '#fdf8f0',
+        borderTop: '1px solid #f0d9a8',
+        fontSize: '11px', color: '#b45309',
+      }}>
+        YPL Elite · Assasins CC · Seasons {seasons.join(', ')} · Static Data
+      </div>
+    </div>
+  );
+}
+
+function BattingRow({ label, value }) {
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '0.3rem 0', borderBottom: '1px solid #f1f5f9', fontSize: '13px',
+    }}>
+      <span style={{ color: '#64748b' }}>{label}</span>
+      <span style={{ fontWeight: '600', color: '#1e293b' }}>{value}</span>
+    </div>
+  );
+}
+
+const expandBtnStyle = (color) => ({
+  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+  fontSize: '11px', fontWeight: '700', color, textTransform: 'uppercase',
+  letterSpacing: '0.07em', display: 'flex', alignItems: 'center', gap: '0.35rem',
+});
+
+const arrowStyle = {
+  display: 'inline-block', transition: 'transform 0.15s',
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

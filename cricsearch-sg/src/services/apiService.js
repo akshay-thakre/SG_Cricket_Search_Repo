@@ -1,4 +1,29 @@
+import { searchAssasinsStats } from '../utils/yplStaticSearch';
+
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+// ── YPL (Sportygo) batting stats ─────────────────────────────────────────────
+
+/**
+ * Fetch YPL batting stats for a team/year from the backend static JSON store.
+ * @param {string} year   e.g. '2026'
+ * @param {string} team   '211' | '120' | 'consolidated'
+ */
+export async function fetchYPLBatting(year, team) {
+  const res = await fetch(`${API_BASE}/api/ypl/batting?year=${encodeURIComponent(year)}&team=${encodeURIComponent(team)}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/** Fetch available years with YPL data. */
+export async function fetchYPLYears() {
+  const res = await fetch(`${API_BASE}/api/ypl/years`);
+  if (!res.ok) return { years: [new Date().getFullYear().toString()] };
+  return res.json();
+}
 
 /**
  * Search players on SCA platform via the backend proxy
@@ -122,6 +147,12 @@ export async function searchAcrossPlatforms(query, signal) {
       noResults: true, loading: false, error: null,
       disabled: true, disabledReason: 'Coming soon',
     },
+    'YPL Elite': {
+      platformName: 'YPL Elite — Assasins CC',
+      count: 0, players: [],
+      icon: { emoji: '🏆', color: '#b45309', code: 'YPL' },
+      noResults: true, loading: false, error: null,
+    },
   };
 
   let totalFound = 0;
@@ -202,13 +233,26 @@ export async function searchAcrossPlatforms(query, signal) {
     platforms['Sportygo'].noResults = true;
   }
 
+  // ── YPL Elite — STATIC (client-side, no network call) ───────────────────
+  const yplMatches = searchAssasinsStats(query);
+  if (yplMatches.length > 0) {
+    platforms['YPL Elite'] = {
+      ...platforms['YPL Elite'],
+      count: yplMatches.length,
+      players: yplMatches,
+      noResults: false,
+    };
+    totalFound += yplMatches.length;
+  }
+
   return {
     query,
     results: platforms,
     totalFound,
     platforms: Object.keys(platforms),
     meta: {
-      live: ['CricClubs (SCA)', 'Sportygo'],
+      live:     ['CricClubs (SCA)', 'Sportygo'],
+      static:   ['YPL Elite'],
       disabled: ['Stumps', 'Last Man Stands'],
     },
   };

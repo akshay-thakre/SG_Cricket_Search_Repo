@@ -1,0 +1,624 @@
+{
+  "team": "Assasins CC",
+  "seasons": ["2017", "2018"],
+  "competition": "YPL Elite",
+  "summary_type": "combined_batting_bowling",
+  "players": [
+    {
+      "player": "Pradipta Kumar",
+      "batting": {
+        "matches": 15,
+        "innings": 14,
+        "not_outs": 1,
+        "runs": 423,
+        "balls": 328,
+        "average": 32.54,
+        "strike_rate": 128.96,
+        "highest_score": 100,
+        "hundreds": 1,
+        "seventy_fives": 0,
+        "fifties": 2,
+        "twenty_fives": 4,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 15,
+        "overs": 67.0,
+        "runs_conceded": 384,
+        "wickets": 14,
+        "best_bowling": "27/3",
+        "maidens": 1,
+        "dots": 0,
+        "economy": 5.73,
+        "average": 27.43,
+        "strike_rate": 28.71
+      }
+    },
+    {
+      "player": "Dommety Santosh Kumar",
+      "batting": {
+        "matches": 17,
+        "innings": 16,
+        "not_outs": 3,
+        "runs": 392,
+        "balls": 434,
+        "average": 30.15,
+        "strike_rate": 90.32,
+        "highest_score": 93,
+        "hundreds": 0,
+        "seventy_fives": 1,
+        "fifties": 1,
+        "twenty_fives": 6,
+        "ducks": 1
+      },
+      "bowling": {
+        "innings": 8,
+        "overs": 34.0,
+        "runs_conceded": 149,
+        "wickets": 13,
+        "best_bowling": "18/5",
+        "maidens": 2,
+        "dots": 0,
+        "economy": 4.38,
+        "average": 11.46,
+        "strike_rate": 15.69
+      }
+    },
+    {
+      "player": "Gururaj Banakar",
+      "batting": {
+        "matches": 16,
+        "innings": 16,
+        "not_outs": 0,
+        "runs": 379,
+        "balls": 329,
+        "average": 23.69,
+        "strike_rate": 115.2,
+        "highest_score": 67,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 3,
+        "twenty_fives": 4,
+        "ducks": 2
+      },
+      "bowling": {
+        "innings": 1,
+        "overs": 1.0,
+        "runs_conceded": 7,
+        "wickets": 0,
+        "best_bowling": "0/0",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 7.0,
+        "average": null,
+        "strike_rate": null
+      }
+    },
+    {
+      "player": "Vikram Singh Salaria",
+      "batting": {
+        "matches": 15,
+        "innings": 15,
+        "not_outs": 1,
+        "runs": 348,
+        "balls": 368,
+        "average": 24.86,
+        "strike_rate": 94.57,
+        "highest_score": 124,
+        "hundreds": 1,
+        "seventy_fives": 0,
+        "fifties": 1,
+        "twenty_fives": 2,
+        "ducks": 1
+      },
+      "bowling": {
+        "innings": 6,
+        "overs": 9.2,
+        "runs_conceded": 75,
+        "wickets": 3,
+        "best_bowling": "20/2",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 8.04,
+        "average": 25.0,
+        "strike_rate": 18.67
+      }
+    },
+    {
+      "player": "Amit Dubey",
+      "batting": {
+        "matches": 16,
+        "innings": 13,
+        "not_outs": 1,
+        "runs": 282,
+        "balls": 352,
+        "average": 23.5,
+        "strike_rate": 80.11,
+        "highest_score": 61,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 2,
+        "twenty_fives": 2,
+        "ducks": 2
+      },
+      "bowling": {
+        "innings": 6,
+        "overs": 8.0,
+        "runs_conceded": 67,
+        "wickets": 3,
+        "best_bowling": "1/1",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 8.38,
+        "average": 22.33,
+        "strike_rate": 16.0
+      }
+    },
+    {
+      "player": "Kintul Mistry",
+      "batting": {
+        "matches": 12,
+        "innings": 12,
+        "not_outs": 1,
+        "runs": 240,
+        "balls": 177,
+        "average": 21.82,
+        "strike_rate": 135.59,
+        "highest_score": 39,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 4,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 12,
+        "overs": 61.3,
+        "runs_conceded": 345,
+        "wickets": 17,
+        "best_bowling": "8/3",
+        "maidens": 3,
+        "dots": 0,
+        "economy": 5.61,
+        "average": 20.29,
+        "strike_rate": 21.71
+      }
+    },
+    {
+      "player": "Vivek Singh",
+      "batting": {
+        "matches": 17,
+        "innings": 17,
+        "not_outs": 0,
+        "runs": 189,
+        "balls": 286,
+        "average": 11.12,
+        "strike_rate": 66.08,
+        "highest_score": 29,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 2,
+        "ducks": 1
+      },
+      "bowling": {
+        "innings": 8,
+        "overs": 22.0,
+        "runs_conceded": 125,
+        "wickets": 4,
+        "best_bowling": "3/2",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 5.68,
+        "average": 31.25,
+        "strike_rate": 33.0
+      }
+    },
+    {
+      "player": "Kapil Arora",
+      "batting": {
+        "matches": 14,
+        "innings": 8,
+        "not_outs": 2,
+        "runs": 114,
+        "balls": 91,
+        "average": 19.0,
+        "strike_rate": 125.27,
+        "highest_score": 51,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 1,
+        "twenty_fives": 1,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 14,
+        "overs": 78.0,
+        "runs_conceded": 361,
+        "wickets": 25,
+        "best_bowling": "25/5",
+        "maidens": 3,
+        "dots": 0,
+        "economy": 4.63,
+        "average": 14.44,
+        "strike_rate": 18.72
+      }
+    },
+    {
+      "player": "Syed Basha",
+      "batting": {
+        "matches": 4,
+        "innings": 3,
+        "not_outs": 0,
+        "runs": 97,
+        "balls": 101,
+        "average": 32.33,
+        "strike_rate": 96.04,
+        "highest_score": 37,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 2,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 3,
+        "overs": 9.0,
+        "runs_conceded": 29,
+        "wickets": 2,
+        "best_bowling": "3/1",
+        "maidens": 1,
+        "dots": 0,
+        "economy": 3.22,
+        "average": 14.5,
+        "strike_rate": 27.0
+      }
+    },
+    {
+      "player": "Akshay Ramdas Thakre",
+      "batting": {
+        "matches": 8,
+        "innings": 6,
+        "not_outs": 3,
+        "runs": 82,
+        "balls": 86,
+        "average": 27.33,
+        "strike_rate": 95.35,
+        "highest_score": 24,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 4,
+        "overs": 8.0,
+        "runs_conceded": 51,
+        "wickets": 2,
+        "best_bowling": "16/1",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 6.38,
+        "average": 25.5,
+        "strike_rate": 24.0
+      }
+    },
+    {
+      "player": "Sheetanshu Srivastava",
+      "batting": {
+        "matches": 7,
+        "innings": 6,
+        "not_outs": 0,
+        "runs": 62,
+        "balls": 76,
+        "average": 10.33,
+        "strike_rate": 81.58,
+        "highest_score": 27,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 2,
+        "ducks": 1
+      },
+      "bowling": null
+    },
+    {
+      "player": "Nimbagal Mahammad Hasen",
+      "batting": {
+        "matches": 4,
+        "innings": 4,
+        "not_outs": 0,
+        "runs": 53,
+        "balls": 53,
+        "average": 13.25,
+        "strike_rate": 100.0,
+        "highest_score": 21,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 1
+      },
+      "bowling": {
+        "innings": 2,
+        "overs": 4.1,
+        "runs_conceded": 33,
+        "wickets": 1,
+        "best_bowling": "0/1",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 7.92,
+        "average": 33.0,
+        "strike_rate": 25.0
+      }
+    },
+    {
+      "player": "Ramyajit Bramha",
+      "batting": {
+        "matches": 5,
+        "innings": 3,
+        "not_outs": 1,
+        "runs": 31,
+        "balls": 35,
+        "average": 15.5,
+        "strike_rate": 88.57,
+        "highest_score": 21,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 1
+      },
+      "bowling": {
+        "innings": 4,
+        "overs": 14.4,
+        "runs_conceded": 106,
+        "wickets": 4,
+        "best_bowling": "29/2",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 7.23,
+        "average": 26.5,
+        "strike_rate": 22.0
+      }
+    },
+    {
+      "player": "Srikanth Akkena",
+      "batting": {
+        "matches": 7,
+        "innings": 4,
+        "not_outs": 2,
+        "runs": 29,
+        "balls": 37,
+        "average": 14.5,
+        "strike_rate": 78.38,
+        "highest_score": 17,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 7,
+        "overs": 32.0,
+        "runs_conceded": 143,
+        "wickets": 11,
+        "best_bowling": "9/4",
+        "maidens": 1,
+        "dots": 0,
+        "economy": 4.47,
+        "average": 13.0,
+        "strike_rate": 17.45
+      }
+    },
+    {
+      "player": "Gurjinder Singh",
+      "batting": {
+        "matches": 7,
+        "innings": 3,
+        "not_outs": 0,
+        "runs": 24,
+        "balls": 17,
+        "average": 8.0,
+        "strike_rate": 141.18,
+        "highest_score": 16,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 7,
+        "overs": 33.3,
+        "runs_conceded": 185,
+        "wickets": 12,
+        "best_bowling": "18/6",
+        "maidens": 1,
+        "dots": 0,
+        "economy": 5.52,
+        "average": 15.42,
+        "strike_rate": 16.75
+      }
+    },
+    {
+      "player": "Arvind Bazaz",
+      "batting": {
+        "matches": 4,
+        "innings": 2,
+        "not_outs": 2,
+        "runs": 16,
+        "balls": 11,
+        "average": null,
+        "strike_rate": 145.45,
+        "highest_score": 12,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 4,
+        "overs": 17.0,
+        "runs_conceded": 98,
+        "wickets": 6,
+        "best_bowling": "36/3",
+        "maidens": 1,
+        "dots": 0,
+        "economy": 5.76,
+        "average": 16.33,
+        "strike_rate": 17.0
+      }
+    },
+    {
+      "player": "Harsha Bardhan Sharma",
+      "batting": {
+        "matches": 11,
+        "innings": 6,
+        "not_outs": 3,
+        "runs": 10,
+        "balls": 15,
+        "average": 3.33,
+        "strike_rate": 66.67,
+        "highest_score": 8,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 1
+      },
+      "bowling": {
+        "innings": 11,
+        "overs": 46.4,
+        "runs_conceded": 232,
+        "wickets": 16,
+        "best_bowling": "20/5",
+        "maidens": 1,
+        "dots": 0,
+        "economy": 4.97,
+        "average": 14.5,
+        "strike_rate": 17.5
+      }
+    },
+    {
+      "player": "Gaurav Khandelwal",
+      "batting": {
+        "matches": 2,
+        "innings": 2,
+        "not_outs": 0,
+        "runs": 10,
+        "balls": 19,
+        "average": 5.0,
+        "strike_rate": 52.63,
+        "highest_score": 10,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 1
+      },
+      "bowling": null
+    },
+    {
+      "player": "Ramesh Vasantkumar",
+      "batting": {
+        "matches": 1,
+        "innings": 1,
+        "not_outs": 0,
+        "runs": 7,
+        "balls": 17,
+        "average": 7.0,
+        "strike_rate": 41.18,
+        "highest_score": 7,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": null
+    },
+    {
+      "player": "Arijit Nandi",
+      "batting": {
+        "matches": 1,
+        "innings": 1,
+        "not_outs": 0,
+        "runs": 5,
+        "balls": 9,
+        "average": 5.0,
+        "strike_rate": 55.56,
+        "highest_score": 5,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": null
+    },
+    {
+      "player": "Arvind Pendekar",
+      "batting": {
+        "matches": 3,
+        "innings": 1,
+        "not_outs": 0,
+        "runs": 2,
+        "balls": 6,
+        "average": 2.0,
+        "strike_rate": 33.33,
+        "highest_score": 2,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 3,
+        "overs": 14.1,
+        "runs_conceded": 86,
+        "wickets": 3,
+        "best_bowling": "21/1",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 6.07,
+        "average": 28.67,
+        "strike_rate": 28.33
+      }
+    },
+    {
+      "player": "Shailendra Singh",
+      "batting": {
+        "matches": 1,
+        "innings": 0,
+        "not_outs": 0,
+        "runs": 0,
+        "balls": 0,
+        "average": null,
+        "strike_rate": 0.0,
+        "highest_score": 0,
+        "hundreds": 0,
+        "seventy_fives": 0,
+        "fifties": 0,
+        "twenty_fives": 0,
+        "ducks": 0
+      },
+      "bowling": {
+        "innings": 1,
+        "overs": 3.0,
+        "runs_conceded": 21,
+        "wickets": 0,
+        "best_bowling": "21/0",
+        "maidens": 0,
+        "dots": 0,
+        "economy": 7.0,
+        "average": null,
+        "strike_rate": null
+      }
+    }
+  ]
+}
