@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAnyPlayerStats } from '../services/apiService';
+import { aggregateAllStats } from '../utils/aggregatePlayerStats';
 
 // ── Stats format normalizer ───────────────────────────────────────────────────
 // SCA returns batting/bowling as plain objects.
@@ -51,6 +52,38 @@ export function AggregatedResults({ searchResults }) {
   const { query, results, totalFound, meta } = searchResults;
 
   const [expandedPlatform, setExpandedPlatform] = useState(null);
+  const [scaLiveStatsArray, setScaLiveStatsArray] = useState([]);
+  const [scaLiveLoading, setScaLiveLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const scaPlatform = results?.['SCA'];
+    const livePlayers = scaPlatform?.players?.filter((p) => p.source === 'sca') || [];
+
+    if (livePlayers.length === 0) {
+      setScaLiveStatsArray([]);
+      setScaLiveLoading(false);
+      return () => { cancelled = true; };
+    }
+
+    setScaLiveLoading(true);
+    setScaLiveStatsArray([]);
+
+    Promise.allSettled(
+      livePlayers.map((p) => fetchAnyPlayerStats(p).then((data) => normalizeStats(data)))
+    ).then((outcomes) => {
+      if (cancelled) return;
+      const resolved = outcomes
+        .filter((o) => o.status === 'fulfilled' && o.value)
+        .map((o) => o.value);
+      setScaLiveStatsArray(resolved);
+      setScaLiveLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  // results is stable for a given query; re-fetching on every parent re-render would thrash the API.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   if (!results || Object.keys(results).length === 0) return null;
 
@@ -94,6 +127,12 @@ export function AggregatedResults({ searchResults }) {
       <div style={{ display: 'grid', gap: '1.5rem' }}>
         {Object.entries(results)
           .filter(([, p]) => !p.noResults || p.error)
+          .sort(([a], [b]) => {
+            const order = ['YPL', 'BPL', 'SG IA', 'SCA'];
+            const ai = order.indexOf(a);
+            const bi = order.indexOf(b);
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+          })
           .map(([platformKey, platformData]) => (
             <PlatformSection
               key={platformKey}
@@ -104,6 +143,11 @@ export function AggregatedResults({ searchResults }) {
               }
             />
           ))}
+        <PerformanceAcrossAllLeagues
+          results={results}
+          scaLiveStatsArray={scaLiveStatsArray}
+          scaLiveLoading={scaLiveLoading}
+        />
       </div>
     </div>
   );
@@ -1205,6 +1249,119 @@ function SCACorpSeasonDetail({ season }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Performance across all leagues panel ──────────────────────────────────────
+
+function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoading }) {
+  const hasScaLivePlayers = !!(
+    results?.['SCA'] &&
+    !results['SCA'].noResults &&
+    results['SCA'].players?.some((p) => p.source === 'sca')
+  );
+  const awaitingSca = hasScaLivePlayers && scaLiveLoading;
+
+  const agg = awaitingSca ? null : aggregateAllStats(results, scaLiveStatsArray);
+
+  const safe = (v) => (v === null || v === undefined || Number.isNaN(Number(v)) ? 0 : Number(v));
+
+  const totalRuns    = safe(agg?.batting?.runs);
+  const totalMatches = safe(agg?.batting?.matches ?? agg?.bowling?.matches);
+  const totalInnings = safe(agg?.batting?.innings);
+  const totalWickets = safe(agg?.bowling?.wickets);
+
+  const hasAnyData = totalRuns > 0 || totalMatches > 0 || totalInnings > 0 || totalWickets > 0;
+
+  return (
+    <div style={{
+      backgroundColor: '#f5f8fc',
+      border: '2px solid #c7d5e8',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      boxShadow: '0 2px 8px rgba(6, 28, 84, 0.10)',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '1.25rem 1.5rem',
+        backgroundColor: '#e8f0fb',
+        borderBottom: '1px solid #c7d5e8',
+        display: 'flex', alignItems: 'center', gap: '0.75rem',
+      }}>
+        <div style={{
+          width: '38px', height: '38px', borderRadius: '50%',
+          backgroundColor: '#dbeafe',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '18px', flexShrink: 0,
+        }}>📊</div>
+        <div>
+          <div style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>
+            Performance across all leagues
+          </div>
+          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+            YPL · BPL · SG IA · SCA
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '1.25rem 1.5rem' }}>
+        {awaitingSca ? (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.75rem',
+            padding: '0.75rem 1rem', backgroundColor: '#fefce8',
+            border: '1px solid #fef08a', borderRadius: '8px',
+            color: '#92400e', fontSize: '13px', fontWeight: '500',
+          }}>
+            <span style={{ fontSize: '16px', display: 'inline-block', animation: 'statspin 1s linear infinite' }}>⟳</span>
+            Calculating — awaiting stats from SCA to calculate.
+          </div>
+        ) : !hasAnyData ? (
+          <div style={{ color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', textAlign: 'center', padding: '0.5rem 0' }}>
+            No aggregated stats available for this search.
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gap: '0.75rem',
+          }}>
+            <AggStatBox label="Total Runs"    value={totalRuns}    color="#0066cc" />
+            <AggStatBox label="Total Matches" value={totalMatches} color="#16a34a" />
+            <AggStatBox label="Total Innings" value={totalInnings} color="#1e293b" />
+            <AggStatBox label="Total Wickets" value={totalWickets} color="#7c3aed" />
+          </div>
+        )}
+
+        {!awaitingSca && agg?.leaguesContributed?.length > 0 && (
+          <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8' }}>
+            Data from: {agg.leaguesContributed.join(' · ')}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AggStatBox({ label, value, color }) {
+  return (
+    <div style={{
+      backgroundColor: '#ffffff',
+      border: '1px solid #d0dae8',
+      borderRadius: '8px',
+      padding: '0.875rem 0.5rem',
+      textAlign: 'center',
+    }}>
+      <div style={{ fontSize: '22px', fontWeight: '800', color }}>
+        {value}
+      </div>
+      <div style={{
+        fontSize: '9px', color: '#64748b', fontWeight: '600',
+        marginTop: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.06em',
+      }}>
+        {label}
+      </div>
     </div>
   );
 }
