@@ -235,11 +235,7 @@ function AllLeaguesPanel({ results }) {
 export function AggregatedResults({ searchResults }) {
   const { query, results, totalFound, meta } = searchResults;
 
-  // Auto-expand the first live platform that has results
-  const firstLiveWithResults = Object.keys(results).find(
-    (k) => !results[k].disabled && !results[k].noResults && results[k].count > 0
-  );
-  const [expandedPlatform, setExpandedPlatform] = useState(firstLiveWithResults || null);
+  const [expandedPlatform, setExpandedPlatform] = useState(null);
 
   if (!results || Object.keys(results).length === 0) return null;
 
