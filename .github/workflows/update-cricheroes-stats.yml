@@ -1,4 +1,4 @@
-name: Update SGIA Stats
+name: Update CricHeroes Stats
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run (parse and validate but do not commit changes)"
+        description: "Dry run — parse and validate but do not commit"
         required: false
         default: "false"
         type: choice
@@ -16,22 +16,22 @@ on:
           - "true"
 
 permissions:
-  contents: write   # required to commit and push sgiaStats.json back to main
+  contents: write   # required to push sgiaStats.json and bplStats.json back to main
 
 jobs:
-  update-sgia-stats:
-    name: Download & patch sgiaStats.json
+  update-stats:
+    name: Download & patch SGIA + BPL stats
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       # ── Checkout ───────────────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Use the built-in GITHUB_TOKEN so the job can push back to main.
-          # If main has branch protection requiring PR reviews, replace this
-          # with a PAT stored in a secret (e.g. secrets.DEPLOY_PAT).
+          # GITHUB_TOKEN is sufficient unless main has required PR reviews.
+          # If pushes are blocked, store a PAT as secrets.DEPLOY_PAT and use:
+          #   token: ${{ secrets.DEPLOY_PAT }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # ── Node.js ────────────────────────────────────────────────────────────
@@ -57,27 +57,34 @@ jobs:
         run: npx playwright install chromium
 
       # ── Run updater ────────────────────────────────────────────────────────
-      - name: Run SGIA stats updater
+      - name: Run CricHeroes stats updater
         working-directory: scripts
-        run: node update-sgia-stats.js
+        run: node update-cricheroes-stats.js
         env:
-          # Expose dry-run flag for potential future use in the script
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
 
       # ── Detect changes ─────────────────────────────────────────────────────
-      - name: Check if sgiaStats.json changed
+      - name: Check for JSON changes
         id: check_changes
         run: |
-          if git diff --quiet cricsearch-sg/src/data/sgiaStats.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No changes detected in sgiaStats.json."
+          CHANGED_FILES=""
+          for f in cricsearch-sg/src/data/sgiaStats.json cricsearch-sg/src/data/bplStats.json; do
+            if ! git diff --quiet "$f"; then
+              CHANGED_FILES="$CHANGED_FILES $f"
+              echo "Changed: $f"
+              git diff --stat "$f"
+            fi
+          done
+
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "changed=true"  >> "$GITHUB_OUTPUT"
+            echo "files=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
           else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Changes detected in sgiaStats.json."
-            git diff --stat cricsearch-sg/src/data/sgiaStats.json
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes detected in any stats JSON."
           fi
 
-      # ── Commit & push (only when data changed and not a dry run) ──────────
+      # ── Commit & push ──────────────────────────────────────────────────────
       - name: Commit and push updated stats
         if: >
           steps.check_changes.outputs.changed == 'true' &&
@@ -85,26 +92,29 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add cricsearch-sg/src/data/sgiaStats.json
-          git commit -m "chore: update SGIA stats from CricHeroes"
+          git add cricsearch-sg/src/data/sgiaStats.json cricsearch-sg/src/data/bplStats.json
+          git commit -m "chore: update CricHeroes stats from leaderboards"
           git push
 
-      # ── Summary ────────────────────────────────────────────────────────────
+      # ── Job summary ────────────────────────────────────────────────────────
       - name: Job summary
         if: always()
         run: |
           if [ "${{ steps.check_changes.outputs.changed }}" = "true" ]; then
-            echo "### ✅ sgiaStats.json updated" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ✅ Stats updated" >> "$GITHUB_STEP_SUMMARY"
+            echo "Changed files:${{ steps.check_changes.outputs.files }}" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "### ℹ️ No changes — sgiaStats.json already up to date" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ℹ️ No changes — stats already up to date" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      # ── Upload debug screenshots on failure ────────────────────────────────
-      - name: Upload debug artifacts on failure
+      # ── Debug artifacts on failure ─────────────────────────────────────────
+      - name: Upload debug screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: sgia-debug-screenshots
-          path: tmp/sgia/*.png
+          name: cricheroes-debug-screenshots
+          path: |
+            tmp/sgia/*.png
+            tmp/bpl/*.png
           if-no-files-found: ignore
           retention-days: 7
