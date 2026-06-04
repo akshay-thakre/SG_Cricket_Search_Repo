@@ -160,6 +160,11 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
                 </span>
               )}
             </div>
+            {platformName === 'SCA' && (
+              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                live + static corporate · cognizant
+              </div>
+            )}
             {error && <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '2px' }}>Error: {error}</div>}
           </div>
         </div>

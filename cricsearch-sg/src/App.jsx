@@ -83,7 +83,7 @@ export default function CricSearchApp() {
                 backgroundColor: '#e8f1ff', padding: '0.5rem 1rem', borderRadius: '6px',
                 fontSize: '12px', fontWeight: '600', color: '#0066cc', border: '1px solid #d0dae8',
               }}>
-                🇸🇬 SG Only
+                🇸🇬 Only
               </div>
             </div>
           </div>
@@ -150,7 +150,9 @@ export default function CricSearchApp() {
         padding: '1.5rem', marginTop: '3rem', fontSize: '12px', color: '#64748b', textAlign: 'center',
       }}>
         <div>CricSearch SG • Singapore Cricket Search • Live data from SCA</div>
-        <div style={{ marginTop: '0.25rem', fontSize: '11px' }}>YPL Batting Stats • Stumps, Last Man Stands — coming soon</div>
+        <div style={{ marginTop: '0.5rem', fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
+          Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
+        </div>
       </div>
     </div>
   );
