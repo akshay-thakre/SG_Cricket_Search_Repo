@@ -1278,10 +1278,11 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
 
   const agg = awaitingSca ? null : calculatePerformanceAcrossAllLeagues(results, scaLiveStatsArray);
 
-  const totalRuns    = agg?.totalRuns    ?? 0;
-  const totalMatches = agg?.totalMatches ?? 0;
-  const totalInnings = agg?.totalInnings ?? 0;
-  const totalWickets = agg?.totalWickets ?? 0;
+  const totalRuns       = agg?.totalRuns    ?? 0;
+  const totalMatches    = agg?.totalMatches ?? 0;
+  const totalInnings    = agg?.totalInnings ?? 0;
+  const totalWickets    = agg?.totalWickets ?? 0;
+  const ambiguousLeagues = agg?.ambiguousLeagues ?? [];
 
   const hasAnyData = totalRuns > 0 || totalMatches > 0 || totalInnings > 0 || totalWickets > 0;
 
@@ -1348,6 +1349,27 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
         {!awaitingSca && agg?.leaguesContributed?.length > 0 && (
           <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8' }}>
             Leagues contributing: {agg.leaguesContributed.join(' · ')}
+          </div>
+        )}
+
+        {!awaitingSca && ambiguousLeagues.length > 0 && (
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.6rem 0.875rem',
+            backgroundColor: '#fff7ed',
+            border: '1px solid #fed7aa',
+            borderRadius: '6px',
+            fontSize: '12px',
+            color: '#92400e',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.4rem',
+          }}>
+            <span style={{ flexShrink: 0 }}>⚠️</span>
+            <span>
+              <strong>{ambiguousLeagues.join(', ')}</strong> not included — multiple players match.
+              Refine your search for accurate aggregation.
+            </span>
           </div>
         )}
       </div>
