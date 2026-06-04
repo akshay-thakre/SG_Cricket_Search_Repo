@@ -116,7 +116,7 @@ export async function fetchAnyPlayerStats(player) {
 }
 
 /**
- * Multi-platform search — SCA (live) + Sportygo (live when SPORTYGO_CLUB_ID is set).
+ * Multi-platform search — SCA (live) + YPL (static client-side).
  * Splits multi-word queries into firstName + lastName for better CricClubs matching.
  */
 export async function searchAcrossPlatforms(query, signal) {
@@ -125,12 +125,6 @@ export async function searchAcrossPlatforms(query, signal) {
       platformName: 'CricClubs (SCA)',
       count: 0, players: [],
       icon: { emoji: '🏏', color: '#1e40af', code: 'CC' },
-      noResults: true, loading: false, error: null,
-    },
-    'Sportygo': {
-      platformName: 'Sportygo',
-      count: 0, players: [],
-      icon: { emoji: '🏟️', color: '#16a34a', code: 'SY' },
       noResults: true, loading: false, error: null,
     },
     'Stumps': {
@@ -147,8 +141,8 @@ export async function searchAcrossPlatforms(query, signal) {
       noResults: true, loading: false, error: null,
       disabled: true, disabledReason: 'Coming soon',
     },
-    'YPL Elite': {
-      platformName: 'YPL Elite — Assasins CC',
+    'YPL': {
+      platformName: 'YPL',
       count: 0, players: [],
       icon: { emoji: '🏆', color: '#b45309', code: 'YPL' },
       noResults: true, loading: false, error: null,
@@ -162,9 +156,6 @@ export async function searchAcrossPlatforms(query, signal) {
   const scaParams = parts.length >= 2
     ? { firstName: parts[0], lastName: parts.slice(1).join(' ') }
     : { firstName: query };
-
-  // Sportygo has a single "Name" field mapped to firstName — send full query
-  const sportygoParams = { firstName: query.trim() };
 
   // ── SCA — LIVE ──────────────────────────────────────────────────
   try {
@@ -199,45 +190,11 @@ export async function searchAcrossPlatforms(query, signal) {
     platforms['CricClubs (SCA)'].noResults = true;
   }
 
-  // ── Sportygo — LIVE ─────────────────────────────────────────────
-  try {
-    const sgResult = await searchSportygoPlayers(sportygoParams, signal);
-    if (sgResult.players && sgResult.players.length > 0) {
-      const seen = new Set();
-      const uniquePlayers = sgResult.players.filter((p) => {
-        if (!p.id || seen.has(p.id)) return false;
-        seen.add(p.id);
-        return true;
-      });
-
-      platforms['Sportygo'] = {
-        ...platforms['Sportygo'],
-        count: uniquePlayers.length,
-        players: uniquePlayers.map((p) => ({
-          id: p.id,
-          name: p.name,
-          team: p.teamName || 'Unknown',
-          role: p.playerRole || 'Unknown',
-          profileUrl: p.profileUrl,
-          verified: p.verified,
-          source: 'sportygo',
-          clubId: p.clubId,
-        })),
-        noResults: false,
-      };
-      totalFound += uniquePlayers.length;
-    }
-  } catch (err) {
-    if (err.name === 'AbortError') throw err;
-    platforms['Sportygo'].error = err.message;
-    platforms['Sportygo'].noResults = true;
-  }
-
-  // ── YPL Elite — STATIC (client-side, no network call) ───────────────────
+  // ── YPL — STATIC (client-side, no network call) ─────────────────
   const yplMatches = searchAssasinsStats(query);
   if (yplMatches.length > 0) {
-    platforms['YPL Elite'] = {
-      ...platforms['YPL Elite'],
+    platforms['YPL'] = {
+      ...platforms['YPL'],
       count: yplMatches.length,
       players: yplMatches,
       noResults: false,
@@ -251,8 +208,8 @@ export async function searchAcrossPlatforms(query, signal) {
     totalFound,
     platforms: Object.keys(platforms),
     meta: {
-      live:     ['CricClubs (SCA)', 'Sportygo'],
-      static:   ['YPL Elite'],
+      live:     ['CricClubs (SCA)'],
+      static:   ['YPL'],
       disabled: ['Stumps', 'Last Man Stands'],
     },
   };
