@@ -78,8 +78,8 @@ function AllLeaguesPanel({ results }) {
   // Static aggregation (YPL, SGIA, BPL, SCA Corp) — computed once
   const [agg, setAgg] = useState(() => aggregateStaticPlayerStats(results));
   const [liveStatsMerged, setLiveStatsMerged] = useState(false);
-  const [battingOpen, setBattingOpen] = useState(false);
-  const [bowlingOpen, setBowlingOpen] = useState(false);
+  const [battingOpen, setBattingOpen] = useState(true);
+  const [bowlingOpen, setBowlingOpen] = useState(true);
 
   // Merge live SCA stats when they become available
   const mergeLive = useCallback((liveStats) => {
@@ -277,7 +277,6 @@ export function AggregatedResults({ searchResults }) {
       </div>
 
       <div style={{ display: 'grid', gap: '1.5rem' }}>
-        <AllLeaguesPanel results={results} />
         {Object.entries(results)
           .filter(([, p]) => !p.noResults || p.error)
           .map(([platformKey, platformData]) => (
@@ -290,6 +289,7 @@ export function AggregatedResults({ searchResults }) {
               }
             />
           ))}
+        <AllLeaguesPanel results={results} />
       </div>
     </div>
   );
