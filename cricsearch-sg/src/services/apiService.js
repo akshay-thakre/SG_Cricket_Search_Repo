@@ -1,6 +1,7 @@
 import { searchAssasinsStats } from '../utils/yplStaticSearch';
 import { searchSGIAStats } from '../utils/sgiaStaticSearch';
 import { searchSCACorporateStats } from '../utils/scaCorporateSearch';
+import { searchBPLStats } from '../utils/bplStaticSearch';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -141,6 +142,12 @@ export async function searchAcrossPlatforms(query, signal) {
       icon: { emoji: '🇸🇬', color: '#dc2626', code: 'SIA' },
       noResults: true, loading: false, error: null,
     },
+    'BPL': {
+      platformName: 'BPL',
+      count: 0, players: [],
+      icon: { emoji: '🏟️', color: '#7c3aed', code: 'BPL' },
+      noResults: true, loading: false, error: null,
+    },
   };
 
   let totalFound = 0;
@@ -216,6 +223,18 @@ export async function searchAcrossPlatforms(query, signal) {
     totalFound += sgiaMatches.length;
   }
 
+  // ── BPL — STATIC (client-side, no network call) ──────────────────
+  const bplMatches = searchBPLStats(query);
+  if (bplMatches.length > 0) {
+    platforms['BPL'] = {
+      ...platforms['BPL'],
+      count: bplMatches.length,
+      players: bplMatches,
+      noResults: false,
+    };
+    totalFound += bplMatches.length;
+  }
+
   return {
     query,
     results: platforms,
@@ -223,7 +242,7 @@ export async function searchAcrossPlatforms(query, signal) {
     platforms: Object.keys(platforms),
     meta: {
       live:   ['SCA'],
-      static: ['YPL', 'SG IA'],
+      static: ['YPL', 'SG IA', 'BPL'],
     },
   };
 }

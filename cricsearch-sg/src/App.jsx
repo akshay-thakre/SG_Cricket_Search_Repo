@@ -59,7 +59,7 @@ export default function CricSearchApp() {
         boxShadow: '0 2px 8px rgba(6, 28, 84, 0.06)',
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="app-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#0066cc' }}>
                 🏏 CricSearch SG
@@ -68,7 +68,7 @@ export default function CricSearchApp() {
                 Singapore Cricket Player Search — Live Data
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div className="app-header-badges" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                 backgroundColor: backendStatus === 'online' ? '#f0fdf4' : backendStatus === 'offline' ? '#fef2f2' : '#fefce8',
@@ -92,7 +92,7 @@ export default function CricSearchApp() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1.5rem 2rem' }}>
+      <div className="app-main-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1.5rem 2rem' }}>
 
         {/* Backend Offline Warning */}
         {backendStatus === 'offline' && (
