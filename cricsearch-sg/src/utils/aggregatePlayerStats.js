@@ -242,6 +242,59 @@ export function aggregateStaticPlayerStats(results) {
 }
 
 /**
+ * Full aggregation across all leagues.
+ *
+ * staticResults  — searchResults.results keyed by platform name
+ * scaLiveStats   — array of normalised SCA live player stats objects
+ *
+ * Returns { batting, bowling, leaguesContributed }
+ */
+export function aggregateAllStats(staticResults, scaLiveStats = []) {
+  const batAcc = emptyBat();
+  const bwlAcc = emptyBwl();
+  const leaguesContributed = [];
+
+  const ypl = staticResults?.['YPL'];
+  if (ypl && !ypl.noResults && ypl.players?.length > 0) {
+    ypl.players.forEach((p) => extractFromYPL(p, batAcc, bwlAcc));
+    leaguesContributed.push('YPL');
+  }
+
+  const bpl = staticResults?.['BPL'];
+  if (bpl && !bpl.noResults && bpl.players?.length > 0) {
+    bpl.players.forEach((p) => extractFromBPL(p, batAcc, bwlAcc));
+    leaguesContributed.push('BPL');
+  }
+
+  const sgia = staticResults?.['SG IA'];
+  if (sgia && !sgia.noResults && sgia.players?.length > 0) {
+    sgia.players.forEach((p) => extractFromSGIA(p, batAcc, bwlAcc));
+    leaguesContributed.push('SG IA');
+  }
+
+  const sca = staticResults?.['SCA'];
+  if (sca && !sca.noResults && sca.players?.length > 0) {
+    sca.players
+      .filter((p) => p.source === 'sca-corporate')
+      .forEach((p) => extractFromSCACorp(p, batAcc, bwlAcc));
+    if (sca.players.some((p) => p.source === 'sca-corporate')) {
+      leaguesContributed.push('SCA Corp');
+    }
+  }
+
+  if (scaLiveStats.length > 0) {
+    scaLiveStats.forEach((stats) => extractFromSCALive(stats, batAcc, bwlAcc));
+    leaguesContributed.push('SCA');
+  }
+
+  return {
+    batting: finaliseBat(batAcc),
+    bowling: finaliseBwl(bwlAcc),
+    leaguesContributed,
+  };
+}
+
+/**
  * Merge live SCA stats (fetched asynchronously in the card) into an existing
  * aggregated result so the panel can update once live data arrives.
  */
