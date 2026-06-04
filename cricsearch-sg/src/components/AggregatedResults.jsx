@@ -841,7 +841,7 @@ function SGIAPlayerCard({ player, isLast }) {
         borderTop: '1px solid #fecaca',
         fontSize: '11px', color: '#dc2626',
       }}>
-        Singapore Indian Association · Season 2025 · Static Data (updated ~15 days)
+        Singapore Indian Association · Season 2025 · Updated daily at 6:00 AM SGT
       </div>
     </div>
   );
@@ -880,7 +880,7 @@ function SGIATournamentEntry({ entry, isLast, d }) {
         {status === 'on-going' && (
           <span style={{
             fontSize: '10px', color: '#64748b', fontStyle: 'italic', marginLeft: '0.25rem',
-          }}>Stats updated every 15 days. Last update: 4th June.</span>
+          }}>Updated daily at 6:00 AM SGT</span>
         )}
       </div>
 
@@ -987,6 +987,7 @@ function BPLPlayerCard({ player, isLast }) {
             fontSize: '10px', fontWeight: '700',
           }}>BPL 2025</span>
           <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {lastUpdated}</span>
+          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>Updated daily at 6:00 AM SGT</span>
         </div>
       </div>
 
