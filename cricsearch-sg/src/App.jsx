@@ -156,7 +156,9 @@ export default function CricSearchApp() {
           Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
         </div>
         <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8', maxWidth: '700px', margin: '0.75rem auto 0', lineHeight: '1.7' }}>
-          This platform is designed to leverage AI-driven insights to support continuous learning, adaptation, and informed decision-making. By standardizing player statistics and reducing subjective debates, it promotes fairness, transparency, and accountability while ensuring data usage aligns with ethical and responsible practices. The goal is to create a trusted environment where information is reliable, accessible, and used constructively. Beyond analytics, the platform aims to strengthen team cohesion, build mutual trust, and support both the skipper and the management of Changi Risers in making rational, data-backed decisions. By encouraging healthy competition and a performance-driven mindset, it contributes to individual growth and overall team success. Together, these principles empower the Risers to perform at their best and achieve more consistent victories.
+          This platform uses AI-driven insights to standardize player stats, reduce bias, and enable fair, transparent decision-making.
+          It supports both the skipper and Changi Risers management with reliable, data-backed insights.
+          By fostering trust, healthy competition, and a performance mindset, it helps the Risers achieve consistent success.
         </div>
       </div>
     </div>
