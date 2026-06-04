@@ -128,20 +128,6 @@ export async function searchAcrossPlatforms(query, signal) {
       icon: { emoji: '🏏', color: '#1e40af', code: 'CC' },
       noResults: true, loading: false, error: null,
     },
-    'Stumps': {
-      platformName: 'Stumps',
-      count: 0, players: [],
-      icon: { emoji: '🏑', color: '#2563eb', code: 'ST' },
-      noResults: true, loading: false, error: null,
-      disabled: true, disabledReason: 'Coming soon',
-    },
-    'Last Man Stands': {
-      platformName: 'Last Man Stands',
-      count: 0, players: [],
-      icon: { emoji: '⚡', color: '#f59e0b', code: 'LMS' },
-      noResults: true, loading: false, error: null,
-      disabled: true, disabledReason: 'Coming soon',
-    },
     'YPL': {
       platformName: 'YPL',
       count: 0, players: [],
@@ -227,9 +213,8 @@ export async function searchAcrossPlatforms(query, signal) {
     totalFound,
     platforms: Object.keys(platforms),
     meta: {
-      live:     ['CricClubs (SCA)'],
-      static:   ['YPL', 'SG IA'],
-      disabled: ['Stumps', 'Last Man Stands'],
+      live:   ['CricClubs (SCA)'],
+      static: ['YPL', 'SG IA'],
     },
   };
 }
