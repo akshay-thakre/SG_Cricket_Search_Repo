@@ -166,6 +166,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           <PlatformBadge code="LMS" label="Last Man Stands" />
           <PlatformBadge code="ST" label="Stumps" />
           <PlatformBadge code="YPL" label="YPL" />
+          <PlatformBadge code="SIA" label="SG IA" />
         </div>
       </div>
     </div>
