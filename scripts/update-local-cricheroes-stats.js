@@ -166,13 +166,36 @@ async function downloadTabXls(browser, url, tabLabel, savePath, debugDir) {
     locale: 'en-US',
     timezoneId: 'Asia/Singapore',
   });
+
+  // Remove automation markers so Cloudflare bot check passes.
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    window.chrome = { runtime: {}, loadTimes: () => {}, csi: () => {}, app: {} };
+    Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
+    Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+  });
+
   const page = await context.newPage();
 
   try {
     await page.goto(url, { waitUntil: 'networkidle', timeout: 60_000 })
       .catch(() => log(`  [${tabLabel}] networkidle timed out – continuing with partial load`));
 
-    await page.waitForTimeout(3000);
+    // Wait for Cloudflare "Just a moment" bot check to pass (up to 30 s).
+    for (let i = 0; i < 15; i++) {
+      const title = await page.title().catch(() => '');
+      if (!title.toLowerCase().includes('just a moment')) break;
+      log(`  [${tabLabel}] Cloudflare verification in progress... (${i + 1}/15)`);
+      await page.waitForTimeout(2000);
+    }
+    const postCfTitle = await page.title().catch(() => '');
+    if (postCfTitle.toLowerCase().includes('just a moment')) {
+      await page.screenshot({ path: path.join(debugDir, 'error.png') });
+      throw new Error(
+        'Cloudflare bot check did not pass after 30 s. ' +
+        'Try opening cricheroes.com in your regular Chrome browser first, then re-run.'
+      );
+    }
 
     const currentUrl = page.url();
     if (/login|signin|captcha/i.test(currentUrl)) {
@@ -728,7 +751,10 @@ async function main() {
   log('A browser window will open. Please do not close it until the script finishes.');
   log('');
 
-  const browser = await chromium.launch({ headless: false });
+  const browser = await chromium.launch({
+    headless: false,
+    args: ['--disable-blink-features=AutomationControlled'],
+  });
   const results = [];
 
   for (const config of TOURNAMENTS) {
