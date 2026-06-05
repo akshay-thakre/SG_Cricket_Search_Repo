@@ -241,6 +241,194 @@ export function aggregateStaticPlayerStats(results) {
   };
 }
 
+// ── calculatePerformanceAcrossAllLeagues ──────────────────────────────────────
+//
+// Purpose: produce the four headline totals shown in the "Performance across
+// all leagues" panel.  Each league's player records are flattened into a list
+// of immutable "contribution" objects that are deduplicated before summing, so
+// the same competition record can never inflate the totals.
+//
+// Field reading uses the exact field names from each source's data shape rather
+// than the generic alias chains in addBat/addBwl, which can silently fall back
+// to unintended fields.
+
+function safeAdd(v) {
+  // Coerce a value to a non-negative integer (0 for missing/null/NaN).
+  if (v === null || v === undefined || v === '' || v === '-' || v === '--') return 0;
+  const num = Number(v);
+  return Number.isNaN(num) || num < 0 ? 0 : Math.floor(num);
+}
+
+/**
+ * Aggregate headline stats across all four leagues.
+ *
+ * @param {object} platforms      searchResults.results (keyed by platform)
+ * @param {Array}  scaLiveStats   Normalised SCA live player stats (from fetch)
+ * @returns {{ totalRuns, totalMatches, totalInnings, totalWickets, leaguesContributed }}
+ */
+export function calculatePerformanceAcrossAllLeagues(platforms, scaLiveStats = []) {
+  const contributions = [];
+  const seen = new Set();
+  const ambiguousLeagues = [];
+
+  function push(league, dedupeKey, matches, innings, runs, wickets) {
+    const key = `${league}||${dedupeKey}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    contributions.push({
+      league,
+      matches: safeAdd(matches),
+      innings: safeAdd(innings),
+      runs:    safeAdd(runs),
+      wickets: safeAdd(wickets),
+    });
+  }
+
+  // ── YPL — inlineStats.batting / .bowling ────────────────────────────────────
+  // Field names: batting.{matches, innings, runs} · bowling.{wickets}
+  const ypl = platforms?.['YPL'];
+  if (ypl && !ypl.noResults && ypl.players?.length > 0) {
+    if (ypl.players.length > 1) {
+      ambiguousLeagues.push('YPL');
+    } else {
+      ypl.players.forEach((p) => {
+        const b   = p.inlineStats?.batting;
+        const bwl = p.inlineStats?.bowling;
+        push('YPL', `${p.name}||ypl-static`,
+          b?.matches, b?.innings, b?.runs, bwl?.wickets);
+      });
+    }
+  }
+
+  // ── BPL — player.batting / .bowling ─────────────────────────────────────────
+  // Field names: batting.{matches, innings, runs} · bowling.{wickets}
+  const bpl = platforms?.['BPL'];
+  if (bpl && !bpl.noResults && bpl.players?.length > 0) {
+    if (bpl.players.length > 1) {
+      ambiguousLeagues.push('BPL');
+    } else {
+      bpl.players.forEach((p) => {
+        push('BPL', `${p.name}||bpl-static`,
+          p.batting?.matches, p.batting?.innings, p.batting?.runs, p.bowling?.wickets);
+      });
+    }
+  }
+
+  // ── SG IA — player.entries[].batting / .bowling ──────────────────────────────
+  // Field names: batting.{mat, inns, runs} · bowling.{wickets}
+  // One record per tournament entry; multiple entries under 1 player = same person.
+  const sgia = platforms?.['SG IA'];
+  if (sgia && !sgia.noResults && sgia.players?.length > 0) {
+    if (sgia.players.length > 1) {
+      ambiguousLeagues.push('SG IA');
+    } else {
+      sgia.players.forEach((player) => {
+        (player.entries || []).forEach((entry) => {
+          const b   = entry.batting;
+          const bwl = entry.bowling;
+          const entryKey = `${player.name}||${entry.tournamentName || ''}||${entry.year || ''}||sgia-static`;
+          push('SG IA', entryKey,
+            b?.mat, b?.inns, b?.runs, bwl?.wickets);
+        });
+      });
+    }
+  }
+
+  // ── SCA: Corporate + Live handled together ───────────────────────────────────
+  // If EITHER source returns multiple distinct players the whole SCA league is
+  // ambiguous and none of its data contributes to the totals.
+  const sca = platforms?.['SCA'];
+  const scaCorpPlayers = sca?.players?.filter((p) => p.source === 'sca-corporate') || [];
+  const scaIsAmbiguous = scaCorpPlayers.length > 1 || scaLiveStats.length > 1;
+
+  if (scaIsAmbiguous) {
+    ambiguousLeagues.push('SCA');
+  } else {
+    // SCA Corporate (0 or 1 player)
+    if (scaCorpPlayers.length === 1) {
+      (scaCorpPlayers[0].seasons || []).forEach((season) => {
+        const batInns = safeAdd(season.batting?.inns);
+        const bwlInns = safeAdd(season.bowling?.inns);
+        if (batInns === 0 && bwlInns === 0) return; // squad-registration only, skip
+        const seasonKey = `${scaCorpPlayers[0].name}||${season.year || ''}||${season.competition || ''}||sca-corporate`;
+        push('SCA', seasonKey,
+          season.batting?.mat, season.batting?.inns,
+          season.batting?.runs, season.bowling?.wkts);
+      });
+    }
+
+    // SCA Live (0 or 1 player after ambiguity check above)
+    if (scaLiveStats.length === 1) {
+      const stats = scaLiveStats[0];
+      const name  = stats?.playerName || '';
+      push('SCA', `${name}||sca-live`,
+        stats?.batting?.matches, stats?.batting?.innings,
+        stats?.batting?.runs,    stats?.bowling?.wickets);
+    }
+  }
+
+  const totalRuns    = contributions.reduce((s, r) => s + r.runs,    0);
+  const totalMatches = contributions.reduce((s, r) => s + r.matches, 0);
+  const totalInnings = contributions.reduce((s, r) => s + r.innings, 0);
+  const totalWickets = contributions.reduce((s, r) => s + r.wickets, 0);
+  const leaguesContributed = [...new Set(contributions.map((r) => r.league))];
+
+  return { totalRuns, totalMatches, totalInnings, totalWickets, leaguesContributed, ambiguousLeagues };
+}
+
+/**
+ * Full aggregation across all leagues.
+ *
+ * staticResults  — searchResults.results keyed by platform name
+ * scaLiveStats   — array of normalised SCA live player stats objects
+ *
+ * Returns { batting, bowling, leaguesContributed }
+ */
+export function aggregateAllStats(staticResults, scaLiveStats = []) {
+  const batAcc = emptyBat();
+  const bwlAcc = emptyBwl();
+  const leaguesContributed = [];
+
+  const ypl = staticResults?.['YPL'];
+  if (ypl && !ypl.noResults && ypl.players?.length > 0) {
+    ypl.players.forEach((p) => extractFromYPL(p, batAcc, bwlAcc));
+    leaguesContributed.push('YPL');
+  }
+
+  const bpl = staticResults?.['BPL'];
+  if (bpl && !bpl.noResults && bpl.players?.length > 0) {
+    bpl.players.forEach((p) => extractFromBPL(p, batAcc, bwlAcc));
+    leaguesContributed.push('BPL');
+  }
+
+  const sgia = staticResults?.['SG IA'];
+  if (sgia && !sgia.noResults && sgia.players?.length > 0) {
+    sgia.players.forEach((p) => extractFromSGIA(p, batAcc, bwlAcc));
+    leaguesContributed.push('SG IA');
+  }
+
+  const sca = staticResults?.['SCA'];
+  if (sca && !sca.noResults && sca.players?.length > 0) {
+    sca.players
+      .filter((p) => p.source === 'sca-corporate')
+      .forEach((p) => extractFromSCACorp(p, batAcc, bwlAcc));
+    if (sca.players.some((p) => p.source === 'sca-corporate')) {
+      leaguesContributed.push('SCA Corp');
+    }
+  }
+
+  if (scaLiveStats.length > 0) {
+    scaLiveStats.forEach((stats) => extractFromSCALive(stats, batAcc, bwlAcc));
+    leaguesContributed.push('SCA');
+  }
+
+  return {
+    batting: finaliseBat(batAcc),
+    bowling: finaliseBwl(bwlAcc),
+    leaguesContributed,
+  };
+}
+
 /**
  * Merge live SCA stats (fetched asynchronously in the card) into an existing
  * aggregated result so the panel can update once live data arrives.
