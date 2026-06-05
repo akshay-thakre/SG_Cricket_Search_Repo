@@ -61,7 +61,7 @@ export default function CricSearchApp() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="app-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: '#0066cc', lineHeight: '1.3' }}>
+              <h1 className="app-header-title" style={{ margin: 0, fontWeight: '700', color: '#0066cc', lineHeight: '1.3' }}>
                 🏏 Changi Risers Cricket Search SG
               </h1>
               <div style={{ fontSize: '13px', color: '#64748b', marginTop: '0.25rem' }}>
@@ -145,17 +145,14 @@ export default function CricSearchApp() {
       </div>
 
       {/* Footer */}
-      <div style={{
-        backgroundColor: '#f5f8fc', borderTop: '1px solid #d0dae8',
-        padding: '2rem 1.5rem', marginTop: '3rem', textAlign: 'center',
-      }}>
-        <div style={{ fontSize: '12px', color: '#64748b' }}>
+      <div className="app-footer">
+        <div className="app-footer-line1">
           Changi Risers Cricket Search SG &bull; Singapore Cricket Search &bull; Live data from SCA
         </div>
-        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', maxWidth: '700px', margin: '0.75rem auto 0' }}>
+        <div className="app-footer-note" style={{ fontStyle: 'italic' }}>
           Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
         </div>
-        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8', maxWidth: '700px', margin: '0.75rem auto 0', lineHeight: '1.7' }}>
+        <div className="app-footer-note">
           This platform uses AI-driven insights to standardize player stats, reduce bias, and enable fair, transparent decision-making.
           It supports both the skipper and Changi Risers management with reliable, data-backed insights.
           By fostering trust, healthy competition, and a performance mindset, it helps the Risers achieve consistent success.
