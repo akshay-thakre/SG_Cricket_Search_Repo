@@ -93,6 +93,7 @@ function parseOvers(v) {
 
 // ── Excel file detection ──────────────────────────────────────────────────────
 
+// Column keys that are exclusive (or near-exclusive) to one tab type.
 const BOWLING_MARKERS = new Set([
   'econ', 'economy', 'er', 'eco',
   'wickets', 'wkts', 'wkt',
@@ -110,6 +111,9 @@ const BATTING_MARKERS = new Set([
   'ballsfaced', 'bf',
 ]);
 
+/**
+ * Returns 'batting', 'bowling', or null if it cannot be determined.
+ */
 function detectTabType(filePath) {
   const workbook = XLSX.readFile(filePath, { cellDates: false, raw: false });
   const sheet    = workbook.Sheets[workbook.SheetNames[0]];
@@ -354,8 +358,8 @@ function buildBPLBatting(row, teamId) {
 
 function buildBPLBowling(row, teamId) {
   const { overs, balls: ballsFromOvers } = parseOvers(row.overs);
-  const balls        = safeInt(row.balls) || ballsFromOvers;
-  const bestRaw      = String(row.best ?? '0').trim();
+  const balls       = safeInt(row.balls) || ballsFromOvers;
+  const bestRaw     = String(row.best ?? '0').trim();
   const best_wickets = bestRaw.includes('/')
     ? safeInt(bestRaw.split('/')[0])
     : safeInt(bestRaw);
@@ -532,8 +536,8 @@ function importTournament(config) {
   for (const f of files) {
     const type = detectTabType(f);
     log(`${tag}   ${path.basename(f)} → detected as: ${type ?? 'unknown'}`);
-    if (type === 'batting' && !batFile)  batFile  = f;
-    if (type === 'bowling' && !bowlFile) bowlFile = f;
+    if (type === 'batting' && !batFile)   batFile  = f;
+    if (type === 'bowling' && !bowlFile)  bowlFile = f;
   }
 
   if (!batFile)  throw new Error(`${tag} Could not identify a batting file in ${downloadDir}.`);
@@ -555,7 +559,7 @@ function importTournament(config) {
   const updated  = patch(existing, batRows, bowlRows);
 
   const jsonOut = JSON.stringify(updated, null, 2) + '\n';
-  JSON.parse(jsonOut);
+  JSON.parse(jsonOut); // validate before write
 
   const toCompare = (obj) => { const { lastUpdated: _, ...rest } = obj; return JSON.stringify(rest); };
   const changed   = toCompare(existing) !== toCompare(updated);
@@ -597,6 +601,7 @@ function main() {
   log('=== CricHeroes manual import starting ===');
   log('');
 
+  // Create download folders and drop a helper text file if first run.
   for (const t of TOURNAMENTS) {
     ensureDir(t.downloadDir);
     const hint = path.join(t.downloadDir, 'PUT_FILES_HERE.txt');
@@ -610,6 +615,7 @@ function main() {
     }
   }
 
+  // Check upfront that every folder has files before doing any work.
   const missing = TOURNAMENTS.filter((t) => findExcelFiles(t.downloadDir).length === 0);
   if (missing.length > 0) {
     log('ERROR: Missing Excel files. Please download them first:\n');
@@ -627,6 +633,7 @@ function main() {
     process.exit(1);
   }
 
+  // Import each tournament.
   const results = [];
   for (const config of TOURNAMENTS) {
     try {
@@ -638,6 +645,7 @@ function main() {
     }
   }
 
+  // Backup old JSON then write new JSON for successful results.
   const writtenFiles = [];
   for (const r of results) {
     if (r.success && r.changed) {
@@ -646,12 +654,13 @@ function main() {
 
       log(`Writing ${path.basename(r.jsonFile)}...`);
       fs.writeFileSync(r.jsonFile, r.jsonOut, 'utf-8');
-      JSON.parse(fs.readFileSync(r.jsonFile, 'utf-8'));
+      JSON.parse(fs.readFileSync(r.jsonFile, 'utf-8')); // verify
       log(`  OK: ${path.basename(r.jsonFile)} written and verified.`);
       writtenFiles.push(r.jsonFile);
     }
   }
 
+  // Move processed Excel files to done/ so they don't get re-imported accidentally.
   const doneDir = path.join(DOWNLOAD_BASE, 'done', nowStamp());
   for (const r of results) {
     if (r.success) {
@@ -665,6 +674,7 @@ function main() {
     }
   }
 
+  // Summary.
   log('');
   log('=== Summary ===');
   for (const r of results) {
