@@ -168,14 +168,23 @@ export function AggregatedResults({ searchResults }) {
 
 // ── Platform section ────────────────────────────────────────────────────────────────
 
+const PLATFORM_ACCENT = {
+  'YPL': '#b45309',
+  'BPL': '#7c3aed',
+  'SG IA': '#dc2626',
+  'SCA': '#0066cc',
+};
+
 function PlatformSection({ platformData, isExpanded, onToggle }) {
   const { platformName, count, players, noResults, icon, disabled, disabledReason, error } = platformData;
   const isLive = !disabled;
+  const accent = error ? '#dc2626' : (PLATFORM_ACCENT[platformName] || '#0066cc');
 
   return (
     <div style={{
       backgroundColor: '#f5f8fc',
       border: `1px solid ${error ? '#fecaca' : '#d0dae8'}`,
+      borderLeft: `4px solid ${accent}`,
       borderRadius: '12px',
       overflow: 'hidden',
       boxShadow: '0 2px 6px rgba(6, 28, 84, 0.08)',
@@ -183,13 +192,15 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
     }}>
       <button
         onClick={disabled ? undefined : onToggle}
+        className="platform-section-header-btn"
         style={{
-          width: '100%', padding: '1.5rem',
+          width: '100%', padding: '1.25rem 1.5rem',
           backgroundColor: error ? '#fef2f2' : '#f5f8fc',
           border: 'none',
           borderBottom: isExpanded ? '1px solid #d0dae8' : 'none',
           cursor: disabled ? 'default' : 'pointer',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          gap: '0.5rem',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -376,12 +387,10 @@ function PlayerCard({ player, platformName, isLast }) {
 
         {/* ── KEY STATS SUMMARY ROW (always shown when loaded) ── */}
         {!statsLoading && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '0.5rem',
-            marginBottom: (hasBatting || hasBowling) ? '1rem' : 0,
-          }}>
+          <div
+            className="stat-grid-4"
+            style={{ marginBottom: (hasBatting || hasBowling) ? '1rem' : 0 }}
+          >
             <StatBox
               label="Matches"
               value={hasBatting ? stats.batting.matches : hasBowling ? stats.bowling.matches : null}
@@ -494,7 +503,8 @@ function CompetitionsPanel({ competitions }) {
         onClick={() => setOpen(!open)}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '12px', color: '#0066cc', fontWeight: '600', padding: 0,
+          fontSize: '12px', color: '#0066cc', fontWeight: '600',
+          padding: '0.4rem 0', minHeight: '36px',
           display: 'flex', alignItems: 'center', gap: '0.4rem',
         }}
       >
@@ -539,14 +549,10 @@ function ExpandableSection({ label, accentColor, children }) {
     <div style={{ marginTop: '0.75rem' }}>
       <button
         onClick={() => setOpen(!open)}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 0.4rem 0',
-          fontSize: '11px', fontWeight: '700', color: accentColor,
-          textTransform: 'uppercase', letterSpacing: '0.08em',
-          display: 'flex', alignItems: 'center', gap: '0.35rem',
-        }}
+        className="expand-trigger"
+        style={{ fontSize: '12px', color: accentColor }}
       >
-        <span style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.15s' }}>▶</span>
+        <span style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.15s', flexShrink: 0 }}>▶</span>
         {label}
       </button>
       {open && <div style={{ marginTop: '0.25rem' }}>{children}</div>}
@@ -570,7 +576,7 @@ function StatBox({ label, value, highlight = false, color = '#0066cc', small = f
       <div style={{ fontSize: small ? '12px' : '15px', fontWeight: '700', color: highlight ? color : '#1e293b' }}>
         {displayValue}
       </div>
-      <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: '600', marginTop: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', marginTop: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {label}
       </div>
     </div>
@@ -621,7 +627,7 @@ function YPLPlayerCard({ player, isLast }) {
             <span style={{ color: '#b45309' }}>YPL Elite</span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        <div className="player-header-badges">
           {seasons.map((s) => (
             <span key={s} style={{
               backgroundColor: '#fef3c7', color: '#92400e',
@@ -641,10 +647,7 @@ function YPLPlayerCard({ player, isLast }) {
       <div style={{ padding: '1rem 1.25rem' }}>
 
         {/* Summary row */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '0.5rem', marginBottom: '0.75rem',
-        }}>
+        <div className="stat-grid-4" style={{ marginBottom: '0.75rem' }}>
           <StatBox label="Matches"  value={b?.matches}  highlight />
           <StatBox label="Runs"     value={b?.runs}     highlight />
           <StatBox label="Bat Avg"  value={d(b?.average, 2)} highlight />
@@ -761,9 +764,10 @@ function BattingRow({ label, value }) {
 }
 
 const expandBtnStyle = (color) => ({
-  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-  fontSize: '11px', fontWeight: '700', color, textTransform: 'uppercase',
-  letterSpacing: '0.07em', display: 'flex', alignItems: 'center', gap: '0.35rem',
+  background: 'none', border: 'none', cursor: 'pointer',
+  padding: '0.45rem 0', minHeight: '40px', width: '100%',
+  fontSize: '12px', fontWeight: '700', color, textTransform: 'uppercase',
+  letterSpacing: '0.07em', display: 'flex', alignItems: 'center', gap: '0.4rem',
 });
 
 const arrowStyle = {
@@ -871,7 +875,7 @@ function SGIATournamentEntry({ entry, isLast, d }) {
       </div>
 
       {/* Summary stat boxes */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.5rem' }}>
+      <div className="stat-grid-4" style={{ marginBottom: '0.5rem' }}>
         <StatBox label="Matches" value={hasBatting ? b.mat : hasBowling ? bwl.mat : null} highlight />
         <StatBox label="Runs" value={hasBatting ? b.runs : null} highlight />
         <StatBox label="Bat Avg" value={hasBatting ? d(b.avg, 2) : '--'} highlight />
@@ -966,7 +970,7 @@ function BPLPlayerCard({ player, isLast }) {
             {team}
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
+        <div className="player-header-badges" style={{ flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
           <span style={{
             backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
@@ -1103,7 +1107,7 @@ function SCACorpPlayerCard({ player, isLast }) {
             {team} · SCA Corporate League
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="player-header-badges">
           <span style={{
             backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
@@ -1275,7 +1279,8 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
   return (
     <div style={{
       backgroundColor: '#f5f8fc',
-      border: '2px solid #c7d5e8',
+      border: '1px solid #c7d5e8',
+      borderLeft: '4px solid #1d4ed8',
       borderRadius: '12px',
       overflow: 'hidden',
       boxShadow: '0 2px 8px rgba(6, 28, 84, 0.10)',
@@ -1320,11 +1325,7 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
             No aggregated stats available for this search.
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-            gap: '0.75rem',
-          }}>
+          <div className="agg-stat-grid">
             <AggStatBox label="Total Runs"    value={totalRuns}    color="#0066cc" />
             <AggStatBox label="Total Matches" value={totalMatches} color="#16a34a" />
             <AggStatBox label="Total Innings" value={totalInnings} color="#1e293b" />
@@ -1376,7 +1377,7 @@ function AggStatBox({ label, value, color }) {
         {value}
       </div>
       <div style={{
-        fontSize: '9px', color: '#64748b', fontWeight: '600',
+        fontSize: '10px', color: '#64748b', fontWeight: '600',
         marginTop: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.06em',
       }}>
         {label}
