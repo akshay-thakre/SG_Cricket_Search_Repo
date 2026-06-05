@@ -62,7 +62,6 @@ ehthumbs.db
 .npm/
 *.tmp
 *.temp
-tmp/
 
 # ===========================
 # Certificates & keys
