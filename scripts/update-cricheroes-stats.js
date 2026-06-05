@@ -203,10 +203,30 @@ async function downloadTabXls(browser, url, tabLabel, savePath, debugDir) {
     }
 
     // Wait for any known tab text – abbreviated or full-word.
-    await page.waitForSelector(
+    const tabBarFound = await page.waitForSelector(
       'text=/^(BAT|BOWL|Batting|Bowling|BATTING|BOWLING|FIELD|MVP)$/i',
       { timeout: 30_000 }
-    ).catch(() => log(`  [${tabLabel}] Tab bar wait timed out -- continuing anyway`));
+    ).then(() => true).catch(() => false);
+
+    if (!tabBarFound) {
+      // Dump page diagnostics to the log so we can diagnose bot detection / layout changes.
+      const diagUrl   = page.url();
+      const diagTitle = await page.title().catch(() => '(error)');
+      const diagBody  = await page.evaluate(() =>
+        (document.body?.innerText ?? document.body?.textContent ?? '').trim().slice(0, 600)
+      ).catch(() => '(error)');
+      const diagLinks = await page.evaluate(() =>
+        [...document.querySelectorAll('button,a,[role="tab"]')]
+          .map((el) => (el.innerText || el.textContent || '').trim())
+          .filter((t) => t)
+          .slice(0, 20)
+      ).catch(() => []);
+      log(`  [${tabLabel}] Tab bar not found. Diagnostics:`);
+      log(`  [${tabLabel}]   URL:    ${diagUrl}`);
+      log(`  [${tabLabel}]   Title:  ${diagTitle}`);
+      log(`  [${tabLabel}]   Body:   ${diagBody.replace(/\n/g, ' ')}`);
+      log(`  [${tabLabel}]   Clickable elements: ${JSON.stringify(diagLinks)}`);
+    }
 
     // Build click strategies for all known aliases of this tab label.
     const aliases = TAB_ALIASES[tabLabel] || [tabLabel];
