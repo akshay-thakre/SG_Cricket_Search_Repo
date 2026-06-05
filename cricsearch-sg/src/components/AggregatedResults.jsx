@@ -988,7 +988,7 @@ function BPLPlayerCard({ player, isLast }) {
               🏏 <strong>{batting.runs}</strong> runs
               {batting.average != null && <span style={{ color: '#64748b' }}> · avg {fmt(batting.average)}</span>}
               {batting.highest_score > 0 && <span style={{ color: '#64748b' }}> · HS {batting.highest_score}</span>}
-              <span style={{ color: '#64748b' }}> · {batting.matches}M</span>
+              {batting.matches > 0 && <span style={{ color: '#64748b' }}> · {batting.matches}M</span>}
               {batting.batting_hand && <span style={{ color: '#9ca3af' }}> · {batting.batting_hand}</span>}
             </div>
           )}
@@ -1023,7 +1023,8 @@ function BPLPlayerCard({ player, isLast }) {
                 <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BATTING</div>
                 <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
                   {[
-                    ['Mat', batting.matches], ['Inns', batting.innings], ['NO', batting.not_outs],
+                    ['Mat', batting.matches > 0 ? batting.matches : null],
+                    ['Inns', batting.innings], ['NO', batting.not_outs],
                     ['Runs', batting.runs], ['Balls', batting.balls_faced], ['Avg', fmt(batting.average)],
                     ['SR', fmt(batting.strike_rate)], ['HS', batting.highest_score],
                     ['50s', batting.fifties], ['100s', batting.hundreds],
@@ -1046,7 +1047,8 @@ function BPLPlayerCard({ player, isLast }) {
                 <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BOWLING</div>
                 <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
                   {[
-                    ['Mat', bowling.matches], ['Inns', bowling.innings], ['Overs', bowling.overs],
+                    ['Mat', bowling.matches > 0 ? bowling.matches : null],
+                    ['Inns', bowling.innings], ['Overs', bowling.overs],
                     ['Runs', bowling.runs_conceded], ['Wkts', bowling.wickets],
                     ['BB', bowling.best_wickets], ['Econ', fmt(bowling.economy)],
                     ['Ave', fmt(bowling.average)], ['SR', fmt(bowling.strike_rate)],
