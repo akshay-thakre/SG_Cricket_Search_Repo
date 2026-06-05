@@ -775,18 +775,7 @@ const arrowStyle = {
 // No API call — all data is bundled in player.entries[].
 
 function SGIAPlayerCard({ player, isLast }) {
-  const { name, team, lastUpdated, entries } = player;
-
-  const fmtDate = (iso) => {
-    try {
-      return new Date(iso).toLocaleString('en-SG', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
-      });
-    } catch {
-      return iso;
-    }
-  };
+  const { name, team, entries } = player;
 
   const d = (v, dec = 0) => (v === null || v === undefined ? '--' : dec > 0 ? Number(v).toFixed(dec) : String(v));
 
@@ -821,9 +810,6 @@ function SGIAPlayerCard({ player, isLast }) {
             backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
             padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '11px', fontWeight: '600',
           }}>🇸🇬 SIA</span>
-          <div style={{ marginTop: '0.4rem', fontSize: '10px', color: '#94a3b8' }}>
-            Updated: {fmtDate(lastUpdated)}
-          </div>
         </div>
       </div>
 
@@ -951,7 +937,7 @@ function fmt(val) {
 // ── BPL 2025 player card (static, no API fetch) ───────────────────────────────
 
 function BPLPlayerCard({ player, isLast }) {
-  const { name, team, batting, bowling, lastUpdated } = player;
+  const { name, team, batting, bowling } = player;
   const [expanded, setExpanded] = useState(false);
 
   const hasBatting = batting && batting.innings > 0;
@@ -986,7 +972,6 @@ function BPLPlayerCard({ player, isLast }) {
             padding: '0.2rem 0.6rem', borderRadius: '4px',
             fontSize: '10px', fontWeight: '700',
           }}>BPL 2025</span>
-          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {lastUpdated}</span>
           <span style={{ fontSize: '9px', color: '#c4b5fd' }}>Updated daily at 6:00 AM SGT</span>
         </div>
       </div>
