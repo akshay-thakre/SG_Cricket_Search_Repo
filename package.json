@@ -1,9 +1,0 @@
-{
-  "name": "sg-cricket-search-repo",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "update:local-cricheroes": "npm --prefix scripts install && npm --prefix scripts run update:local-cricheroes",
-    "import:cricheroes": "npm --prefix scripts install && npm --prefix scripts run import:cricheroes"
-  }
-}

@@ -62,15 +62,12 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           <span>Changi Risers Cricket Search SG</span>
         </div>
 
-        <div
-          className="search-subtitle"
-          style={{
-            fontSize: '15px',
-            color: '#cbd5e1',
-            marginBottom: '2.5rem',
-            lineHeight: '1.6'
-          }}
-        >
+        <div style={{
+          fontSize: '15px',
+          color: '#cbd5e1',
+          marginBottom: '2.5rem',
+          lineHeight: '1.6'
+        }}>
           Search cricket player stats across Singapore platforms — aggregated in one place
         </div>
 

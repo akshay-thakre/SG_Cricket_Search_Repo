@@ -40,81 +40,6 @@ body {
   }
 }
 
-/* ── Responsive stat grids ─────────────────────────────────────────────────── */
-
-/* 4-column summary stat grid — collapses to 2×2 on mobile */
-.stat-grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
-}
-
-/* 4-column aggregated performance grid — collapses to 2×2 on mobile */
-.agg-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-/* ── Expand / collapse trigger buttons ────────────────────────────────────── */
-/* 44px minimum tap target, proper active state */
-.expand-trigger {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem 0;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  width: 100%;
-  text-align: left;
-  transition: opacity 0.15s;
-}
-.expand-trigger:active {
-  opacity: 0.65;
-}
-
-/* App header title */
-.app-header-title {
-  font-size: 22px;
-}
-
-/* ── App footer ───────────────────────────────────────────────────────────── */
-.app-footer {
-  background-color: #f5f8fc;
-  border-top: 1px solid #d0dae8;
-  padding: 2rem 1.5rem;
-  margin-top: 3rem;
-  text-align: center;
-}
-
-.app-footer-line1 {
-  font-size: 12px;
-  color: #64748b;
-}
-
-.app-footer-note {
-  font-size: 11px;
-  color: #94a3b8;
-  max-width: 680px;
-  margin: 0.875rem auto 0;
-  line-height: 1.8;
-}
-
-/* ── Player header badges — right-side badge clusters ─────────────────────── */
-.player-header-badges {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: flex-start;
-  flex-shrink: 0;
-}
-
 /* ── Mobile responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   /* App header: stack title + badges vertically */
@@ -128,37 +53,25 @@ body {
     justify-content: flex-start !important;
     flex-wrap: wrap !important;
   }
-  /* Slightly smaller header title on mobile */
-  .app-header-title {
-    font-size: 18px !important;
-    line-height: 1.35 !important;
-  }
 
   /* Main content: tighter horizontal padding */
   .app-main-content {
-    padding: 0.875rem 0.75rem 2rem !important;
+    padding: 1rem 0.75rem 2rem !important;
   }
 
   /* Search hero: less vertical padding */
   .search-hero {
-    padding: 1.75rem 1rem !important;
+    padding: 2rem 1rem !important;
     border-radius: 12px !important;
-    margin-bottom: 1.25rem !important;
   }
 
   /* Search title: smaller font */
   .search-title {
-    font-size: 20px !important;
-    gap: 0.5rem !important;
+    font-size: 26px !important;
+    gap: 0.6rem !important;
   }
   .search-title span:first-child {
-    font-size: 26px !important;
-  }
-
-  /* Search subtitle: tighter margin */
-  .search-subtitle {
-    font-size: 13px !important;
-    margin-bottom: 1.75rem !important;
+    font-size: 32px !important;
   }
 
   /* Search form: input full-width, buttons below in a row */
@@ -176,42 +89,12 @@ body {
   /* Platform badge grid: 2 columns on narrow screens */
   .platform-badge-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
-    margin-top: 1.25rem !important;
+    gap: 0.75rem !important;
+    margin-top: 1.5rem !important;
   }
 
-  /* 4-col → 2×2 summary stat grids */
-  .stat-grid-4 {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* 4-col → 2×2 aggregated stats grid */
-  .agg-stat-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* Stats cells: 3 per row */
+  /* Stats cells: 3 per row instead of auto */
   .stats-cell-grid {
     grid-template-columns: repeat(3, 1fr) !important;
-  }
-
-  /* Player header badges: left-align on mobile so they flow under the name */
-  .player-header-badges {
-    justify-content: flex-start !important;
-  }
-
-  /* Platform section header: tighter padding */
-  .platform-section-header-btn {
-    padding: 1rem !important;
-  }
-
-  /* Footer: tighter spacing on mobile */
-  .app-footer {
-    padding: 1.5rem 1rem !important;
-    margin-top: 2rem !important;
-  }
-  .app-footer-note {
-    font-size: 11px !important;
-    line-height: 1.75 !important;
   }
 }
