@@ -22,13 +22,7 @@ You only need to do this once on your laptop.
 
 1. **Install Node.js** (version 18 or newer) from https://nodejs.org — choose the LTS version.
 
-2. **Install dependencies.** Open a terminal (Command Prompt or PowerShell), navigate to the `scripts` folder inside the repo, and run:
-   ```
-   npm install
-   npx playwright install chromium
-   ```
-
-3. **Make sure git is configured** with your GitHub credentials so pushes work without prompting for a password. If you are unsure, ask the team.
+2. **Make sure git is configured** with your GitHub credentials so pushes work without prompting for a password. If you are unsure, ask the team.
 
 ---
 
@@ -36,20 +30,26 @@ You only need to do this once on your laptop.
 
 1. Open **Command Prompt** or **PowerShell**.
 
-2. Navigate to the `scripts` folder:
+2. Navigate to the repo root folder:
    ```
-   cd path\to\SG_Cricket_Search_Repo\scripts
+   cd C:\Users\aksha\Documents\Cricket_Search_SG_Project
    ```
-   (Replace `path\to` with wherever you cloned the repo, e.g. `C:\Users\YourName\SG_Cricket_Search_Repo\scripts`)
 
-3. Run:
+3. Pull the latest changes:
+   ```
+   git pull origin main
+   ```
+
+4. Run:
    ```
    npm run update:local-cricheroes
    ```
 
-4. A **browser window will open automatically**. Do not close it — the script is using it to download the stats. You can watch it click through the pages.
+   The first time you run this, it will automatically install the required packages and download the Chromium browser (about 130 MB). This only happens once — subsequent runs skip this step.
 
-5. Wait for the terminal to print `Push complete. Stats are live on GitHub.`
+5. A **browser window will open automatically**. Do not close it — the script is using it to download the stats. You can watch it click through the pages.
+
+6. Wait for the terminal to print `Push complete. Stats are live on GitHub.`
 
 That's it. The website will update automatically after the push.
 
@@ -57,16 +57,17 @@ That's it. The website will update automatically after the push.
 
 ## What happens step by step
 
-1. Browser opens and visits the SGIA SHL 3 leaderboard on CricHeroes.
-2. Clicks the **Batting** tab → downloads the Excel file.
-3. Clicks the **Bowling** tab → downloads the Excel file.
-4. Repeats steps 1–3 for the BPL 2025 leaderboard.
-5. Parses both Excel files and checks for changes.
-6. If there are changes:
+1. Packages are installed automatically if not already present.
+2. Browser opens and visits the SGIA SHL 3 leaderboard on CricHeroes.
+3. Clicks the **Batting** tab → downloads the Excel file.
+4. Clicks the **Bowling** tab → downloads the Excel file.
+5. Repeats steps 2–4 for the BPL 2025 leaderboard.
+6. Parses both Excel files and checks for changes.
+7. If there are changes:
    - Saves a backup of the old stats file (see below).
    - Writes the new stats file.
-7. Commits and pushes to GitHub.
-8. Browser closes automatically.
+8. Commits and pushes to GitHub.
+9. Browser closes automatically.
 
 **Important:** The stats file is only overwritten if BOTH the batting and bowling downloads succeed. If either download fails, the existing file is left untouched.
 
@@ -77,8 +78,8 @@ That's it. The website will update automatically after the push.
 Before every write, the old stats file is backed up to:
 
 ```
-backups/cricheroes/sgia/sgiaStats-YYYY-MM-DD-HH-mm-ss.json
-backups/cricheroes/bpl/bplStats-YYYY-MM-DD-HH-mm-ss.json
+backups\cricheroes\sgia\sgiaStats-YYYY-MM-DD-HH-mm-ss.json
+backups\cricheroes\bpl\bplStats-YYYY-MM-DD-HH-mm-ss.json
 ```
 
 These backups are stored locally only and are not pushed to GitHub.

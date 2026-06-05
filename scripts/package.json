@@ -6,6 +6,7 @@
   "scripts": {
     "update-sgia": "node update-sgia-stats.js",
     "update:cricheroes": "node update-cricheroes-stats.js",
+    "preupdate:local-cricheroes": "npx playwright install chromium",
     "update:local-cricheroes": "node update-local-cricheroes-stats.js"
   },
   "dependencies": {

@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "update:local-cricheroes": "npm --prefix scripts run update:local-cricheroes"
+    "update:local-cricheroes": "npm --prefix scripts install && npm --prefix scripts run update:local-cricheroes"
   }
 }
