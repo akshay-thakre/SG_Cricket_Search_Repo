@@ -143,12 +143,18 @@ function parseSheetToRows(filePath, colMap) {
 
 // ── Shared Playwright download ────────────────────────────────────────────────
 
-async function tryClick(page, strategies) {
+// CricHeroes may render tabs as abbreviated ("BAT") or full-word ("Batting") labels.
+const TAB_ALIASES = {
+  BAT:  ['BAT', 'Batting', 'Bat', 'BATTING', 'bat'],
+  BOWL: ['BOWL', 'Bowling', 'Bowl', 'BOWLING', 'bowl'],
+};
+
+async function tryClick(page, strategies, timeoutMs = 3000) {
   for (const get of strategies) {
     try {
       const loc = get();
-      await loc.waitFor({ state: 'visible', timeout: 6000 });
-      await loc.click({ timeout: 6000 });
+      await loc.waitFor({ state: 'visible', timeout: timeoutMs });
+      await loc.click({ timeout: timeoutMs });
       return true;
     } catch { /* try next */ }
   }
@@ -166,18 +172,28 @@ async function downloadTabXls(browser, url, tabLabel, savePath, debugDir) {
     userAgent:
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
       'AppleWebKit/537.36 (KHTML, like Gecko) ' +
-      'Chrome/124.0.0.0 Safari/537.36',
+      'Chrome/130.0.0.0 Safari/537.36',
     viewport: { width: 1280, height: 900 },
+    locale: 'en-US',
+    timezoneId: 'Asia/Singapore',
   });
   const page = await context.newPage();
 
   try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+    // Use networkidle so the React SPA has fully rendered before we look for tabs.
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 60_000 })
+      .catch(() => log(`  [${tabLabel}] networkidle timed out – continuing with partial load`));
+
+    // Extra wait for any deferred client-side rendering.
+    await page.waitForTimeout(3000);
 
     const currentUrl = page.url();
     if (/login|signin|captcha/i.test(currentUrl)) {
       throw new Error(`Auth redirect: ${currentUrl}`);
     }
+
+    // Always capture the page state so we can diagnose tab-detection failures.
+    await page.screenshot({ path: path.join(debugDir, `debug-${tabLabel}-pageload.png`) });
 
     const loginVisible = await page.locator('text=/login|sign in/i').first()
       .isVisible({ timeout: 3000 }).catch(() => false);
@@ -186,22 +202,50 @@ async function downloadTabXls(browser, url, tabLabel, savePath, debugDir) {
       throw new Error('Login prompt detected. Cannot proceed without authentication.');
     }
 
-    // Wait for tab bar to render
-    await page.waitForSelector('text=/^(BAT|BOWL|FIELD|MVP)$/i', { timeout: 20_000 })
-      .catch(() => log(`  [${tabLabel}] Tab bar wait timed out -- continuing anyway`));
+    // Wait for any known tab text – abbreviated or full-word.
+    await page.waitForSelector(
+      'text=/^(BAT|BOWL|Batting|Bowling|BATTING|BOWLING|FIELD|MVP)$/i',
+      { timeout: 30_000 }
+    ).catch(() => log(`  [${tabLabel}] Tab bar wait timed out -- continuing anyway`));
 
-    // Click the tab
-    log(`  [${tabLabel}] Clicking ${tabLabel} tab...`);
-    const tabClicked = await tryClick(page, [
-      () => page.getByRole('button', { name: new RegExp(`^${tabLabel}$`, 'i') }),
-      () => page.getByRole('tab',   { name: new RegExp(`^${tabLabel}$`, 'i') }),
-      () => page.locator(`[role="tab"]:has-text("${tabLabel}")`),
-      () => page.locator(`button:has-text("${tabLabel}")`),
-      () => page.locator(`a:has-text("${tabLabel}")`),
-      () => page.locator(`[class*="tab"]:has-text("${tabLabel}")`),
-      () => page.locator(`div:has-text("${tabLabel}")`).nth(1),
-      () => page.getByText(new RegExp(`^${tabLabel}$`, 'i')).nth(0),
-    ]);
+    // Build click strategies for all known aliases of this tab label.
+    const aliases = TAB_ALIASES[tabLabel] || [tabLabel];
+    log(`  [${tabLabel}] Clicking ${tabLabel} tab (aliases: ${aliases.join(', ')})...`);
+
+    const strategies = [];
+    for (const v of aliases) {
+      strategies.push(
+        () => page.getByRole('button', { name: new RegExp(`^${v}$`, 'i') }),
+        () => page.getByRole('tab',   { name: new RegExp(`^${v}$`, 'i') }),
+        () => page.locator(`[role="tab"]:has-text("${v}")`),
+        () => page.locator(`button:has-text("${v}")`),
+        () => page.getByText(new RegExp(`^${v}$`, 'i')).first(),
+      );
+    }
+
+    let tabClicked = await tryClick(page, strategies, 3000);
+
+    // JS fallback: walk the DOM and dispatch a click on any element whose
+    // trimmed text exactly matches one of the aliases.
+    if (!tabClicked) {
+      log(`  [${tabLabel}] Playwright selectors failed – trying JS DOM click...`);
+      tabClicked = await page.evaluate((labels) => {
+        const candidates = ['[role="tab"]', '[class*="tab"]', 'button', 'li', 'a', 'span'];
+        for (const label of labels) {
+          for (const sel of candidates) {
+            for (const el of document.querySelectorAll(sel)) {
+              const text = (el.innerText || el.textContent || '').trim();
+              if (text.toLowerCase() === label.toLowerCase()) {
+                el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }, aliases);
+      if (tabClicked) log(`  [${tabLabel}] JS DOM click succeeded.`);
+    }
 
     if (!tabClicked) {
       await page.screenshot({ path: path.join(debugDir, `debug-${tabLabel}-notab.png`) });
