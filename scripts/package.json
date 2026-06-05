@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "update-sgia": "node update-sgia-stats.js",
-    "update:cricheroes": "node update-cricheroes-stats.js"
+    "update:cricheroes": "node update-cricheroes-stats.js",
+    "update:local-cricheroes": "node update-local-cricheroes-stats.js"
   },
   "dependencies": {
     "playwright": "^1.45.0",
