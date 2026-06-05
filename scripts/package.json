@@ -1,13 +1,14 @@
 {
   "name": "sgia-stats-updater",
   "version": "1.0.0",
-  "description": "Automated CricHeroes stats updater — downloads leaderboard XLS and patches sgiaStats.json + bplStats.json",
+  "description": "CricHeroes stats updater — downloads leaderboard XLS and patches sgiaStats.json + bplStats.json",
   "private": true,
   "scripts": {
     "update-sgia": "node update-sgia-stats.js",
     "update:cricheroes": "node update-cricheroes-stats.js",
     "preupdate:local-cricheroes": "npx playwright install chromium",
-    "update:local-cricheroes": "node update-local-cricheroes-stats.js"
+    "update:local-cricheroes": "node update-local-cricheroes-stats.js",
+    "import:cricheroes": "node import-cricheroes-stats.js"
   },
   "dependencies": {
     "playwright": "^1.45.0",
