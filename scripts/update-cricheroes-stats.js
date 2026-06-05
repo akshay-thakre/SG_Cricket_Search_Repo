@@ -77,7 +77,7 @@ function nowSGT() {
 
 /**
  * Convert a cricket overs string like "6.4" (6 complete overs + 4 balls)
- * to { overs: 6, balls: 40 }.  Plain integers ("6") -> { overs: 6, balls: 36 }.
+ * to { overs: 6, balls: 40 }.  Plain integers ("6") → { overs: 6, balls: 36 }.
  */
 function parseOvers(v) {
   const s = String(v ?? '0').trim();
@@ -125,7 +125,7 @@ function parseSheetToRows(filePath, colMap) {
   }
 
   log(`  Header at row ${headerRowIdx}: ` +
-    Object.entries(headerMap).map(([i, f]) => `col${i}->${f}`).join(', '));
+    Object.entries(headerMap).map(([i, f]) => `col${i}→${f}`).join(', '));
 
   const results = [];
   for (let i = headerRowIdx + 1; i < rawRows.length; i++) {
@@ -143,18 +143,12 @@ function parseSheetToRows(filePath, colMap) {
 
 // ── Shared Playwright download ────────────────────────────────────────────────
 
-// CricHeroes may render tabs as abbreviated ("BAT") or full-word ("Batting") labels.
-const TAB_ALIASES = {
-  BAT:  ['BAT', 'Batting', 'Bat', 'BATTING', 'bat'],
-  BOWL: ['BOWL', 'Bowling', 'Bowl', 'BOWLING', 'bowl'],
-};
-
-async function tryClick(page, strategies, timeoutMs = 3000) {
+async function tryClick(page, strategies) {
   for (const get of strategies) {
     try {
       const loc = get();
-      await loc.waitFor({ state: 'visible', timeout: timeoutMs });
-      await loc.click({ timeout: timeoutMs });
+      await loc.waitFor({ state: 'visible', timeout: 6000 });
+      await loc.click({ timeout: 6000 });
       return true;
     } catch { /* try next */ }
   }
@@ -172,28 +166,18 @@ async function downloadTabXls(browser, url, tabLabel, savePath, debugDir) {
     userAgent:
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
       'AppleWebKit/537.36 (KHTML, like Gecko) ' +
-      'Chrome/130.0.0.0 Safari/537.36',
+      'Chrome/124.0.0.0 Safari/537.36',
     viewport: { width: 1280, height: 900 },
-    locale: 'en-US',
-    timezoneId: 'Asia/Singapore',
   });
   const page = await context.newPage();
 
   try {
-    // Use networkidle so the React SPA has fully rendered before we look for tabs.
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 60_000 })
-      .catch(() => log(`  [${tabLabel}] networkidle timed out – continuing with partial load`));
-
-    // Extra wait for any deferred client-side rendering.
-    await page.waitForTimeout(3000);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45_000 });
 
     const currentUrl = page.url();
     if (/login|signin|captcha/i.test(currentUrl)) {
       throw new Error(`Auth redirect: ${currentUrl}`);
     }
-
-    // Always capture the page state so we can diagnose tab-detection failures.
-    await page.screenshot({ path: path.join(debugDir, `debug-${tabLabel}-pageload.png`) });
 
     const loginVisible = await page.locator('text=/login|sign in/i').first()
       .isVisible({ timeout: 3000 }).catch(() => false);
@@ -202,70 +186,22 @@ async function downloadTabXls(browser, url, tabLabel, savePath, debugDir) {
       throw new Error('Login prompt detected. Cannot proceed without authentication.');
     }
 
-    // Wait for any known tab text – abbreviated or full-word.
-    const tabBarFound = await page.waitForSelector(
-      'text=/^(BAT|BOWL|Batting|Bowling|BATTING|BOWLING|FIELD|MVP)$/i',
-      { timeout: 30_000 }
-    ).then(() => true).catch(() => false);
+    // Wait for tab bar to render
+    await page.waitForSelector('text=/^(BAT|BOWL|FIELD|MVP)$/i', { timeout: 20_000 })
+      .catch(() => log(`  [${tabLabel}] Tab bar wait timed out — continuing anyway`));
 
-    if (!tabBarFound) {
-      // Dump page diagnostics to the log so we can diagnose bot detection / layout changes.
-      const diagUrl   = page.url();
-      const diagTitle = await page.title().catch(() => '(error)');
-      const diagBody  = await page.evaluate(() =>
-        (document.body?.innerText ?? document.body?.textContent ?? '').trim().slice(0, 600)
-      ).catch(() => '(error)');
-      const diagLinks = await page.evaluate(() =>
-        [...document.querySelectorAll('button,a,[role="tab"]')]
-          .map((el) => (el.innerText || el.textContent || '').trim())
-          .filter((t) => t)
-          .slice(0, 20)
-      ).catch(() => []);
-      log(`  [${tabLabel}] Tab bar not found. Diagnostics:`);
-      log(`  [${tabLabel}]   URL:    ${diagUrl}`);
-      log(`  [${tabLabel}]   Title:  ${diagTitle}`);
-      log(`  [${tabLabel}]   Body:   ${diagBody.replace(/\n/g, ' ')}`);
-      log(`  [${tabLabel}]   Clickable elements: ${JSON.stringify(diagLinks)}`);
-    }
-
-    // Build click strategies for all known aliases of this tab label.
-    const aliases = TAB_ALIASES[tabLabel] || [tabLabel];
-    log(`  [${tabLabel}] Clicking ${tabLabel} tab (aliases: ${aliases.join(', ')})...`);
-
-    const strategies = [];
-    for (const v of aliases) {
-      strategies.push(
-        () => page.getByRole('button', { name: new RegExp(`^${v}$`, 'i') }),
-        () => page.getByRole('tab',   { name: new RegExp(`^${v}$`, 'i') }),
-        () => page.locator(`[role="tab"]:has-text("${v}")`),
-        () => page.locator(`button:has-text("${v}")`),
-        () => page.getByText(new RegExp(`^${v}$`, 'i')).first(),
-      );
-    }
-
-    let tabClicked = await tryClick(page, strategies, 3000);
-
-    // JS fallback: walk the DOM and dispatch a click on any element whose
-    // trimmed text exactly matches one of the aliases.
-    if (!tabClicked) {
-      log(`  [${tabLabel}] Playwright selectors failed – trying JS DOM click...`);
-      tabClicked = await page.evaluate((labels) => {
-        const candidates = ['[role="tab"]', '[class*="tab"]', 'button', 'li', 'a', 'span'];
-        for (const label of labels) {
-          for (const sel of candidates) {
-            for (const el of document.querySelectorAll(sel)) {
-              const text = (el.innerText || el.textContent || '').trim();
-              if (text.toLowerCase() === label.toLowerCase()) {
-                el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-                return true;
-              }
-            }
-          }
-        }
-        return false;
-      }, aliases);
-      if (tabClicked) log(`  [${tabLabel}] JS DOM click succeeded.`);
-    }
+    // Click the tab
+    log(`  [${tabLabel}] Clicking ${tabLabel} tab...`);
+    const tabClicked = await tryClick(page, [
+      () => page.getByRole('button', { name: new RegExp(`^${tabLabel}$`, 'i') }),
+      () => page.getByRole('tab',   { name: new RegExp(`^${tabLabel}$`, 'i') }),
+      () => page.locator(`[role="tab"]:has-text("${tabLabel}")`),
+      () => page.locator(`button:has-text("${tabLabel}")`),
+      () => page.locator(`a:has-text("${tabLabel}")`),
+      () => page.locator(`[class*="tab"]:has-text("${tabLabel}")`),
+      () => page.locator(`div:has-text("${tabLabel}")`).nth(1),
+      () => page.getByText(new RegExp(`^${tabLabel}$`, 'i')).nth(0),
+    ]);
 
     if (!tabClicked) {
       await page.screenshot({ path: path.join(debugDir, `debug-${tabLabel}-notab.png`) });
@@ -304,13 +240,13 @@ async function downloadTabXls(browser, url, tabLabel, savePath, debugDir) {
     }
 
     await download.saveAs(savePath);
-    log(`  [${tabLabel}] Saved -> ${path.relative(process.cwd(), savePath)}`);
+    log(`  [${tabLabel}] Saved → ${path.relative(process.cwd(), savePath)}`);
   } finally {
     await context.close();
   }
 }
 
-// ── SGIA -- column maps & builders ─────────────────────────────────────────────
+// ── SGIA — column maps & builders ─────────────────────────────────────────────
 
 const SGIA_BAT_COL_MAP = {
   rank: 'rank',        '#': 'rank',
@@ -413,7 +349,7 @@ function patchSGIA(existing, batRows, bowlRows) {
   };
 }
 
-// ── BPL -- column maps & builders ──────────────────────────────────────────────
+// ── BPL — column maps & builders ──────────────────────────────────────────────
 
 const BPL_BAT_COL_MAP = {
   playerid: 'player_id', 'player_id': 'player_id',
@@ -446,7 +382,7 @@ const BPL_BOWL_COL_MAP = {
   mat: 'matches',        matches: 'matches',
   inn: 'innings',        inns: 'innings',        innings: 'innings',
   overs: 'overs',        ov: 'overs',
-  balls: 'balls',
+  balls: 'balls',        // total balls bowled (if present in XLS)
   runs: 'runs_conceded', runsconceded: 'runs_conceded', rc: 'runs_conceded',
   wkt: 'wickets',        wkts: 'wickets',        wickets: 'wickets',
   best: 'best',          bbi: 'best',             bestbowling: 'best',
@@ -458,7 +394,9 @@ const BPL_BOWL_COL_MAP = {
 };
 
 function buildBPLBatting(row, teamId) {
+  // Highest score: strip asterisk (*) for not-out and store as integer
   const hs = safeInt(String(row.highest_score ?? '0').replace(/[^0-9]/g, ''));
+  // Average: null when innings = 0 (cannot be computed)
   const innings = safeInt(row.innings);
   const avg = innings === 0 ? null : safeFloatNullable(row.average);
   return {
@@ -482,6 +420,7 @@ function buildBPLBatting(row, teamId) {
 
 function buildBPLBowling(row, teamId) {
   const { overs, balls: ballsFromOvers } = parseOvers(row.overs);
+  // Use an explicit "Balls" column if present; otherwise derive from overs
   const balls = safeInt(row.balls) || ballsFromOvers;
   const bestRaw = String(row.best ?? '0').trim();
   const best_wickets = bestRaw.includes('/')
@@ -507,9 +446,10 @@ function buildBPLBowling(row, teamId) {
 }
 
 function patchBPL(existing, batRows, bowlRows) {
+  // Build lookup maps keyed by normalised player name
   const batMap  = new Map();
   const bowlMap = new Map();
-  const idMap   = new Map();
+  const idMap   = new Map(); // normName → player_id
 
   for (const row of batRows) {
     const key = normName(row.name);
@@ -545,6 +485,7 @@ function patchBPL(existing, batRows, bowlRows) {
     const has_batting = !!bat;
     const has_bowling = !!bowl;
 
+    // Collect unique teams (bat team + bowl team if different)
     const teams = [];
     if (teamId > 0 || teamName) {
       teams.push({ team_id: teamId, team_name: teamName });
@@ -560,6 +501,7 @@ function patchBPL(existing, batRows, bowlRows) {
     players.push({ player_id, name: displayName, teams, batting, bowling, has_batting, has_bowling });
   }
 
+  // Sort by name for deterministic output
   players.sort((a, b) => a.name.localeCompare(b.name));
 
   const summary = {
@@ -601,11 +543,7 @@ function defaultBPLBowling(teamId, teamName) {
 
 // ── Tournament configuration ──────────────────────────────────────────────────
 
-// ROOT is the repo root (one level above this script's directory)
 const ROOT = path.resolve(__dirname, '..');
-
-// tmp dirs live under scripts/tmp/ so workflow artifact paths match
-const SCRIPTS_TMP = path.join(__dirname, 'tmp');
 
 const TOURNAMENTS = [
   {
@@ -613,7 +551,7 @@ const TOURNAMENTS = [
     name:     'SGIA SHL 3',
     url:      'https://cricheroes.com/tournament/1986843/sgia-shl-3/leaderboard',
     jsonFile: path.join(ROOT, 'cricsearch-sg', 'src', 'data', 'sgiaStats.json'),
-    tmpDir:   path.join(SCRIPTS_TMP, 'sgia'),
+    tmpDir:   path.join(ROOT, 'tmp', 'sgia'),
     batColMap:  SGIA_BAT_COL_MAP,
     bowlColMap: SGIA_BOWL_COL_MAP,
     patch:    patchSGIA,
@@ -623,7 +561,7 @@ const TOURNAMENTS = [
     name:     'BPL 2025',
     url:      'https://cricheroes.com/tournament/1500354/bpl-2025/leaderboard',
     jsonFile: path.join(ROOT, 'cricsearch-sg', 'src', 'data', 'bplStats.json'),
-    tmpDir:   path.join(SCRIPTS_TMP, 'bpl'),
+    tmpDir:   path.join(ROOT, 'tmp', 'bpl'),
     batColMap:  BPL_BAT_COL_MAP,
     bowlColMap: BPL_BOWL_COL_MAP,
     patch:    patchBPL,
@@ -650,20 +588,20 @@ async function updateTournament(browser, config) {
   for (const [label, p] of [['BAT', batPath], ['BOWL', bowlPath]]) {
     const bytes = fs.statSync(p).size;
     log(`${tag} ${label} file: ${bytes} bytes`);
-    if (bytes < 500) throw new Error(`${label} file too small (${bytes} B) -- likely a failed download.`);
+    if (bytes < 500) throw new Error(`${label} file too small (${bytes} B) — likely a failed download.`);
   }
 
   // Parse
   log(`${tag} Parsing BAT Excel...`);
   const batRows = parseSheetToRows(batPath, batColMap);
-  log(`${tag}   -> ${batRows.length} rows`);
+  log(`${tag}   → ${batRows.length} rows`);
 
   log(`${tag} Parsing BOWL Excel...`);
   const bowlRows = parseSheetToRows(bowlPath, bowlColMap);
-  log(`${tag}   -> ${bowlRows.length} rows`);
+  log(`${tag}   → ${bowlRows.length} rows`);
 
-  if (batRows.length === 0)  throw new Error('Zero batting rows parsed -- check column mapping.');
-  if (bowlRows.length === 0) throw new Error('Zero bowling rows parsed -- check column mapping.');
+  if (batRows.length === 0)  throw new Error('Zero batting rows parsed — check column mapping.');
+  if (bowlRows.length === 0) throw new Error('Zero bowling rows parsed — check column mapping.');
 
   // Patch JSON
   log(`${tag} Patching JSON...`);
@@ -681,7 +619,7 @@ async function updateTournament(browser, config) {
   };
   const changed = toCompare(existing) !== toCompare(updated);
 
-  log(`${tag} === ${name} done -- changed: ${changed} ===`);
+  log(`${tag} === ${name} done — changed: ${changed} ===`);
   return { jsonFile, jsonOut, changed };
 }
 
@@ -712,8 +650,9 @@ async function main() {
     if (r.success && r.changed) {
       log(`Writing ${path.basename(r.jsonFile)}...`);
       fs.writeFileSync(r.jsonFile, r.jsonOut, 'utf-8');
+      // Read back to confirm valid JSON
       JSON.parse(fs.readFileSync(r.jsonFile, 'utf-8'));
-      log(`  OK ${path.basename(r.jsonFile)} written and verified.`);
+      log(`  ✓ ${path.basename(r.jsonFile)} written and verified.`);
     }
   }
 
@@ -722,7 +661,7 @@ async function main() {
   for (const r of results) {
     const status = r.success
       ? (r.changed ? 'UPDATED' : 'NO CHANGE')
-      : `FAILED -- ${r.error}`;
+      : `FAILED — ${r.error}`;
     log(`  ${r.config.key.toUpperCase()}: ${status}`);
   }
 

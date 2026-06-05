@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchAnyPlayerStats } from '../services/apiService';
 import { calculatePerformanceAcrossAllLeagues } from '../utils/aggregatePlayerStats';
 
-// ── Stats format normalizer ─────────────────────────────────────────────────────
+// ── Stats format normalizer ───────────────────────────────────────────────────
 // SCA returns batting/bowling as plain objects.
 // Sportygo returns them as arrays of per-series rows + player.totals.
 // This function converts Sportygo format to the SCA shape so the card renders identically.
@@ -46,7 +46,7 @@ function normalizeStats(raw) {
   };
 }
 
-// ── Main aggregated results component ────────────────────────────────────────────
+// ── Main aggregated results component ────────────────────────────────────────
 
 export function AggregatedResults({ searchResults }) {
   const { query, results, totalFound, meta } = searchResults;
@@ -166,25 +166,16 @@ export function AggregatedResults({ searchResults }) {
   );
 }
 
-// ── Platform section ────────────────────────────────────────────────────────────────
-
-const PLATFORM_ACCENT = {
-  'YPL': '#b45309',
-  'BPL': '#7c3aed',
-  'SG IA': '#dc2626',
-  'SCA': '#0066cc',
-};
+// ── Platform section ──────────────────────────────────────────────────────────
 
 function PlatformSection({ platformData, isExpanded, onToggle }) {
   const { platformName, count, players, noResults, icon, disabled, disabledReason, error } = platformData;
   const isLive = !disabled;
-  const accent = error ? '#dc2626' : (PLATFORM_ACCENT[platformName] || '#0066cc');
 
   return (
     <div style={{
       backgroundColor: '#f5f8fc',
       border: `1px solid ${error ? '#fecaca' : '#d0dae8'}`,
-      borderLeft: `4px solid ${accent}`,
       borderRadius: '12px',
       overflow: 'hidden',
       boxShadow: '0 2px 6px rgba(6, 28, 84, 0.08)',
@@ -192,15 +183,13 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
     }}>
       <button
         onClick={disabled ? undefined : onToggle}
-        className="platform-section-header-btn"
         style={{
-          width: '100%', padding: '1.25rem 1.5rem',
+          width: '100%', padding: '1.5rem',
           backgroundColor: error ? '#fef2f2' : '#f5f8fc',
           border: 'none',
           borderBottom: isExpanded ? '1px solid #d0dae8' : 'none',
           cursor: disabled ? 'default' : 'pointer',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          gap: '0.5rem',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -302,7 +291,7 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
   );
 }
 
-// ── Player card with auto-fetched stats ──────────────────────────────────────────────
+// ── Player card with auto-fetched stats ───────────────────────────────────────
 
 function PlayerCard({ player, platformName, isLast }) {
   const { id, name, team, role, profileUrl, verified } = player;
@@ -387,10 +376,12 @@ function PlayerCard({ player, platformName, isLast }) {
 
         {/* ── KEY STATS SUMMARY ROW (always shown when loaded) ── */}
         {!statsLoading && (
-          <div
-            className="stat-grid-4"
-            style={{ marginBottom: (hasBatting || hasBowling) ? '1rem' : 0 }}
-          >
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '0.5rem',
+            marginBottom: (hasBatting || hasBowling) ? '1rem' : 0,
+          }}>
             <StatBox
               label="Matches"
               value={hasBatting ? stats.batting.matches : hasBowling ? stats.bowling.matches : null}
@@ -492,7 +483,7 @@ function PlayerCard({ player, platformName, isLast }) {
   );
 }
 
-// ── Competition/season breakdown ───────────────────────────────────────────────────────
+// ── Competition/season breakdown ──────────────────────────────────────────────
 
 function CompetitionsPanel({ competitions }) {
   const [open, setOpen] = useState(false);
@@ -503,8 +494,7 @@ function CompetitionsPanel({ competitions }) {
         onClick={() => setOpen(!open)}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '12px', color: '#0066cc', fontWeight: '600',
-          padding: '0.4rem 0', minHeight: '36px',
+          fontSize: '12px', color: '#0066cc', fontWeight: '600', padding: 0,
           display: 'flex', alignItems: 'center', gap: '0.4rem',
         }}
       >
@@ -541,7 +531,7 @@ function CompetitionsPanel({ competitions }) {
   );
 }
 
-// ── Expandable section (for full batting/bowling details) ─────────────────────────────
+// ── Expandable section (for full batting/bowling details) ─────────────────────
 
 function ExpandableSection({ label, accentColor, children }) {
   const [open, setOpen] = useState(false);
@@ -549,10 +539,14 @@ function ExpandableSection({ label, accentColor, children }) {
     <div style={{ marginTop: '0.75rem' }}>
       <button
         onClick={() => setOpen(!open)}
-        className="expand-trigger"
-        style={{ fontSize: '12px', color: accentColor }}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 0.4rem 0',
+          fontSize: '11px', fontWeight: '700', color: accentColor,
+          textTransform: 'uppercase', letterSpacing: '0.08em',
+          display: 'flex', alignItems: 'center', gap: '0.35rem',
+        }}
       >
-        <span style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.15s', flexShrink: 0 }}>▶</span>
+        <span style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.15s' }}>▶</span>
         {label}
       </button>
       {open && <div style={{ marginTop: '0.25rem' }}>{children}</div>}
@@ -560,7 +554,7 @@ function ExpandableSection({ label, accentColor, children }) {
   );
 }
 
-// ── Stat box ─────────────────────────────────────────────────────────────────────
+// ── Stat box ──────────────────────────────────────────────────────────────────
 
 function StatBox({ label, value, highlight = false, color = '#0066cc', small = false }) {
   const displayValue = value !== null && value !== undefined ? String(value) : 'N/A';
@@ -576,14 +570,14 @@ function StatBox({ label, value, highlight = false, color = '#0066cc', small = f
       <div style={{ fontSize: small ? '12px' : '15px', fontWeight: '700', color: highlight ? color : '#1e293b' }}>
         {displayValue}
       </div>
-      <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', marginTop: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: '600', marginTop: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {label}
       </div>
     </div>
   );
 }
 
-// ── YPL Static player card ────────────────────────────────────────────────────────────────
+// ── YPL Static player card ────────────────────────────────────────────────────
 // Renders pre-loaded batting + bowling stats from the Assasins CC static dataset.
 // No API call is made — all data is bundled in player.inlineStats.
 
@@ -627,7 +621,7 @@ function YPLPlayerCard({ player, isLast }) {
             <span style={{ color: '#b45309' }}>YPL Elite</span>
           </div>
         </div>
-        <div className="player-header-badges">
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {seasons.map((s) => (
             <span key={s} style={{
               backgroundColor: '#fef3c7', color: '#92400e',
@@ -647,7 +641,10 @@ function YPLPlayerCard({ player, isLast }) {
       <div style={{ padding: '1rem 1.25rem' }}>
 
         {/* Summary row */}
-        <div className="stat-grid-4" style={{ marginBottom: '0.75rem' }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '0.5rem', marginBottom: '0.75rem',
+        }}>
           <StatBox label="Matches"  value={b?.matches}  highlight />
           <StatBox label="Runs"     value={b?.runs}     highlight />
           <StatBox label="Bat Avg"  value={d(b?.average, 2)} highlight />
@@ -764,22 +761,32 @@ function BattingRow({ label, value }) {
 }
 
 const expandBtnStyle = (color) => ({
-  background: 'none', border: 'none', cursor: 'pointer',
-  padding: '0.45rem 0', minHeight: '40px', width: '100%',
-  fontSize: '12px', fontWeight: '700', color, textTransform: 'uppercase',
-  letterSpacing: '0.07em', display: 'flex', alignItems: 'center', gap: '0.4rem',
+  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+  fontSize: '11px', fontWeight: '700', color, textTransform: 'uppercase',
+  letterSpacing: '0.07em', display: 'flex', alignItems: 'center', gap: '0.35rem',
 });
 
 const arrowStyle = {
   display: 'inline-block', transition: 'transform 0.15s',
 };
 
-// ── SG IA Static player card ────────────────────────────────────────────────────────────────
+// ── SG IA Static player card ──────────────────────────────────────────────────
 // Renders per-tournament batting + bowling stats from the SG IA static dataset.
 // No API call — all data is bundled in player.entries[].
 
 function SGIAPlayerCard({ player, isLast }) {
-  const { name, team, entries } = player;
+  const { name, team, lastUpdated, entries } = player;
+
+  const fmtDate = (iso) => {
+    try {
+      return new Date(iso).toLocaleString('en-SG', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+      });
+    } catch {
+      return iso;
+    }
+  };
 
   const d = (v, dec = 0) => (v === null || v === undefined ? '--' : dec > 0 ? Number(v).toFixed(dec) : String(v));
 
@@ -814,6 +821,9 @@ function SGIAPlayerCard({ player, isLast }) {
             backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
             padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '11px', fontWeight: '600',
           }}>🇸🇬 SIA</span>
+          <div style={{ marginTop: '0.4rem', fontSize: '10px', color: '#94a3b8' }}>
+            Updated: {fmtDate(lastUpdated)}
+          </div>
         </div>
       </div>
 
@@ -875,7 +885,7 @@ function SGIATournamentEntry({ entry, isLast, d }) {
       </div>
 
       {/* Summary stat boxes */}
-      <div className="stat-grid-4" style={{ marginBottom: '0.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.5rem' }}>
         <StatBox label="Matches" value={hasBatting ? b.mat : hasBowling ? bwl.mat : null} highlight />
         <StatBox label="Runs" value={hasBatting ? b.runs : null} highlight />
         <StatBox label="Bat Avg" value={hasBatting ? d(b.avg, 2) : '--'} highlight />
@@ -930,7 +940,7 @@ function SGIATournamentEntry({ entry, isLast, d }) {
   );
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmt(val) {
   if (val === null || val === undefined) return null;
@@ -938,10 +948,10 @@ function fmt(val) {
   return isNaN(n) ? val : n.toFixed(2).replace(/\.?0+$/, '');
 }
 
-// ── BPL 2025 player card (static, no API fetch) ──────────────────────────────────────────
+// ── BPL 2025 player card (static, no API fetch) ───────────────────────────────
 
 function BPLPlayerCard({ player, isLast }) {
-  const { name, team, batting, bowling } = player;
+  const { name, team, batting, bowling, lastUpdated } = player;
   const [expanded, setExpanded] = useState(false);
 
   const hasBatting = batting && batting.innings > 0;
@@ -970,12 +980,13 @@ function BPLPlayerCard({ player, isLast }) {
             {team}
           </div>
         </div>
-        <div className="player-header-badges" style={{ flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
           <span style={{
             backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
             fontSize: '10px', fontWeight: '700',
           }}>BPL 2025</span>
+          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {lastUpdated}</span>
           <span style={{ fontSize: '9px', color: '#c4b5fd' }}>Updated daily at 6:00 AM SGT</span>
         </div>
       </div>
@@ -988,7 +999,7 @@ function BPLPlayerCard({ player, isLast }) {
               🏏 <strong>{batting.runs}</strong> runs
               {batting.average != null && <span style={{ color: '#64748b' }}> · avg {fmt(batting.average)}</span>}
               {batting.highest_score > 0 && <span style={{ color: '#64748b' }}> · HS {batting.highest_score}</span>}
-              {batting.matches > 0 && <span style={{ color: '#64748b' }}> · {batting.matches}M</span>}
+              <span style={{ color: '#64748b' }}> · {batting.matches}M</span>
               {batting.batting_hand && <span style={{ color: '#9ca3af' }}> · {batting.batting_hand}</span>}
             </div>
           )}
@@ -1023,8 +1034,7 @@ function BPLPlayerCard({ player, isLast }) {
                 <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BATTING</div>
                 <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
                   {[
-                    ['Mat', batting.matches > 0 ? batting.matches : null],
-                    ['Inns', batting.innings], ['NO', batting.not_outs],
+                    ['Mat', batting.matches], ['Inns', batting.innings], ['NO', batting.not_outs],
                     ['Runs', batting.runs], ['Balls', batting.balls_faced], ['Avg', fmt(batting.average)],
                     ['SR', fmt(batting.strike_rate)], ['HS', batting.highest_score],
                     ['50s', batting.fifties], ['100s', batting.hundreds],
@@ -1047,8 +1057,7 @@ function BPLPlayerCard({ player, isLast }) {
                 <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BOWLING</div>
                 <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
                   {[
-                    ['Mat', bowling.matches > 0 ? bowling.matches : null],
-                    ['Inns', bowling.innings], ['Overs', bowling.overs],
+                    ['Mat', bowling.matches], ['Inns', bowling.innings], ['Overs', bowling.overs],
                     ['Runs', bowling.runs_conceded], ['Wkts', bowling.wickets],
                     ['BB', bowling.best_wickets], ['Econ', fmt(bowling.economy)],
                     ['Ave', fmt(bowling.average)], ['SR', fmt(bowling.strike_rate)],
@@ -1077,7 +1086,7 @@ function BPLPlayerCard({ player, isLast }) {
   );
 }
 
-// ── SCA Corporate player card (static, no API fetch) ─────────────────────────────
+// ── SCA Corporate player card (static, no API fetch) ─────────────────────────
 
 function SCACorpPlayerCard({ player, isLast }) {
   const { name, team, seasons = [] } = player;
@@ -1109,7 +1118,7 @@ function SCACorpPlayerCard({ player, isLast }) {
             {team} · SCA Corporate League
           </div>
         </div>
-        <div className="player-header-badges">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{
             backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
@@ -1258,7 +1267,7 @@ function SCACorpSeasonDetail({ season }) {
   );
 }
 
-// ── Performance across all leagues panel ──────────────────────────────────────────────
+// ── Performance across all leagues panel ──────────────────────────────────────
 
 function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoading }) {
   const hasScaLivePlayers = !!(
@@ -1281,8 +1290,7 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
   return (
     <div style={{
       backgroundColor: '#f5f8fc',
-      border: '1px solid #c7d5e8',
-      borderLeft: '4px solid #1d4ed8',
+      border: '2px solid #c7d5e8',
       borderRadius: '12px',
       overflow: 'hidden',
       boxShadow: '0 2px 8px rgba(6, 28, 84, 0.10)',
@@ -1327,7 +1335,11 @@ function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoadin
             No aggregated stats available for this search.
           </div>
         ) : (
-          <div className="agg-stat-grid">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gap: '0.75rem',
+          }}>
             <AggStatBox label="Total Runs"    value={totalRuns}    color="#0066cc" />
             <AggStatBox label="Total Matches" value={totalMatches} color="#16a34a" />
             <AggStatBox label="Total Innings" value={totalInnings} color="#1e293b" />
@@ -1379,7 +1391,7 @@ function AggStatBox({ label, value, color }) {
         {value}
       </div>
       <div style={{
-        fontSize: '10px', color: '#64748b', fontWeight: '600',
+        fontSize: '9px', color: '#64748b', fontWeight: '600',
         marginTop: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.06em',
       }}>
         {label}
