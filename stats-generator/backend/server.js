@@ -6,10 +6,11 @@ const fs = require('fs');
 const { parse } = require('csv-parse/sync');
 const XLSX = require('xlsx');
 const { execSync } = require('child_process');
+const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 const REPO_ROOT = process.env.REPO_ROOT || path.resolve(__dirname, '../..');
 
@@ -79,14 +80,31 @@ const BOWLING_REQUIRED = ['name', 'team_name', 'total_wickets'];
 const INT_FIELDS = new Set(['mat', 'inns', 'runs', 'balls', 'no', 'fours', 'sixes', 'fifties', 'hundreds', 'wickets', 'maidens']);
 const FLOAT_FIELDS = new Set(['avg', 'sr', 'econ', 'overs']);
 
-// multer: store in memory
+// Column aliases for reading tournament metadata out of data rows
+const TOURNAMENT_ID_ALIASES   = ['tournament_id', 'tournamentid', 'tournament_code', 'tourney_id'];
+const TOURNAMENT_NAME_ALIASES = ['tournament_name', 'tournamentname', 'tournament', 'tourney_name', 'competition_name'];
+const YEAR_ALIASES            = ['year', 'season', 'yr'];
+
+// In-memory store of parsed file data, keyed by sessionId
+// Each session: { createdAt, batting: Map<tournamentId, rows[]>, bowling: Map<tournamentId, rows[]> }
+const parsedSessions = new Map();
+
+// Clean sessions older than 60 minutes
+setInterval(() => {
+  const cutoff = Date.now() - 60 * 60 * 1000;
+  for (const [id, s] of parsedSessions) {
+    if (s.createdAt < cutoff) parsedSessions.delete(id);
+  }
+}, 10 * 60 * 1000);
+
 const upload = multer({ storage: multer.memoryStorage() });
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function parseFileToRows(buffer, originalname) {
   const ext = path.extname(originalname).toLowerCase();
   if (ext === '.csv') {
-    const text = buffer.toString('utf8');
-    return parse(text, { columns: true, skip_empty_lines: true, trim: true });
+    return parse(buffer.toString('utf8'), { columns: true, skip_empty_lines: true, trim: true });
   }
   if (ext === '.xlsx' || ext === '.xls') {
     const wb = XLSX.read(buffer, { type: 'buffer' });
@@ -96,27 +114,73 @@ function parseFileToRows(buffer, originalname) {
   throw new Error(`Unsupported file type: ${ext}. Use .csv, .xlsx, or .xls`);
 }
 
+function normalizeKey(k) {
+  return k.trim().toLowerCase();
+}
+
+function findAlias(normRow, aliases) {
+  for (const alias of aliases) {
+    const v = normRow[alias];
+    if (v !== undefined && String(v).trim() !== '') return String(v).trim();
+  }
+  return null;
+}
+
+function slugify(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+// Strip _batting / _bowling suffixes from filename to get a base tournament name
+function filenameToBase(filename) {
+  let base = path.basename(filename, path.extname(filename));
+  base = base.replace(/[-_\s]*(batting|bowling|bat|bowl|stats)[-_\s]*/gi, ' ').trim();
+  return base || path.basename(filename, path.extname(filename));
+}
+
+// Read tournament metadata from a single row (normalised keys)
+function rowTournamentMeta(normRow, fileBase) {
+  const tournamentId   = findAlias(normRow, TOURNAMENT_ID_ALIASES)   || slugify(fileBase);
+  const tournamentName = findAlias(normRow, TOURNAMENT_NAME_ALIASES)  || fileBase;
+  const year           = findAlias(normRow, YEAR_ALIASES)             || String(new Date().getFullYear());
+  return {
+    tournamentId:   String(tournamentId).trim(),
+    tournamentName: String(tournamentName).trim(),
+    year:           String(year).trim(),
+  };
+}
+
+// Group rows from one file by tournament_id, also capturing name & year per group
+function groupRowsByTournament(rows, fileBase) {
+  // Map: tournamentId → { meta: {id, name, year}, rows: [] }
+  const groups = new Map();
+  for (const row of rows) {
+    const normRow = {};
+    for (const [k, v] of Object.entries(row)) normRow[normalizeKey(k)] = v;
+
+    const meta = rowTournamentMeta(normRow, fileBase);
+    if (!groups.has(meta.tournamentId)) {
+      groups.set(meta.tournamentId, { meta, rows: [] });
+    }
+    groups.get(meta.tournamentId).rows.push(row);
+  }
+  return groups;
+}
+
 function validateColumns(rows, required, label) {
   if (!rows || rows.length === 0) throw new Error(`${label}: file is empty`);
-  const cols = Object.keys(rows[0]).map(c => c.trim().toLowerCase());
+  const cols = Object.keys(rows[0]).map(c => normalizeKey(c));
   const missing = required.filter(r => !cols.includes(r.toLowerCase()));
   if (missing.length > 0) {
     throw new Error(`${label}: missing required columns: ${missing.join(', ')}`);
   }
 }
 
-function normalizeKey(key) {
-  return key.trim().toLowerCase();
-}
-
 function mapRow(row, fieldMap) {
-  const normalized = {};
-  for (const [k, v] of Object.entries(row)) {
-    normalized[normalizeKey(k)] = v;
-  }
+  const norm = {};
+  for (const [k, v] of Object.entries(row)) norm[normalizeKey(k)] = v;
   const out = {};
   for (const [src, dest] of Object.entries(fieldMap)) {
-    const val = normalized[src.toLowerCase()];
+    const val = norm[src.toLowerCase()];
     if (val === undefined || val === '') continue;
     if (INT_FIELDS.has(dest)) {
       const n = parseInt(val, 10);
@@ -131,80 +195,149 @@ function mapRow(row, fieldMap) {
   return out;
 }
 
-function mapBattingRows(rows) {
-  return rows.map((row, i) => {
-    const mapped = mapRow(row, BATTING_MAP);
-    if (!mapped.rank) mapped.rank = i + 1;
-    return { rank: i + 1, ...mapped };
-  });
-}
+// ─── Routes ─────────────────────────────────────────────────────────────────
 
-function mapBowlingRows(rows) {
-  return rows.map((row, i) => {
-    const mapped = mapRow(row, BOWLING_MAP);
-    if (!mapped.rank) mapped.rank = i + 1;
-    return { rank: i + 1, ...mapped };
-  });
-}
+// GET /api/competitions
+app.get('/api/competitions', (_req, res) => res.json(COMPETITIONS));
 
-// Build multer fields dynamically (up to 20 tournaments)
-function buildUploadFields() {
-  const fields = [];
-  for (let i = 0; i < 20; i++) {
-    fields.push({ name: `batting_${i}`, maxCount: 1 });
-    fields.push({ name: `bowling_${i}`, maxCount: 1 });
-  }
-  return fields;
-}
-
-// POST /api/generate
-app.post('/api/generate', upload.fields(buildUploadFields()), (req, res) => {
+/**
+ * POST /api/parse-files
+ * Accepts: multipart with batting_files[] and bowling_files[]
+ * Returns: sessionId + list of detected tournaments (id, name, year, battingCount, bowlingCount)
+ */
+app.post('/api/parse-files', upload.fields([
+  { name: 'batting_files', maxCount: 50 },
+  { name: 'bowling_files', maxCount: 50 },
+]), (req, res) => {
   try {
-    const tournamentsRaw = req.body.tournaments;
-    if (!tournamentsRaw) return res.status(400).json({ error: 'Missing tournaments data' });
+    const battingFiles = req.files['batting_files'] || [];
+    const bowlingFiles = req.files['bowling_files'] || [];
+    const logs = [];
 
-    const tournaments = JSON.parse(tournamentsRaw);
-    const competition = req.body.competition;
+    if (battingFiles.length === 0 && bowlingFiles.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded' });
+    }
 
+    // Aggregate batting rows grouped by tournamentId across all uploaded batting files
+    const allBatting = new Map(); // tournamentId → { meta, rows[] }
+    for (const file of battingFiles) {
+      logs.push(`Reading batting file: ${file.originalname}`);
+      const rows = parseFileToRows(file.buffer, file.originalname);
+      validateColumns(rows, BATTING_REQUIRED, `Batting (${file.originalname})`);
+      logs.push(`  → ${rows.length} records found`);
+
+      const fileBase = filenameToBase(file.originalname);
+      const groups = groupRowsByTournament(rows, fileBase);
+
+      for (const [tid, group] of groups) {
+        if (!allBatting.has(tid)) {
+          allBatting.set(tid, { meta: group.meta, rows: [] });
+        }
+        allBatting.get(tid).rows.push(...group.rows);
+        logs.push(`  → Tournament detected: "${group.meta.tournamentName}" (${tid}) — ${group.rows.length} batting rows`);
+      }
+    }
+
+    // Aggregate bowling rows
+    const allBowling = new Map(); // tournamentId → { meta, rows[] }
+    for (const file of bowlingFiles) {
+      logs.push(`Reading bowling file: ${file.originalname}`);
+      const rows = parseFileToRows(file.buffer, file.originalname);
+      validateColumns(rows, BOWLING_REQUIRED, `Bowling (${file.originalname})`);
+      logs.push(`  → ${rows.length} records found`);
+
+      const fileBase = filenameToBase(file.originalname);
+      const groups = groupRowsByTournament(rows, fileBase);
+
+      for (const [tid, group] of groups) {
+        if (!allBowling.has(tid)) {
+          allBowling.set(tid, { meta: group.meta, rows: [] });
+        }
+        allBowling.get(tid).rows.push(...group.rows);
+        logs.push(`  → Tournament detected: "${group.meta.tournamentName}" (${tid}) — ${group.rows.length} bowling rows`);
+      }
+    }
+
+    // Merge all known tournament IDs
+    const allIds = new Set([...allBatting.keys(), ...allBowling.keys()]);
+    const tournaments = [];
+    for (const tid of allIds) {
+      const bMeta = allBatting.get(tid)?.meta;
+      const wMeta = allBowling.get(tid)?.meta;
+      const meta = bMeta || wMeta;
+      tournaments.push({
+        tournamentId:   meta.tournamentId,
+        tournamentName: meta.tournamentName,
+        year:           meta.year,
+        battingCount:   allBatting.get(tid)?.rows.length ?? 0,
+        bowlingCount:   allBowling.get(tid)?.rows.length ?? 0,
+        status:         'on-going',
+      });
+    }
+
+    // Sort by year desc, then name
+    tournaments.sort((a, b) => b.year.localeCompare(a.year) || a.tournamentName.localeCompare(b.tournamentName));
+
+    // Store parsed data in session
+    const sessionId = crypto.randomBytes(8).toString('hex');
+    parsedSessions.set(sessionId, {
+      createdAt: Date.now(),
+      batting: allBatting,
+      bowling: allBowling,
+    });
+
+    logs.push(`Detected ${tournaments.length} tournament(s) across all uploaded files`);
+    res.json({ sessionId, tournaments, logs });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/generate
+ * Body: { sessionId, competition, tournaments: [{tournamentId, tournamentName, year, status}] }
+ * Uses the server-stored parsed data from sessionId.
+ */
+app.post('/api/generate', express.json(), (req, res) => {
+  try {
+    const { sessionId, competition, tournaments } = req.body;
+
+    if (!sessionId || !parsedSessions.has(sessionId)) {
+      return res.status(400).json({ error: 'Session expired or not found. Please re-upload your files.' });
+    }
     if (!competition || !COMPETITIONS[competition]) {
       return res.status(400).json({ error: 'Invalid competition' });
     }
+    if (!tournaments || tournaments.length === 0) {
+      return res.status(400).json({ error: 'No tournaments provided' });
+    }
 
-    const competitionConfig = COMPETITIONS[competition];
+    const session = parsedSessions.get(sessionId);
+    const config = COMPETITIONS[competition];
     const logs = [];
     const dataEntries = [];
 
-    logs.push(`Reading competition: ${competition} (${competitionConfig.fullName})`);
+    logs.push(`Generating JSON for: ${competition} (${config.fullName})`);
 
-    for (let i = 0; i < tournaments.length; i++) {
-      const t = tournaments[i];
-      logs.push(`Processing tournament ${i + 1}: ${t.tournamentName}`);
+    for (const t of tournaments) {
+      logs.push(`Processing tournament: ${t.tournamentName} (${t.tournamentId})`);
 
-      const battingFile = req.files[`batting_${i}`]?.[0];
-      const bowlingFile = req.files[`bowling_${i}`]?.[0];
+      const rawBatting = session.batting.get(t.tournamentId)?.rows || [];
+      const rawBowling = session.bowling.get(t.tournamentId)?.rows || [];
 
-      if (!battingFile) throw new Error(`Tournament "${t.tournamentName}": batting file missing`);
-      if (!bowlingFile) throw new Error(`Tournament "${t.tournamentName}": bowling file missing`);
+      if (rawBatting.length === 0) logs.push(`  Warning: no batting records for ${t.tournamentId}`);
+      if (rawBowling.length === 0) logs.push(`  Warning: no bowling records for ${t.tournamentId}`);
 
-      logs.push(`Validating batting file: ${battingFile.originalname}`);
-      const battingRows = parseFileToRows(battingFile.buffer, battingFile.originalname);
-      validateColumns(battingRows, BATTING_REQUIRED, `Batting (${t.tournamentName})`);
-      logs.push(`Batting file valid — ${battingRows.length} records`);
+      const batting = rawBatting.map((row, i) => ({ rank: i + 1, ...mapRow(row, BATTING_MAP) }));
+      const bowling = rawBowling.map((row, i) => ({ rank: i + 1, ...mapRow(row, BOWLING_MAP) }));
 
-      logs.push(`Validating bowling file: ${bowlingFile.originalname}`);
-      const bowlingRows = parseFileToRows(bowlingFile.buffer, bowlingFile.originalname);
-      validateColumns(bowlingRows, BOWLING_REQUIRED, `Bowling (${t.tournamentName})`);
-      logs.push(`Bowling file valid — ${bowlingRows.length} records`);
-
-      logs.push(`Generating JSON for ${t.tournamentName}...`);
-      const batting = mapBattingRows(battingRows);
-      const bowling = mapBowlingRows(bowlingRows);
+      logs.push(`  Batting: ${batting.length} records | Bowling: ${bowling.length} records`);
 
       dataEntries.push({
-        year: t.year,
-        tournamentId: t.tournamentId,
+        year:           t.year,
+        tournamentId:   t.tournamentId,
         tournamentName: t.tournamentName,
-        status: t.status,
+        status:         t.status || 'on-going',
         batting,
         bowling,
       });
@@ -213,7 +346,7 @@ app.post('/api/generate', upload.fields(buildUploadFields()), (req, res) => {
     const now = new Date().toISOString();
     const result = {
       competition,
-      fullName: competitionConfig.fullName,
+      fullName: config.fullName,
       lastUpdated: now,
       data: dataEntries,
     };
@@ -222,7 +355,7 @@ app.post('/api/generate', upload.fields(buildUploadFields()), (req, res) => {
     const totalBowling = dataEntries.reduce((s, e) => s + e.bowling.length, 0);
 
     logs.push(`JSON generated successfully`);
-    logs.push(`Tournaments: ${dataEntries.length} | Batting records: ${totalBatting} | Bowling records: ${totalBowling}`);
+    logs.push(`Tournaments: ${dataEntries.length} | Batting: ${totalBatting} | Bowling: ${totalBowling}`);
 
     res.json({
       success: true,
@@ -230,8 +363,8 @@ app.post('/api/generate', upload.fields(buildUploadFields()), (req, res) => {
       json: result,
       summary: {
         competition,
-        fullName: competitionConfig.fullName,
-        outputFileName: competitionConfig.outputFileName,
+        fullName: config.fullName,
+        outputFileName: config.outputFileName,
         tournamentsCount: dataEntries.length,
         totalBatting,
         totalBowling,
@@ -248,52 +381,43 @@ app.get('/api/existing-json/:competition', (req, res) => {
   const competition = decodeURIComponent(req.params.competition);
   const config = COMPETITIONS[competition];
   if (!config) return res.status(400).json({ error: 'Unknown competition' });
-
   const filePath = path.join(REPO_ROOT, config.targetRepoPath);
-  if (!fs.existsSync(filePath)) {
-    return res.json({ exists: false });
-  }
+  if (!fs.existsSync(filePath)) return res.json({ exists: false });
   try {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    res.json({ exists: true, data });
-  } catch (e) {
+    res.json({ exists: true, data: JSON.parse(fs.readFileSync(filePath, 'utf8')) });
+  } catch {
     res.status(500).json({ error: 'Failed to read existing JSON' });
   }
 });
 
 // POST /api/save-backup-and-replace
-app.post('/api/save-backup-and-replace', express.json({ limit: '50mb' }), (req, res) => {
+app.post('/api/save-backup-and-replace', (req, res) => {
   try {
     const { competition, newJson } = req.body;
     if (!competition || !newJson) return res.status(400).json({ error: 'Missing competition or newJson' });
-
     const config = COMPETITIONS[competition];
     if (!config) return res.status(400).json({ error: 'Unknown competition' });
 
-    const targetPath = path.join(REPO_ROOT, config.targetRepoPath);
-    const backupDirPath = path.join(REPO_ROOT, config.backupDir);
+    const targetPath  = path.join(REPO_ROOT, config.targetRepoPath);
+    const backupDir   = path.join(REPO_ROOT, config.backupDir);
     const logs = [];
 
-    fs.mkdirSync(backupDirPath, { recursive: true });
+    fs.mkdirSync(backupDir, { recursive: true });
 
-    // Backup existing JSON if it exists
     let backupPath = null;
     if (fs.existsSync(targetPath)) {
       const now = new Date();
       const dateStr = now.toISOString().slice(0, 10);
       const timeStr = now.toTimeString().slice(0, 5).replace(':', '');
       const backupName = `${path.basename(config.outputFileName, '.json')}-${dateStr}-${timeStr}.json`;
-      backupPath = path.join(backupDirPath, backupName);
+      backupPath = path.join(backupDir, backupName);
       fs.copyFileSync(targetPath, backupPath);
       logs.push(`Backup created: ${config.backupDir}/${backupName}`);
     } else {
       logs.push('No existing file to backup — creating new file');
     }
 
-    // Ensure target directory exists
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-
-    // Write new JSON
     fs.writeFileSync(targetPath, JSON.stringify(newJson, null, 2), 'utf8');
     logs.push(`Repo JSON replaced: ${config.targetRepoPath}`);
 
@@ -309,10 +433,8 @@ app.post('/api/push-github', (req, res) => {
   if (!competition || !COMPETITIONS[competition]) {
     return res.status(400).json({ error: 'Unknown competition' });
   }
-
   const config = COMPETITIONS[competition];
   const logs = [];
-
   try {
     const today = new Date().toISOString().slice(0, 10);
 
@@ -320,13 +442,11 @@ app.post('/api/push-github', (req, res) => {
     execSync('git pull origin main', { cwd: REPO_ROOT, stdio: 'pipe' });
     logs.push('git pull completed');
 
-    const targetFile = config.targetRepoPath;
-    logs.push(`Running: git add ${targetFile}`);
-    execSync(`git add "${targetFile}"`, { cwd: REPO_ROOT, stdio: 'pipe' });
+    logs.push(`Running: git add ${config.targetRepoPath}`);
+    execSync(`git add "${config.targetRepoPath}"`, { cwd: REPO_ROOT, stdio: 'pipe' });
 
-    const backupGlob = `${config.backupDir}/`;
-    logs.push(`Running: git add ${backupGlob}`);
-    execSync(`git add "${backupGlob}"`, { cwd: REPO_ROOT, stdio: 'pipe' });
+    logs.push(`Running: git add ${config.backupDir}/`);
+    execSync(`git add "${config.backupDir}/"`, { cwd: REPO_ROOT, stdio: 'pipe' });
 
     const commitMsg = `Update ${competition} stats JSON - ${today}`;
     logs.push(`Running: git commit -m "${commitMsg}"`);
@@ -339,17 +459,10 @@ app.post('/api/push-github', (req, res) => {
 
     res.json({ success: true, logs });
   } catch (err) {
-    const stderr = err.stderr?.toString() || '';
-    const stdout = err.stdout?.toString() || '';
-    const detail = stderr || stdout || err.message;
+    const detail = err.stderr?.toString() || err.stdout?.toString() || err.message;
     logs.push(`Error: ${detail}`);
     res.status(500).json({ error: detail, logs });
   }
-});
-
-// GET /api/competitions
-app.get('/api/competitions', (req, res) => {
-  res.json(COMPETITIONS);
 });
 
 const PORT = process.env.PORT || 3001;
