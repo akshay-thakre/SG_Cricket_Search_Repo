@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAnyPlayerStats } from '../services/apiService';
+import { calculatePerformanceAcrossAllLeagues } from '../utils/aggregatePlayerStats';
 
-// ── Stats format normalizer ───────────────────────────────────────────────────
+// ── Stats format normalizer ─────────────────────────────────────────────────────
 // SCA returns batting/bowling as plain objects.
 // Sportygo returns them as arrays of per-series rows + player.totals.
 // This function converts Sportygo format to the SCA shape so the card renders identically.
@@ -45,12 +46,57 @@ function normalizeStats(raw) {
   };
 }
 
-// ── Main aggregated results component ────────────────────────────────────────
+// ── Main aggregated results component ────────────────────────────────────────────
 
 export function AggregatedResults({ searchResults }) {
   const { query, results, totalFound, meta } = searchResults;
 
   const [expandedPlatform, setExpandedPlatform] = useState(null);
+
+  // Track SCA live stats together with the query they belong to so we never
+  // show stale stats from a previous search during the brief gap before the
+  // new query's useEffect fires.
+  const [scaLiveState, setScaLiveState] = useState({ fetchedQuery: null, loading: false, stats: [] });
+
+  useEffect(() => {
+    let cancelled = false;
+    const scaPlatform = results?.['SCA'];
+    const livePlayers = scaPlatform?.players?.filter((p) => p.source === 'sca') || [];
+
+    if (livePlayers.length === 0) {
+      setScaLiveState({ fetchedQuery: query, loading: false, stats: [] });
+      return () => { cancelled = true; };
+    }
+
+    // Mark in-flight — fetchedQuery intentionally left as previous value so
+    // the stale-check below triggers the loading indicator immediately.
+    setScaLiveState((prev) => ({ ...prev, loading: true }));
+
+    Promise.allSettled(
+      livePlayers.map((p) => fetchAnyPlayerStats(p).then((data) => normalizeStats(data)))
+    ).then((outcomes) => {
+      if (cancelled) return;
+      const resolved = outcomes
+        .filter((o) => o.status === 'fulfilled' && o.value)
+        .map((o) => o.value);
+      setScaLiveState({ fetchedQuery: query, loading: false, stats: resolved });
+    });
+
+    return () => { cancelled = true; };
+  // results is stable for a given query; omitting it avoids re-fetching on every parent re-render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  // Derive loading state and stats for the current query.
+  // If fetchedQuery !== query the previous search's data is stale — treat as loading.
+  const hasScaLivePlayers = !!(
+    results?.['SCA'] &&
+    !results['SCA'].noResults &&
+    results['SCA'].players?.some((p) => p.source === 'sca')
+  );
+  const scaIsStale        = scaLiveState.fetchedQuery !== query;
+  const scaLiveLoading    = hasScaLivePlayers && (scaIsStale || scaLiveState.loading);
+  const scaLiveStatsArray = scaIsStale ? [] : scaLiveState.stats;
 
   if (!results || Object.keys(results).length === 0) return null;
 
@@ -94,6 +140,12 @@ export function AggregatedResults({ searchResults }) {
       <div style={{ display: 'grid', gap: '1.5rem' }}>
         {Object.entries(results)
           .filter(([, p]) => !p.noResults || p.error)
+          .sort(([a], [b]) => {
+            const order = ['YPL', 'BPL', 'SG IA', 'SCA'];
+            const ai = order.indexOf(a);
+            const bi = order.indexOf(b);
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+          })
           .map(([platformKey, platformData]) => (
             <PlatformSection
               key={platformKey}
@@ -104,12 +156,17 @@ export function AggregatedResults({ searchResults }) {
               }
             />
           ))}
+        <PerformanceAcrossAllLeagues
+          results={results}
+          scaLiveStatsArray={scaLiveStatsArray}
+          scaLiveLoading={scaLiveLoading}
+        />
       </div>
     </div>
   );
 }
 
-// ── Platform section ──────────────────────────────────────────────────────────
+// ── Platform section ────────────────────────────────────────────────────────────────
 
 function PlatformSection({ platformData, isExpanded, onToggle }) {
   const { platformName, count, players, noResults, icon, disabled, disabledReason, error } = platformData;
@@ -234,7 +291,7 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
   );
 }
 
-// ── Player card with auto-fetched stats ───────────────────────────────────────
+// ── Player card with auto-fetched stats ──────────────────────────────────────────────
 
 function PlayerCard({ player, platformName, isLast }) {
   const { id, name, team, role, profileUrl, verified } = player;
@@ -426,7 +483,7 @@ function PlayerCard({ player, platformName, isLast }) {
   );
 }
 
-// ── Competition/season breakdown ──────────────────────────────────────────────
+// ── Competition/season breakdown ───────────────────────────────────────────────────────
 
 function CompetitionsPanel({ competitions }) {
   const [open, setOpen] = useState(false);
@@ -474,7 +531,7 @@ function CompetitionsPanel({ competitions }) {
   );
 }
 
-// ── Expandable section (for full batting/bowling details) ─────────────────────
+// ── Expandable section (for full batting/bowling details) ─────────────────────────────
 
 function ExpandableSection({ label, accentColor, children }) {
   const [open, setOpen] = useState(false);
@@ -497,7 +554,7 @@ function ExpandableSection({ label, accentColor, children }) {
   );
 }
 
-// ── Stat box ──────────────────────────────────────────────────────────────────
+// ── Stat box ─────────────────────────────────────────────────────────────────────
 
 function StatBox({ label, value, highlight = false, color = '#0066cc', small = false }) {
   const displayValue = value !== null && value !== undefined ? String(value) : 'N/A';
@@ -520,7 +577,7 @@ function StatBox({ label, value, highlight = false, color = '#0066cc', small = f
   );
 }
 
-// ── YPL Static player card ────────────────────────────────────────────────────
+// ── YPL Static player card ────────────────────────────────────────────────────────────────
 // Renders pre-loaded batting + bowling stats from the Assasins CC static dataset.
 // No API call is made — all data is bundled in player.inlineStats.
 
@@ -713,7 +770,7 @@ const arrowStyle = {
   display: 'inline-block', transition: 'transform 0.15s',
 };
 
-// ── SG IA Static player card ──────────────────────────────────────────────────
+// ── SG IA Static player card ────────────────────────────────────────────────────────────────
 // Renders per-tournament batting + bowling stats from the SG IA static dataset.
 // No API call — all data is bundled in player.entries[].
 
@@ -770,7 +827,7 @@ function SGIAPlayerCard({ player, isLast }) {
         borderTop: '1px solid #fecaca',
         fontSize: '11px', color: '#dc2626',
       }}>
-        Singapore Indian Association · Season 2025 · Static Data (updated ~15 days)
+        Singapore Indian Association · Season 2025 · Updated daily at 6:00 AM SGT
       </div>
     </div>
   );
@@ -809,7 +866,7 @@ function SGIATournamentEntry({ entry, isLast, d }) {
         {status === 'on-going' && (
           <span style={{
             fontSize: '10px', color: '#64748b', fontStyle: 'italic', marginLeft: '0.25rem',
-          }}>Stats updated every 15 days. Last update: 4th June.</span>
+          }}>Updated daily at 6:00 AM SGT</span>
         )}
       </div>
 
@@ -869,7 +926,7 @@ function SGIATournamentEntry({ entry, isLast, d }) {
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────────────
 
 function fmt(val) {
   if (val === null || val === undefined) return null;
@@ -877,7 +934,7 @@ function fmt(val) {
   return isNaN(n) ? val : n.toFixed(2).replace(/\.?0+$/, '');
 }
 
-// ── BPL 2025 player card (static, no API fetch) ───────────────────────────────
+// ── BPL 2025 player card (static, no API fetch) ──────────────────────────────────────────
 
 function BPLPlayerCard({ player, isLast }) {
   const { name, team, batting, bowling } = player;
@@ -918,6 +975,8 @@ function BPLPlayerCard({ player, isLast }) {
           <span style={{ fontSize: '9px', color: '#c4b5fd' }}>Updated daily at 6:00 AM SGT</span>
         </div>
       </div>
+
+      {/* Summary */}
       <div style={{ padding: '1rem 1.25rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
           {hasBatting && (
@@ -1012,7 +1071,7 @@ function BPLPlayerCard({ player, isLast }) {
   );
 }
 
-// ── SCA Corporate player card (static, no API fetch) ─────────────────────────
+// ── SCA Corporate player card (static, no API fetch) ─────────────────────────────
 
 function SCACorpPlayerCard({ player, isLast }) {
   const { name, team, seasons = [] } = player;
@@ -1189,6 +1248,139 @@ function SCACorpSeasonDetail({ season }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Performance across all leagues panel ──────────────────────────────────────────────
+
+function PerformanceAcrossAllLeagues({ results, scaLiveStatsArray, scaLiveLoading }) {
+  const hasScaLivePlayers = !!(
+    results?.['SCA'] &&
+    !results['SCA'].noResults &&
+    results['SCA'].players?.some((p) => p.source === 'sca')
+  );
+  const awaitingSca = hasScaLivePlayers && scaLiveLoading;
+
+  const agg = awaitingSca ? null : calculatePerformanceAcrossAllLeagues(results, scaLiveStatsArray);
+
+  const totalRuns       = agg?.totalRuns    ?? 0;
+  const totalMatches    = agg?.totalMatches ?? 0;
+  const totalInnings    = agg?.totalInnings ?? 0;
+  const totalWickets    = agg?.totalWickets ?? 0;
+  const ambiguousLeagues = agg?.ambiguousLeagues ?? [];
+
+  const hasAnyData = totalRuns > 0 || totalMatches > 0 || totalInnings > 0 || totalWickets > 0;
+
+  return (
+    <div style={{
+      backgroundColor: '#f5f8fc',
+      border: '2px solid #c7d5e8',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      boxShadow: '0 2px 8px rgba(6, 28, 84, 0.10)',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '1.25rem 1.5rem',
+        backgroundColor: '#e8f0fb',
+        borderBottom: '1px solid #c7d5e8',
+        display: 'flex', alignItems: 'center', gap: '0.75rem',
+      }}>
+        <div style={{
+          width: '38px', height: '38px', borderRadius: '50%',
+          backgroundColor: '#dbeafe',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '18px', flexShrink: 0,
+        }}>📊</div>
+        <div>
+          <div style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>
+            Performance across all leagues
+          </div>
+          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+            YPL · BPL · SG IA · SCA
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '1.25rem 1.5rem' }}>
+        {awaitingSca ? (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.75rem',
+            padding: '0.75rem 1rem', backgroundColor: '#fefce8',
+            border: '1px solid #fef08a', borderRadius: '8px',
+            color: '#92400e', fontSize: '13px', fontWeight: '500',
+          }}>
+            <span style={{ fontSize: '16px', display: 'inline-block', animation: 'statspin 1s linear infinite' }}>⟳</span>
+            Calculating — awaiting stats from SCA to calculate.
+          </div>
+        ) : !hasAnyData ? (
+          <div style={{ color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', textAlign: 'center', padding: '0.5rem 0' }}>
+            No aggregated stats available for this search.
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gap: '0.75rem',
+          }}>
+            <AggStatBox label="Total Runs"    value={totalRuns}    color="#0066cc" />
+            <AggStatBox label="Total Matches" value={totalMatches} color="#16a34a" />
+            <AggStatBox label="Total Innings" value={totalInnings} color="#1e293b" />
+            <AggStatBox label="Total Wickets" value={totalWickets} color="#7c3aed" />
+          </div>
+        )}
+
+        {!awaitingSca && agg?.leaguesContributed?.length > 0 && (
+          <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8' }}>
+            Leagues contributing: {agg.leaguesContributed.join(' · ')}
+          </div>
+        )}
+
+        {!awaitingSca && ambiguousLeagues.length > 0 && (
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.6rem 0.875rem',
+            backgroundColor: '#fff7ed',
+            border: '1px solid #fed7aa',
+            borderRadius: '6px',
+            fontSize: '12px',
+            color: '#92400e',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.4rem',
+          }}>
+            <span style={{ flexShrink: 0 }}>⚠️</span>
+            <span>
+              <strong>{ambiguousLeagues.join(', ')}</strong> not included — multiple players match.
+              Refine your search for accurate aggregation.
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AggStatBox({ label, value, color }) {
+  return (
+    <div style={{
+      backgroundColor: '#ffffff',
+      border: '1px solid #d0dae8',
+      borderRadius: '8px',
+      padding: '0.875rem 0.5rem',
+      textAlign: 'center',
+    }}>
+      <div style={{ fontSize: '22px', fontWeight: '800', color }}>
+        {value}
+      </div>
+      <div style={{
+        fontSize: '9px', color: '#64748b', fontWeight: '600',
+        marginTop: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.06em',
+      }}>
+        {label}
+      </div>
     </div>
   );
 }
