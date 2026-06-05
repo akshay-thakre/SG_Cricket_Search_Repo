@@ -417,6 +417,226 @@ input[type="file"]::file-selector-button {
   flex: 1;
 }
 
+/* Step hint */
+.step-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.step-hint strong { color: #94a3b8; }
+.step-hint code {
+  background: #0f1117;
+  border: 1px solid #2d3748;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 0.78rem;
+  color: #38bdf8;
+}
+
+/* Upload grid */
+.upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .upload-grid { grid-template-columns: 1fr; }
+}
+
+/* Drop zone */
+.dropzone {
+  border: 2px dashed #2d3748;
+  border-radius: 10px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.dropzone:hover, .dropzone.dragging {
+  border-color: #38bdf8;
+  background: #0c2036;
+}
+
+.dropzone-icon { font-size: 1.6rem; }
+
+.dropzone-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.dropzone-hint {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+.file-list {
+  list-style: none;
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0f1117;
+  border: 1px solid #2d3748;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.file-chip {
+  font-size: 0.75rem;
+  color: #38bdf8;
+  word-break: break-all;
+  text-align: left;
+}
+
+.remove-file-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.remove-file-btn:hover { color: #f87171; }
+
+/* Hint box */
+.hint-box {
+  background: #0c1929;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 14px;
+  line-height: 1.5;
+}
+
+.hint-box strong { color: #94a3b8; }
+.hint-box code {
+  background: #0f1117;
+  border: 1px solid #2d3748;
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: #38bdf8;
+}
+
+/* Tournament review table */
+.review-table-wrap {
+  overflow-x: auto;
+}
+
+.review-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.review-table th {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 8px 10px;
+  border-bottom: 1px solid #2d3748;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.review-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #1a2234;
+  vertical-align: middle;
+}
+
+.review-table tr:last-child td { border-bottom: none; }
+.review-table tr:hover td { background: #131929; }
+
+.inline-input {
+  background: #0f1117;
+  border: 1px solid #2d3748;
+  border-radius: 4px;
+  color: #e2e8f0;
+  padding: 5px 7px;
+  font-size: 0.8rem;
+  width: 100%;
+  min-width: 100px;
+  outline: none;
+}
+
+.inline-input.wide  { min-width: 180px; }
+.inline-input.narrow { min-width: 60px; max-width: 80px; }
+.inline-input:focus { border-color: #38bdf8; }
+
+.inline-select {
+  background: #0f1117;
+  border: 1px solid #2d3748;
+  border-radius: 4px;
+  color: #e2e8f0;
+  padding: 5px 6px;
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.inline-select:focus { border-color: #38bdf8; }
+
+.count-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.count-badge.good { background: #052e16; color: #4ade80; }
+.count-badge.warn { background: #451a03; color: #fb923c; }
+
+.review-hint {
+  font-size: 0.75rem;
+  color: #475569;
+  margin-top: 10px;
+}
+
+/* Sub-sections inside a card */
+.sub-section { margin-bottom: 4px; }
+.sub-section h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+/* Backup notice */
+.backup-notice {
+  font-size: 0.78rem;
+  color: #fbbf24;
+  background: #1c1200;
+  border: 1px solid #78350f;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-top: 8px;
+}
+
 /* Spinner */
 .spinner {
   display: inline-block;
