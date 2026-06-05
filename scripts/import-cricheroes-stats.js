@@ -133,7 +133,7 @@ function detectTabType(filePath) {
 function findExcelFiles(dir) {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
-    .filter((f) => /\.(xls|xlsx)$/i.test(f) && !f.startsWith('~$'))
+    .filter((f) => /\.(xls|xlsx|csv)$/i.test(f) && !f.startsWith('~$'))
     .map((f) => path.join(dir, f));
 }
 
