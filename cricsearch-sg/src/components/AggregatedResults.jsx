@@ -45,12 +45,249 @@ function normalizeStats(raw) {
   };
 }
 
+// ── Cross-league aggregation helpers ─────────────────────────────────────────
+
+function checkNameFeasibility(query, allPlayers) {
+  const queryWords = query.trim().toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+  if (queryWords.length === 0) return { feasible: true, failedNames: [] };
+  const failedNames = allPlayers
+    .filter(p => {
+      const name = (p.name || '').toLowerCase();
+      return !queryWords.some(w => name.includes(w));
+    })
+    .map(p => p.name);
+  return { feasible: failedNames.length === 0, failedNames };
+}
+
+function normalizeForAgg(player, scaStatsMap) {
+  const src = player.source;
+
+  if (src === 'sca') {
+    const stats = scaStatsMap.get(player.id);
+    if (!stats) return { batting: null, bowling: null };
+    const b = stats.batting;
+    const bwl = stats.bowling;
+    const balls = (b && b.runs != null && b.strikeRate)
+      ? Math.round((b.runs / b.strikeRate) * 100) : null;
+    return {
+      batting: b ? { mat: b.matches||0, inns: b.innings||0, notOuts: b.notOuts||0, runs: b.runs||0, balls: balls||0 } : null,
+      bowling: bwl ? { overs: bwl.overs||0, runs: bwl.runs||0, wickets: bwl.wickets||0 } : null,
+    };
+  }
+
+  if (src === 'sgia-static') {
+    let mat=0, inns=0, notOuts=0, runs=0, balls=0, overs=0, runsConceded=0, wickets=0;
+    let hasBat=false, hasBowl=false;
+    for (const entry of player.entries || []) {
+      if (entry.batting) { hasBat=true; mat+=entry.batting.mat||0; inns+=entry.batting.inns||0; notOuts+=entry.batting.no||0; runs+=entry.batting.runs||0; balls+=entry.batting.balls||0; }
+      if (entry.bowling) { hasBowl=true; overs+=entry.bowling.overs||0; runsConceded+=entry.bowling.runs||0; wickets+=entry.bowling.wickets||0; }
+    }
+    return {
+      batting: hasBat ? { mat, inns, notOuts, runs, balls } : null,
+      bowling: hasBowl ? { overs, runs: runsConceded, wickets } : null,
+    };
+  }
+
+  if (src === 'bpl-static') {
+    const b = player.batting;
+    const bwl = player.bowling;
+    return {
+      batting: (b && b.inns > 0) ? { mat: b.mat||0, inns: b.inns||0, notOuts: b.no||0, runs: b.runs||0, balls: b.balls||0 } : null,
+      bowling: (bwl && bwl.inns > 0) ? { overs: bwl.overs||0, runs: bwl.runs||0, wickets: bwl.wickets||0 } : null,
+    };
+  }
+
+  if (src === 'ypl-static') {
+    const b = player.inlineStats?.batting;
+    const bwl = player.inlineStats?.bowling;
+    return {
+      batting: (b && b.innings > 0) ? { mat: b.matches||0, inns: b.innings||0, notOuts: b.not_outs||0, runs: b.runs||0, balls: b.balls||0 } : null,
+      bowling: (bwl && bwl.innings > 0) ? { overs: bwl.overs||0, runs: bwl.runs_conceded||0, wickets: bwl.wickets||0 } : null,
+    };
+  }
+
+  if (src === 'sca-corporate') {
+    let mat=0, inns=0, notOuts=0, runs=0, balls=0, overs=0, runsConceded=0, wickets=0;
+    let hasBat=false, hasBowl=false;
+    for (const s of player.seasons || []) {
+      if (s.batting) { hasBat=true; mat+=s.batting.mat||0; inns+=s.batting.inns||0; notOuts+=s.batting.not_outs||0; runs+=s.batting.runs||0; balls+=s.batting.balls||0; }
+      if (s.bowling) { hasBowl=true; overs+=s.bowling.overs||0; runsConceded+=s.bowling.runs||0; wickets+=s.bowling.wkts||0; }
+    }
+    return {
+      batting: hasBat ? { mat, inns, notOuts, runs, balls } : null,
+      bowling: hasBowl ? { overs, runs: runsConceded, wickets } : null,
+    };
+  }
+
+  return { batting: null, bowling: null };
+}
+
+function aggregateAll(normalizedList) {
+  let mat=0, inns=0, notOuts=0, runs=0, balls=0, overs=0, runsConceded=0, wickets=0;
+  let hasBat=false, hasBowl=false;
+  for (const n of normalizedList) {
+    if (n.batting) { hasBat=true; mat+=n.batting.mat; inns+=n.batting.inns; notOuts+=n.batting.notOuts; runs+=n.batting.runs; balls+=n.batting.balls; }
+    if (n.bowling) { hasBowl=true; overs+=n.bowling.overs; runsConceded+=n.bowling.runs; wickets+=n.bowling.wickets; }
+  }
+  const dismissals = inns - notOuts;
+  const d = (v, dec=2) => (v == null || isNaN(v) ? '—' : Number(v).toFixed(dec));
+  return {
+    hasBat, hasBowl,
+    batting: {
+      mat, inns, notOuts, runs, balls,
+      avg:  dismissals > 0 ? d(runs / dismissals) : '—',
+      sr:   balls > 0      ? d((runs / balls) * 100) : '—',
+    },
+    bowling: {
+      overs: d(overs, 1), runs: runsConceded, wickets,
+      econ: overs > 0   ? d(runsConceded / overs) : '—',
+      sr:   wickets > 0 ? d((overs * 6) / wickets, 1) : '—',
+    },
+  };
+}
+
+// ── Cross-league panel ────────────────────────────────────────────────────────
+
+function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
+  const [showPanel, setShowPanel] = useState(false);
+
+  // Collect all players across all platforms
+  const allPlayers = Object.values(results).flatMap(p => p.players || []);
+  if (allPlayers.length === 0) return null;
+
+  const { feasible, failedNames } = checkNameFeasibility(query, allPlayers);
+
+  if (!feasible) {
+    return (
+      <div style={{
+        marginTop: '1.5rem', padding: '1rem 1.25rem',
+        backgroundColor: '#fef9ec', border: '1px solid #fcd34d',
+        borderRadius: '10px', fontSize: '13px', color: '#92400e',
+      }}>
+        <strong>Cross-league aggregation not feasible</strong> — name check failed for:{' '}
+        <em>{failedNames.join(', ')}</em>. Results contain players with names unrelated to the search query.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: '1.5rem' }}>
+      {!allLoaded ? (
+        <button disabled style={{
+          display: 'flex', alignItems: 'center', gap: '0.6rem',
+          padding: '0.75rem 1.5rem', borderRadius: '8px',
+          backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1',
+          color: '#64748b', fontSize: '13px', fontWeight: '600', cursor: 'not-allowed',
+        }}>
+          <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #94a3b8', borderTopColor: '#0066cc', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          Waiting for data load...
+        </button>
+      ) : (
+        <button
+          onClick={() => setShowPanel(v => !v)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.6rem',
+            padding: '0.75rem 1.5rem', borderRadius: '8px',
+            backgroundColor: showPanel ? '#e8f1ff' : '#0066cc',
+            border: `1px solid ${showPanel ? '#bcd0f0' : '#0050aa'}`,
+            color: showPanel ? '#0066cc' : '#fff',
+            fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s',
+          }}
+        >
+          <span>✅</span>
+          {showPanel ? 'Hide cross-league performance' : 'Data load complete — View performance across leagues'}
+        </button>
+      )}
+
+      {allLoaded && showPanel && (() => {
+        const normalized = allPlayers.map(p => normalizeForAgg(p, scaStatsMap));
+        const agg = aggregateAll(normalized);
+        return <AggregatedStatsPanel agg={agg} playerName={query} />;
+      })()}
+    </div>
+  );
+}
+
+function AggregatedStatsPanel({ agg, playerName }) {
+  const { batting: b, bowling: bwl, hasBat, hasBowl } = agg;
+
+  const Cell = ({ label, value, accent }) => (
+    <div style={{
+      backgroundColor: '#fff', border: '1px solid #d0dae8', borderRadius: '10px',
+      padding: '1rem', textAlign: 'center', boxShadow: '0 1px 3px rgba(6,28,84,0.05)',
+    }}>
+      <div style={{ fontSize: '22px', fontWeight: '700', color: accent || '#0066cc' }}>{value}</div>
+      <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '4px' }}>{label}</div>
+    </div>
+  );
+
+  return (
+    <div style={{
+      marginTop: '1rem', padding: '1.25rem',
+      backgroundColor: '#f5f8fc', border: '1px solid #d0dae8',
+      borderRadius: '12px', boxShadow: '0 2px 8px rgba(6,28,84,0.07)',
+    }}>
+      <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        Aggregated performance across all leagues
+      </div>
+
+      {hasBat && (
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: '#0066cc', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>🏏 Batting</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
+            <Cell label="Matches"   value={b.mat} />
+            <Cell label="Runs"      value={b.runs} />
+            <Cell label="Bat Avg"   value={b.avg} />
+            <Cell label="Bat SR"    value={b.sr} />
+          </div>
+        </div>
+      )}
+
+      {hasBowl && (
+        <div>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>⚡ Bowling</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
+            <Cell label="Overs"     value={bwl.overs}   accent="#7c3aed" />
+            <Cell label="Wickets"   value={bwl.wickets} accent="#7c3aed" />
+            <Cell label="Economy"   value={bwl.econ}    accent="#7c3aed" />
+            <Cell label="Bowl SR"   value={bwl.sr}      accent="#7c3aed" />
+          </div>
+        </div>
+      )}
+
+      {!hasBat && !hasBowl && (
+        <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '1rem 0' }}>
+          No stats available to aggregate.
+        </div>
+      )}
+
+      <div style={{ marginTop: '0.75rem', fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>
+        Batting avg = runs ÷ dismissals · Batting SR = (runs ÷ balls) × 100 ·
+        Economy = runs ÷ overs · Bowl SR = balls ÷ wickets.
+        SCA live balls estimated from runs ÷ strike rate.
+      </div>
+    </div>
+  );
+}
+
 // ── Main aggregated results component ────────────────────────────────────────
 
 export function AggregatedResults({ searchResults }) {
   const { query, results, totalFound, meta } = searchResults;
 
   const [expandedPlatform, setExpandedPlatform] = useState(null);
+  const [scaStatsMap, setScaStatsMap]           = useState(new Map());
+  const [resolvedCount, setResolvedCount]       = useState(0);
+
+  // Count SCA live players that need async stats fetch
+  const scaLivePlayers = (results['SCA']?.players || []).filter(p => p.source === 'sca');
+  const totalScaLive   = scaLivePlayers.length;
+  const allLoaded      = totalScaLive === 0 || resolvedCount >= totalScaLive;
+
+  function handleStatsResolved(playerId, stats) {
+    setScaStatsMap(prev => { const m = new Map(prev); m.set(playerId, stats); return m; });
+    setResolvedCount(prev => prev + 1);
+  }
 
   if (!results || Object.keys(results).length === 0) return null;
 
@@ -102,16 +339,24 @@ export function AggregatedResults({ searchResults }) {
               onToggle={() =>
                 setExpandedPlatform(expandedPlatform === platformKey ? null : platformKey)
               }
+              onStatsResolved={handleStatsResolved}
             />
           ))}
       </div>
+
+      <CrossLeaguePanel
+        query={query}
+        results={results}
+        scaStatsMap={scaStatsMap}
+        allLoaded={allLoaded}
+      />
     </div>
   );
 }
 
 // ── Platform section ──────────────────────────────────────────────────────────
 
-function PlatformSection({ platformData, isExpanded, onToggle }) {
+function PlatformSection({ platformData, isExpanded, onToggle, onStatsResolved }) {
   const { platformName, count, players, noResults, icon, disabled, disabledReason, error } = platformData;
   const isLive = !disabled;
 
@@ -219,6 +464,7 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
                 player={player}
                 platformName={platformName}
                 isLast={idx === players.length - 1}
+                onStatsResolved={onStatsResolved}
               />
             )
           )}
@@ -236,24 +482,30 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
 
 // ── Player card with auto-fetched stats ───────────────────────────────────────
 
-function PlayerCard({ player, platformName, isLast }) {
+function PlayerCard({ player, platformName, isLast, onStatsResolved }) {
   const { id, name, team, role, profileUrl, verified } = player;
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(!!id);
   const [statsError, setStatsError] = useState(!id ? 'Player ID unavailable — cannot load stats.' : null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      onStatsResolved?.(id, null);
+      return;
+    }
 
     setStatsLoading(true);
     setStatsError(null);
 
     fetchAnyPlayerStats(player)
       .then((data) => {
-        setStats(normalizeStats(data));
+        const normalized = normalizeStats(data);
+        setStats(normalized);
+        onStatsResolved?.(id, normalized);
         setStatsLoading(false);
       })
       .catch((err) => {
+        onStatsResolved?.(id, null);
         setStatsError(err.message || 'Could not load player statistics.');
         setStatsLoading(false);
       });
