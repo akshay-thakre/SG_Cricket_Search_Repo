@@ -87,8 +87,68 @@ function MultiFileButton({ label, files, onChange, accent }) {
   );
 }
 
+// Inline form to register an unknown tournament source ID
+function RegisterForm({ sourceId, competition, onRegistered }) {
+  const [form, setForm] = useState({ year: '', tournamentId: '', tournamentName: '', status: 'on-going' });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+
+  function set(field, val) { setForm(prev => ({ ...prev, [field]: val })); }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErr('');
+    setSaving(true);
+    try {
+      const resp = await fetch('/api/register-tournament', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ competition, sourceId, ...form }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Register failed');
+      onRegistered(sourceId, data.meta);
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form className="register-form" onSubmit={handleSubmit}>
+      <div className="register-form-title">Register Tournament — Source ID: <code>{sourceId}</code></div>
+      <div className="register-fields">
+        <label>
+          Year
+          <input required placeholder="e.g. 2025" value={form.year} onChange={e => set('year', e.target.value)} />
+        </label>
+        <label>
+          Tournament Name
+          <input required placeholder="e.g. BPL 2025" value={form.tournamentName} onChange={e => set('tournamentName', e.target.value)} />
+        </label>
+        <label>
+          ID Slug <span className="field-hint">(lowercase, hyphens only)</span>
+          <input required placeholder="e.g. bpl-2025" value={form.tournamentId} onChange={e => set('tournamentId', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))} />
+        </label>
+        <label>
+          Status
+          <select value={form.status} onChange={e => set('status', e.target.value)}>
+            <option value="on-going">On-going</option>
+            <option value="completed">Completed</option>
+          </select>
+        </label>
+      </div>
+      {err && <div className="register-error">{err}</div>}
+      <button className="btn btn-register" type="submit" disabled={saving}>
+        {saving ? 'Registering…' : 'Register & Continue'}
+      </button>
+    </form>
+  );
+}
+
 // Pairing status table shown after parsing
-function PairingStatus({ tournaments, competition }) {
+function PairingStatus({ tournaments, competition, onTournamentRegistered }) {
   if (!tournaments || tournaments.length === 0) return null;
   return (
     <div className="pairing-table-wrap">
@@ -109,18 +169,31 @@ function PairingStatus({ tournaments, competition }) {
             const unknownMeta = !t.meta;
             const missingFile = t.meta && (!t.hasBatting || !t.hasBowling);
             return (
-              <tr key={t.sourceId} className={ok ? 'row-ok' : 'row-err'}>
-                <td className="sid">{t.sourceId}</td>
-                <td>{t.meta ? t.meta.tournamentName : <span className="unknown-label">Unknown — add to config</span>}</td>
-                <td>{t.meta?.year || '—'}</td>
-                <td><span className={`pill ${t.hasBatting ? 'pill-green' : 'pill-red'}`}>{t.battingCount}</span></td>
-                <td><span className={`pill ${t.hasBowling ? 'pill-green' : 'pill-red'}`}>{t.bowlingCount}</span></td>
-                <td>
-                  {ok         && <span className="status-ok">✓ Ready</span>}
-                  {unknownMeta && <span className="status-err">✗ Unknown ID</span>}
-                  {missingFile && <span className="status-err">✗ {!t.hasBatting ? 'Batting missing' : 'Bowling missing'}</span>}
-                </td>
-              </tr>
+              <>
+                <tr key={t.sourceId} className={ok ? 'row-ok' : 'row-err'}>
+                  <td className="sid">{t.sourceId}</td>
+                  <td>{t.meta ? t.meta.tournamentName : <span className="unknown-label">Unknown — fill in details below</span>}</td>
+                  <td>{t.meta?.year || '—'}</td>
+                  <td><span className={`pill ${t.hasBatting ? 'pill-green' : 'pill-red'}`}>{t.battingCount}</span></td>
+                  <td><span className={`pill ${t.hasBowling ? 'pill-green' : 'pill-red'}`}>{t.bowlingCount}</span></td>
+                  <td>
+                    {ok          && <span className="status-ok">✓ Ready</span>}
+                    {unknownMeta && <span className="status-err">✗ Unknown ID</span>}
+                    {missingFile && <span className="status-err">✗ {!t.hasBatting ? 'Batting missing' : 'Bowling missing'}</span>}
+                  </td>
+                </tr>
+                {unknownMeta && (
+                  <tr key={`${t.sourceId}-register`} className="row-register">
+                    <td colSpan={6} style={{ padding: 0 }}>
+                      <RegisterForm
+                        sourceId={t.sourceId}
+                        competition={competition}
+                        onRegistered={onTournamentRegistered}
+                      />
+                    </td>
+                  </tr>
+                )}
+              </>
             );
           })}
         </tbody>
@@ -373,7 +446,15 @@ function CompetitionSection({ compKey, label, accent }) {
           <div className="pairing-title">
             Tournament Detection — {tournaments.length} source{tournaments.length !== 1 ? 's' : ''} found
           </div>
-          <PairingStatus tournaments={tournaments} competition={compKey} />
+          <PairingStatus
+            tournaments={tournaments}
+            competition={compKey}
+            onTournamentRegistered={(sourceId, meta) => {
+              setTournaments(prev => prev.map(t => t.sourceId === sourceId ? { ...t, meta } : t));
+              setWarnings(prev => prev.filter(w => !w.includes(sourceId)));
+              addLog(`Tournament registered: ${meta.tournamentName} (source ID: ${sourceId})`, 'success');
+            }}
+          />
 
           {warnings.length > 0 && (
             <div className="alert-box warn-box">
@@ -486,9 +567,8 @@ export default function App() {
       </header>
 
       <div className="config-hint">
-        Tournament names, IDs, and years are read from{' '}
-        <code>stats-generator/tournament-config.json</code>.
-        Edit that file to add new tournament source IDs.
+        Tournament metadata is stored in <code>stats-generator/tournament-config.json</code>.
+        If a new source ID is detected after upload, a registration form will appear inline — no manual file editing needed.
       </div>
 
       {COMPETITIONS.map(c => (

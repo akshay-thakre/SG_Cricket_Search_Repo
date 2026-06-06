@@ -375,6 +375,32 @@ app.post('/api/save-backup-and-replace', (req, res) => {
   }
 });
 
+/**
+ * POST /api/register-tournament
+ * Body: { competition, sourceId, year, tournamentId, tournamentName, status }
+ * Saves a new tournament entry to tournament-config.json so the generator can proceed.
+ */
+app.post('/api/register-tournament', (req, res) => {
+  try {
+    const { competition, sourceId, year, tournamentId, tournamentName, status } = req.body;
+    if (!competition || !sourceId || !year || !tournamentId || !tournamentName || !status) {
+      return res.status(400).json({ error: 'All fields are required: competition, sourceId, year, tournamentId, tournamentName, status' });
+    }
+    const slugOk = /^[a-z0-9-]+$/.test(tournamentId);
+    if (!slugOk) return res.status(400).json({ error: 'Tournament ID slug must be lowercase letters, numbers, and hyphens only.' });
+
+    const config = loadConfig();
+    if (!config[competition]) return res.status(400).json({ error: `Unknown competition: ${competition}` });
+
+    config[competition].tournaments[sourceId] = { year: String(year), tournamentId, tournamentName, status };
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf8');
+
+    res.json({ success: true, meta: config[competition].tournaments[sourceId] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/push-github
 app.post('/api/push-github', (req, res) => {
   try {

@@ -1,7 +1,8 @@
 import bplStats from '../data/bplStats.json';
 
 /**
- * Search BPL 2025 tournament static player data by name.
+ * Search BPL tournament static data by player name.
+ * Works with the leaderboard format: { competition, data: [{ tournamentName, batting: [], bowling: [] }] }
  *
  * @param {string} query  Partial or full player name, case-insensitive.
  * @returns {object[]}    Matching player records.
@@ -10,19 +11,30 @@ export function searchBPLStats(query) {
   if (!query || query.trim().length < 2) return [];
   const words = query.trim().toLowerCase().split(/\s+/);
 
-  return bplStats.players
-    .filter((p) => {
-      const name = p.name.toLowerCase();
-      return words.every((w) => name.includes(w));
-    })
-    .map((p) => ({
-      id: `bpl-${p.player_id}`,
-      name: p.name,
-      team: p.teams && p.teams.length > 0 ? p.teams[0].team_name : 'Unknown',
-      source: 'bpl-static',
-      tournament: bplStats.tournament,
-      lastUpdated: '4th June 2026',
-      batting: p.batting,
-      bowling: p.bowling,
-    }));
+  const results = [];
+
+  for (const tournament of bplStats.data || []) {
+    for (const battingRecord of tournament.batting || []) {
+      const name = battingRecord.player?.toLowerCase() || '';
+      if (!words.every(w => name.includes(w))) continue;
+
+      // Find a matching bowling record for the same player + team
+      const bowlingRecord = (tournament.bowling || []).find(
+        b => b.player === battingRecord.player && b.team === battingRecord.team
+      ) || null;
+
+      results.push({
+        id: `bpl-${tournament.tournamentId}-${battingRecord.rank}`,
+        name: battingRecord.player,
+        team: battingRecord.team,
+        source: 'bpl-static',
+        tournament: tournament.tournamentName,
+        lastUpdated: bplStats.lastUpdated,
+        batting: battingRecord,
+        bowling: bowlingRecord,
+      });
+    }
+  }
+
+  return results;
 }
