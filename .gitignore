@@ -88,6 +88,23 @@ ehthumbs.db
 # Add other generated HTML dumps here if needed
 
 # ===========================
+# Stats data backups
+# ===========================
+# Timestamped JSON backups — never commit, use the main data files
+cricsearch-sg/src/data/backups/
+
+# ===========================
+# Uploaded / generated stats input files
+# ===========================
+# Excel and CSV leaderboard uploads from stats-generator
+stats-generator/backend/uploads/
+stats-generator/backend/input/
+stats-generator/backend/generated/
+*.xlsx
+*.xls
+*.csv
+
+# ===========================
 # Playwright browser binaries
 # ===========================
 # Downloaded at build/install time — never commit (130 MB+)
