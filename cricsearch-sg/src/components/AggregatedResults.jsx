@@ -146,10 +146,26 @@ function aggregateAll(normalizedList) {
   };
 }
 
+// ── Source label helper ───────────────────────────────────────────────────────
+
+const SOURCE_LABEL = {
+  'sca':           { label: 'SCA Live',   color: '#1e40af', bg: '#e8f1ff' },
+  'sca-corporate': { label: 'SCA Corp',   color: '#1e40af', bg: '#dbeafe' },
+  'sgia-static':   { label: 'SG IA',      color: '#dc2626', bg: '#fef2f2' },
+  'bpl-static':    { label: 'BPL',        color: '#7c3aed', bg: '#f3e8ff' },
+  'ypl-static':    { label: 'YPL',        color: '#b45309', bg: '#fef3c7' },
+};
+
+function playerKey(p) {
+  return p.id || `${p.source}-${p.name}`;
+}
+
 // ── Cross-league panel ────────────────────────────────────────────────────────
 
 function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
-  const [showPanel, setShowPanel] = useState(false);
+  const [showPanel,   setShowPanel]   = useState(false);
+  const [showNames,   setShowNames]   = useState(false);
+  const [excluded,    setExcluded]    = useState(new Set());
 
   // Collect all players across all platforms
   const allPlayers = Object.values(results).flatMap(p => p.players || []);
@@ -170,8 +186,30 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
     );
   }
 
+  const includedPlayers  = allPlayers.filter(p => !excluded.has(playerKey(p)));
+  const excludedPlayers  = allPlayers.filter(p =>  excluded.has(playerKey(p)));
+
+  const fullNormalized     = allPlayers.map(p => normalizeForAgg(p, scaStatsMap));
+  const fullAgg            = aggregateAll(fullNormalized);
+
+  const adjustedNormalized = includedPlayers.map(p => normalizeForAgg(p, scaStatsMap));
+  const adjustedAgg        = aggregateAll(adjustedNormalized);
+
+  const hasExclusions = excluded.size > 0;
+
+  function toggleExclude(p) {
+    const key = playerKey(p);
+    setExcluded(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }
+
   return (
     <div style={{ marginTop: '1.5rem' }}>
+
+      {/* ── Primary action button ── */}
       {!allLoaded ? (
         <button disabled style={{
           display: 'flex', alignItems: 'center', gap: '0.6rem',
@@ -199,16 +237,111 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
         </button>
       )}
 
-      {allLoaded && showPanel && (() => {
-        const normalized = allPlayers.map(p => normalizeForAgg(p, scaStatsMap));
-        const agg = aggregateAll(normalized);
-        return <AggregatedStatsPanel agg={agg} playerName={query} />;
-      })()}
+      {allLoaded && showPanel && (
+        <div style={{ marginTop: '1rem' }}>
+
+          {/* ── Section 1: Full aggregated performance ── */}
+          <AggregatedStatsPanel
+            agg={fullAgg}
+            title="Aggregated performance across all leagues"
+            accentBat="#0066cc"
+            accentBowl="#7c3aed"
+          />
+
+          {/* ── Section 2: Players considered ── */}
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={() => setShowNames(v => !v)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.6rem 1.1rem', borderRadius: '7px',
+                backgroundColor: showNames ? '#f1f5f9' : '#f8fafc',
+                border: '1px solid #d0dae8', cursor: 'pointer',
+                fontSize: '12px', fontWeight: '600', color: '#1e293b',
+              }}
+            >
+              <span>{showNames ? '▲' : '▼'}</span>
+              Players considered for aggregation ({allPlayers.length})
+              {hasExclusions && (
+                <span style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '4px', padding: '1px 6px', fontSize: '11px' }}>
+                  {excluded.size} excluded
+                </span>
+              )}
+            </button>
+
+            {showNames && (
+              <div style={{
+                marginTop: '0.5rem', padding: '1rem',
+                backgroundColor: '#f8fafc', border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+              }}>
+                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '0.75rem' }}>
+                  Click ✕ to exclude a player from aggregation. Click again to restore.
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {allPlayers.map(p => {
+                    const key   = playerKey(p);
+                    const isOut = excluded.has(key);
+                    const src   = SOURCE_LABEL[p.source] || { label: p.source, color: '#64748b', bg: '#f1f5f9' };
+                    return (
+                      <div
+                        key={key}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '0.4rem',
+                          padding: '0.35rem 0.65rem', borderRadius: '6px',
+                          backgroundColor: isOut ? '#fef2f2' : '#fff',
+                          border: `1px solid ${isOut ? '#fecaca' : '#d0dae8'}`,
+                          opacity: isOut ? 0.6 : 1,
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        <span style={{
+                          fontSize: '10px', fontWeight: '700',
+                          color: src.color, backgroundColor: src.bg,
+                          padding: '1px 5px', borderRadius: '3px',
+                        }}>{src.label}</span>
+                        <span style={{ fontSize: '12px', fontWeight: '500', color: isOut ? '#94a3b8' : '#1e293b' }}>
+                          {p.name}
+                        </span>
+                        <button
+                          onClick={() => toggleExclude(p)}
+                          title={isOut ? 'Restore player' : 'Exclude from aggregation'}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            fontSize: '13px', lineHeight: 1, padding: '0 1px',
+                            color: isOut ? '#16a34a' : '#dc2626', fontWeight: '700',
+                          }}
+                        >
+                          {isOut ? '↩' : '✕'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Section 3: Adjusted performance (only when exclusions exist) ── */}
+          {hasExclusions && (
+            <div style={{ marginTop: '1rem' }}>
+              <AggregatedStatsPanel
+                agg={adjustedAgg}
+                title={`Adjusted performance — excluding ${excludedPlayers.map(p => p.name).join(', ')}`}
+                accentBat="#16a34a"
+                accentBowl="#0891b2"
+                adjusted
+              />
+            </div>
+          )}
+
+        </div>
+      )}
     </div>
   );
 }
 
-function AggregatedStatsPanel({ agg, playerName }) {
+function AggregatedStatsPanel({ agg, title, accentBat, accentBowl, adjusted }) {
   const { batting: b, bowling: bwl, hasBat, hasBowl } = agg;
 
   const Cell = ({ label, value, accent }) => (
@@ -216,48 +349,49 @@ function AggregatedStatsPanel({ agg, playerName }) {
       backgroundColor: '#fff', border: '1px solid #d0dae8', borderRadius: '10px',
       padding: '1rem', textAlign: 'center', boxShadow: '0 1px 3px rgba(6,28,84,0.05)',
     }}>
-      <div style={{ fontSize: '22px', fontWeight: '700', color: accent || '#0066cc' }}>{value}</div>
+      <div style={{ fontSize: '22px', fontWeight: '700', color: accent }}>{value}</div>
       <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '4px' }}>{label}</div>
     </div>
   );
 
   return (
     <div style={{
-      marginTop: '1rem', padding: '1.25rem',
-      backgroundColor: '#f5f8fc', border: '1px solid #d0dae8',
+      padding: '1.25rem',
+      backgroundColor: adjusted ? '#f0fdf4' : '#f5f8fc',
+      border: `1px solid ${adjusted ? '#bbf7d0' : '#d0dae8'}`,
       borderRadius: '12px', boxShadow: '0 2px 8px rgba(6,28,84,0.07)',
     }}>
-      <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-        Aggregated performance across all leagues
+      <div style={{ fontSize: '12px', fontWeight: '700', color: adjusted ? '#15803d' : '#1e293b', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        {adjusted && '↻ '}{title}
       </div>
 
       {hasBat && (
         <div style={{ marginBottom: '1rem' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: '#0066cc', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>🏏 Batting</div>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: accentBat, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>🏏 Batting</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
-            <Cell label="Matches"   value={b.mat} />
-            <Cell label="Runs"      value={b.runs} />
-            <Cell label="Bat Avg"   value={b.avg} />
-            <Cell label="Bat SR"    value={b.sr} />
+            <Cell label="Matches" value={b.mat}  accent={accentBat} />
+            <Cell label="Runs"    value={b.runs} accent={accentBat} />
+            <Cell label="Bat Avg" value={b.avg}  accent={accentBat} />
+            <Cell label="Bat SR"  value={b.sr}   accent={accentBat} />
           </div>
         </div>
       )}
 
       {hasBowl && (
         <div>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>⚡ Bowling</div>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: accentBowl, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>⚡ Bowling</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
-            <Cell label="Overs"     value={bwl.overs}   accent="#7c3aed" />
-            <Cell label="Wickets"   value={bwl.wickets} accent="#7c3aed" />
-            <Cell label="Economy"   value={bwl.econ}    accent="#7c3aed" />
-            <Cell label="Bowl SR"   value={bwl.sr}      accent="#7c3aed" />
+            <Cell label="Overs"   value={bwl.overs}   accent={accentBowl} />
+            <Cell label="Wickets" value={bwl.wickets} accent={accentBowl} />
+            <Cell label="Economy" value={bwl.econ}    accent={accentBowl} />
+            <Cell label="Bowl SR" value={bwl.sr}      accent={accentBowl} />
           </div>
         </div>
       )}
 
       {!hasBat && !hasBowl && (
         <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '1rem 0' }}>
-          No stats available to aggregate.
+          No stats available.
         </div>
       )}
 
@@ -269,7 +403,6 @@ function AggregatedStatsPanel({ agg, playerName }) {
     </div>
   );
 }
-
 // ── Background stats fetcher — fires for all SCA live players immediately,
 //    independent of whether the accordion section is open. This ensures
 //    allLoaded becomes true as soon as all stats resolve, not when user expands.
