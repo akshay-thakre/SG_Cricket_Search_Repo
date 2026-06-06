@@ -1,92 +1,84 @@
 const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const { parse } = require('csv-parse/sync');
-const XLSX = require('xlsx');
+const cors    = require('cors');
+const multer  = require('multer');
+const path    = require('path');
+const fs      = require('fs');
+const { parse }    = require('csv-parse/sync');
+const XLSX         = require('xlsx');
 const { execSync } = require('child_process');
+const crypto       = require('crypto');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
-const REPO_ROOT = process.env.REPO_ROOT || path.resolve(__dirname, '../..');
+const REPO_ROOT    = process.env.REPO_ROOT    || path.resolve(__dirname, '../..');
+const CONFIG_PATH  = process.env.CONFIG_PATH  || path.resolve(__dirname, '../tournament-config.json');
 
-const COMPETITIONS = {
-  'SG IA': {
-    fullName: 'Singapore Indian Association',
-    outputFileName: 'sgiaStats.json',
-    targetRepoPath: 'cricsearch-sg/src/data/sgiaStats.json',
-    backupDir: 'cricsearch-sg/src/data/backups',
-  },
-  'BPL': {
-    fullName: 'Bengali Premier League',
-    outputFileName: 'bplStats.json',
-    targetRepoPath: 'cricsearch-sg/src/data/bplStats.json',
-    backupDir: 'cricsearch-sg/src/data/backups',
-  },
-  'YPL': {
-    fullName: 'Young Premier League',
-    outputFileName: 'yplStats.json',
-    targetRepoPath: 'cricsearch-sg/src/data/yplStats.json',
-    backupDir: 'cricsearch-sg/src/data/backups',
-  },
-  'SCA': {
-    fullName: 'Singapore Cricket Association',
-    outputFileName: 'scaStats.json',
-    targetRepoPath: 'cricsearch-sg/src/data/scaStats.json',
-    backupDir: 'cricsearch-sg/src/data/backups',
-  },
-};
+// ─── Config (reloaded each request so the user can edit without restarting) ──
+function loadConfig() {
+  try {
+    return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+  } catch (e) {
+    throw new Error(`Cannot read tournament-config.json: ${e.message}`);
+  }
+}
 
+// ─── Field maps ──────────────────────────────────────────────────────────────
 const BATTING_MAP = {
-  name: 'player',
-  team_name: 'team',
+  name:         'player',
+  team_name:    'team',
   batting_hand: 'hand',
-  total_match: 'mat',
-  innings: 'inns',
-  total_runs: 'runs',
-  ball_faced: 'balls',
-  highest_run: 'highest',
-  not_out: 'no',
-  average: 'avg',
-  strike_rate: 'sr',
-  '4s': 'fours',
-  '6s': 'sixes',
-  '50s': 'fifties',
-  '100s': 'hundreds',
+  total_match:  'mat',
+  innings:      'inns',
+  total_runs:   'runs',
+  ball_faced:   'balls',
+  highest_run:  'highest',
+  not_out:      'no',
+  average:      'avg',
+  strike_rate:  'sr',
+  '4s':         'fours',
+  '6s':         'sixes',
+  '50s':        'fifties',
+  '100s':       'hundreds',
 };
 
 const BOWLING_MAP = {
-  name: 'player',
-  team_name: 'team',
-  bowling_style: 'style',
-  total_match: 'mat',
-  innings: 'inns',
-  overs: 'overs',
-  runs: 'runs',
-  total_wickets: 'wickets',
-  highest_wicket: 'highest',
-  maidens: 'maidens',
-  avg: 'avg',
-  economy: 'econ',
+  name:            'player',
+  team_name:       'team',
+  bowling_style:   'style',
+  total_match:     'mat',
+  innings:         'inns',
+  overs:           'overs',
+  runs:            'runs',
+  total_wickets:   'wickets',
+  highest_wicket:  'highest',
+  maidens:         'maidens',
+  avg:             'avg',
+  economy:         'econ',
 };
 
 const BATTING_REQUIRED = ['name', 'team_name', 'total_runs'];
 const BOWLING_REQUIRED = ['name', 'team_name', 'total_wickets'];
 
-const INT_FIELDS = new Set(['mat', 'inns', 'runs', 'balls', 'no', 'fours', 'sixes', 'fifties', 'hundreds', 'wickets', 'maidens']);
-const FLOAT_FIELDS = new Set(['avg', 'sr', 'econ', 'overs']);
+const INT_FIELDS   = new Set(['mat','inns','runs','balls','no','fours','sixes','fifties','hundreds','wickets','maidens']);
+const FLOAT_FIELDS = new Set(['avg','sr','econ','overs']);
 
-// multer: store in memory
+// ─── In-memory parse sessions (TTL 60 min) ───────────────────────────────────
+const sessions = new Map();
+setInterval(() => {
+  const cut = Date.now() - 60 * 60 * 1000;
+  for (const [id, s] of sessions) if (s.createdAt < cut) sessions.delete(id);
+}, 10 * 60 * 1000);
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 function parseFileToRows(buffer, originalname) {
   const ext = path.extname(originalname).toLowerCase();
   if (ext === '.csv') {
-    const text = buffer.toString('utf8');
-    return parse(text, { columns: true, skip_empty_lines: true, trim: true });
+    return parse(buffer.toString('utf8'), { columns: true, skip_empty_lines: true, trim: true });
   }
   if (ext === '.xlsx' || ext === '.xls') {
     const wb = XLSX.read(buffer, { type: 'buffer' });
@@ -96,27 +88,21 @@ function parseFileToRows(buffer, originalname) {
   throw new Error(`Unsupported file type: ${ext}. Use .csv, .xlsx, or .xls`);
 }
 
+function normalizeKey(k) { return k.trim().toLowerCase(); }
+
 function validateColumns(rows, required, label) {
   if (!rows || rows.length === 0) throw new Error(`${label}: file is empty`);
-  const cols = Object.keys(rows[0]).map(c => c.trim().toLowerCase());
-  const missing = required.filter(r => !cols.includes(r.toLowerCase()));
-  if (missing.length > 0) {
-    throw new Error(`${label}: missing required columns: ${missing.join(', ')}`);
-  }
-}
-
-function normalizeKey(key) {
-  return key.trim().toLowerCase();
+  const cols = Object.keys(rows[0]).map(normalizeKey);
+  const missing = required.filter(r => !cols.includes(r));
+  if (missing.length) throw new Error(`${label}: missing columns: ${missing.join(', ')}`);
 }
 
 function mapRow(row, fieldMap) {
-  const normalized = {};
-  for (const [k, v] of Object.entries(row)) {
-    normalized[normalizeKey(k)] = v;
-  }
+  const norm = {};
+  for (const [k, v] of Object.entries(row)) norm[normalizeKey(k)] = v;
   const out = {};
   for (const [src, dest] of Object.entries(fieldMap)) {
-    const val = normalized[src.toLowerCase()];
+    const val = norm[src.toLowerCase()];
     if (val === undefined || val === '') continue;
     if (INT_FIELDS.has(dest)) {
       const n = parseInt(val, 10);
@@ -131,98 +117,206 @@ function mapRow(row, fieldMap) {
   return out;
 }
 
-function mapBattingRows(rows) {
-  return rows.map((row, i) => {
-    const mapped = mapRow(row, BATTING_MAP);
-    if (!mapped.rank) mapped.rank = i + 1;
-    return { rank: i + 1, ...mapped };
-  });
+/**
+ * Extract the leading numeric source ID from a filename.
+ * "1986843_batting_leaderboard.csv" → "1986843"
+ * Falls back to the full basename if no numeric prefix found.
+ */
+function extractSourceId(filename) {
+  const base = path.basename(filename, path.extname(filename));
+  const m = base.match(/^(\d+)/);
+  return m ? m[1] : base;
 }
 
-function mapBowlingRows(rows) {
-  return rows.map((row, i) => {
-    const mapped = mapRow(row, BOWLING_MAP);
-    if (!mapped.rank) mapped.rank = i + 1;
-    return { rank: i + 1, ...mapped };
-  });
-}
+// ─── Routes ──────────────────────────────────────────────────────────────────
 
-// Build multer fields dynamically (up to 20 tournaments)
-function buildUploadFields() {
-  const fields = [];
-  for (let i = 0; i < 20; i++) {
-    fields.push({ name: `batting_${i}`, maxCount: 1 });
-    fields.push({ name: `bowling_${i}`, maxCount: 1 });
-  }
-  return fields;
-}
-
-// POST /api/generate
-app.post('/api/generate', upload.fields(buildUploadFields()), (req, res) => {
+// GET /api/tournament-config  – lets the frontend read the current config
+app.get('/api/tournament-config', (_req, res) => {
   try {
-    const tournamentsRaw = req.body.tournaments;
-    if (!tournamentsRaw) return res.status(400).json({ error: 'Missing tournaments data' });
+    res.json(loadConfig());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
-    const tournaments = JSON.parse(tournamentsRaw);
-    const competition = req.body.competition;
+/**
+ * POST /api/parse-files
+ * Multipart body:
+ *   competition  – "SG IA" | "BPL" | …
+ *   batting_files[]
+ *   bowling_files[]
+ *
+ * Returns:
+ *   sessionId, tournaments[], warnings[], errors[]
+ *
+ * Tournament shape:
+ *   { sourceId, meta, hasBatting, hasBowling, battingCount, bowlingCount }
+ *   meta = config entry (or null if unknown)
+ */
+app.post('/api/parse-files', upload.fields([
+  { name: 'batting_files', maxCount: 50 },
+  { name: 'bowling_files', maxCount: 50 },
+]), (req, res) => {
+  try {
+    const competition  = req.body.competition;
+    const battingFiles = req.files['batting_files'] || [];
+    const bowlingFiles = req.files['bowling_files'] || [];
+    const config       = loadConfig();
+    const compConfig   = config[competition];
+    const logs         = [];
+    const warnings     = [];
+    const errors       = [];
 
-    if (!competition || !COMPETITIONS[competition]) {
-      return res.status(400).json({ error: 'Invalid competition' });
+    if (!compConfig) return res.status(400).json({ error: `Unknown competition: ${competition}` });
+    if (!battingFiles.length && !bowlingFiles.length) {
+      return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    const competitionConfig = COMPETITIONS[competition];
-    const logs = [];
-    const dataEntries = [];
+    // sourceId → { battingRows: [], bowlingRows: [], battingFiles: [], bowlingFiles: [] }
+    const bySource = new Map();
 
-    logs.push(`Reading competition: ${competition} (${competitionConfig.fullName})`);
+    function ensureSource(id) {
+      if (!bySource.has(id)) bySource.set(id, { battingRows: [], bowlingRows: [], battingFiles: [], bowlingFiles: [] });
+      return bySource.get(id);
+    }
 
-    for (let i = 0; i < tournaments.length; i++) {
-      const t = tournaments[i];
-      logs.push(`Processing tournament ${i + 1}: ${t.tournamentName}`);
+    // Parse batting files
+    for (const file of battingFiles) {
+      const sid = extractSourceId(file.originalname);
+      logs.push(`Reading batting file: ${file.originalname} → source ID: ${sid}`);
+      const rows = parseFileToRows(file.buffer, file.originalname);
+      validateColumns(rows, BATTING_REQUIRED, `Batting (${file.originalname})`);
+      logs.push(`  ✓ ${rows.length} batting records`);
+      const bucket = ensureSource(sid);
+      bucket.battingRows.push(...rows);
+      bucket.battingFiles.push(file.originalname);
+    }
 
-      const battingFile = req.files[`batting_${i}`]?.[0];
-      const bowlingFile = req.files[`bowling_${i}`]?.[0];
+    // Parse bowling files
+    for (const file of bowlingFiles) {
+      const sid = extractSourceId(file.originalname);
+      logs.push(`Reading bowling file: ${file.originalname} → source ID: ${sid}`);
+      const rows = parseFileToRows(file.buffer, file.originalname);
+      validateColumns(rows, BOWLING_REQUIRED, `Bowling (${file.originalname})`);
+      logs.push(`  ✓ ${rows.length} bowling records`);
+      const bucket = ensureSource(sid);
+      bucket.bowlingRows.push(...rows);
+      bucket.bowlingFiles.push(file.originalname);
+    }
 
-      if (!battingFile) throw new Error(`Tournament "${t.tournamentName}": batting file missing`);
-      if (!bowlingFile) throw new Error(`Tournament "${t.tournamentName}": bowling file missing`);
+    // Build tournament list with validation
+    const tournaments = [];
+    for (const [sid, bucket] of bySource) {
+      const meta = compConfig.tournaments[sid] || null;
 
-      logs.push(`Validating batting file: ${battingFile.originalname}`);
-      const battingRows = parseFileToRows(battingFile.buffer, battingFile.originalname);
-      validateColumns(battingRows, BATTING_REQUIRED, `Batting (${t.tournamentName})`);
-      logs.push(`Batting file valid — ${battingRows.length} records`);
+      if (!meta) {
+        warnings.push(`Unknown tournament source ID: ${sid}. Add it to tournament-config.json before generating.`);
+      }
 
-      logs.push(`Validating bowling file: ${bowlingFile.originalname}`);
-      const bowlingRows = parseFileToRows(bowlingFile.buffer, bowlingFile.originalname);
-      validateColumns(bowlingRows, BOWLING_REQUIRED, `Bowling (${t.tournamentName})`);
-      logs.push(`Bowling file valid — ${bowlingRows.length} records`);
+      if (bucket.battingRows.length > 0 && bucket.bowlingRows.length === 0) {
+        errors.push(`Source ID ${sid}: batting file uploaded but bowling file is missing.`);
+      }
+      if (bucket.bowlingRows.length > 0 && bucket.battingRows.length === 0) {
+        errors.push(`Source ID ${sid}: bowling file uploaded but batting file is missing.`);
+      }
 
-      logs.push(`Generating JSON for ${t.tournamentName}...`);
-      const batting = mapBattingRows(battingRows);
-      const bowling = mapBowlingRows(bowlingRows);
+      tournaments.push({
+        sourceId:     sid,
+        meta,
+        hasBatting:   bucket.battingRows.length > 0,
+        hasBowling:   bucket.bowlingRows.length > 0,
+        battingCount: bucket.battingRows.length,
+        bowlingCount: bucket.bowlingRows.length,
+        battingFiles: bucket.battingFiles,
+        bowlingFiles: bucket.bowlingFiles,
+      });
+    }
 
-      dataEntries.push({
-        year: t.year,
-        tournamentId: t.tournamentId,
-        tournamentName: t.tournamentName,
-        status: t.status,
+    // Sort by year desc, then name
+    tournaments.sort((a, b) => {
+      const ay = a.meta?.year || '0';
+      const by = b.meta?.year || '0';
+      return by.localeCompare(ay) || (a.meta?.tournamentName || a.sourceId).localeCompare(b.meta?.tournamentName || b.sourceId);
+    });
+
+    // Store in session
+    const sessionId = crypto.randomBytes(8).toString('hex');
+    sessions.set(sessionId, { createdAt: Date.now(), bySource, competition });
+
+    logs.push(`Detected ${tournaments.length} tournament source(s)`);
+    res.json({ sessionId, tournaments, logs, warnings, errors });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/generate
+ * Body: { sessionId, competition }
+ * Uses stored session. Fails fast if any tournament has no config entry or unmatched files.
+ */
+app.post('/api/generate', (req, res) => {
+  try {
+    const { sessionId, competition } = req.body;
+
+    if (!sessionId || !sessions.has(sessionId)) {
+      return res.status(400).json({ error: 'Session expired. Please re-upload your files.' });
+    }
+
+    const session    = sessions.get(sessionId);
+    const config     = loadConfig();
+    const compConfig = config[competition];
+    if (!compConfig) return res.status(400).json({ error: `Unknown competition: ${competition}` });
+
+    const logs   = [];
+    const data   = [];
+    const { bySource } = session;
+
+    logs.push(`Building JSON for: ${competition} (${compConfig.fullName})`);
+
+    for (const [sid, bucket] of bySource) {
+      const meta = compConfig.tournaments[sid];
+      if (!meta) {
+        return res.status(400).json({
+          error: `Cannot generate: source ID "${sid}" is not in tournament-config.json. Add it first.`,
+        });
+      }
+      if (bucket.battingRows.length === 0) {
+        return res.status(400).json({ error: `Source ID ${sid} (${meta.tournamentName}): batting file is missing.` });
+      }
+      if (bucket.bowlingRows.length === 0) {
+        return res.status(400).json({ error: `Source ID ${sid} (${meta.tournamentName}): bowling file is missing.` });
+      }
+
+      const batting = bucket.battingRows.map((r, i) => ({ rank: i + 1, ...mapRow(r, BATTING_MAP) }));
+      const bowling = bucket.bowlingRows.map((r, i) => ({ rank: i + 1, ...mapRow(r, BOWLING_MAP) }));
+
+      logs.push(`  ${meta.tournamentName}: ${batting.length} batting, ${bowling.length} bowling`);
+      data.push({
+        year:           meta.year,
+        tournamentId:   meta.tournamentId,
+        tournamentName: meta.tournamentName,
+        status:         meta.status,
         batting,
         bowling,
       });
     }
 
-    const now = new Date().toISOString();
+    // Sort tournaments by year desc
+    data.sort((a, b) => b.year.localeCompare(a.year));
+
+    const now    = new Date().toISOString();
     const result = {
-      competition,
-      fullName: competitionConfig.fullName,
-      lastUpdated: now,
-      data: dataEntries,
+      competition:  compConfig.competition,
+      fullName:     compConfig.fullName,
+      lastUpdated:  now,
+      data,
     };
 
-    const totalBatting = dataEntries.reduce((s, e) => s + e.batting.length, 0);
-    const totalBowling = dataEntries.reduce((s, e) => s + e.bowling.length, 0);
+    const totalBatting = data.reduce((s, e) => s + e.batting.length, 0);
+    const totalBowling = data.reduce((s, e) => s + e.bowling.length, 0);
 
-    logs.push(`JSON generated successfully`);
-    logs.push(`Tournaments: ${dataEntries.length} | Batting records: ${totalBatting} | Bowling records: ${totalBowling}`);
+    logs.push(`JSON generated — ${data.length} tournaments, ${totalBatting} batting, ${totalBowling} bowling`);
 
     res.json({
       success: true,
@@ -230,9 +324,9 @@ app.post('/api/generate', upload.fields(buildUploadFields()), (req, res) => {
       json: result,
       summary: {
         competition,
-        fullName: competitionConfig.fullName,
-        outputFileName: competitionConfig.outputFileName,
-        tournamentsCount: dataEntries.length,
+        fullName:        compConfig.fullName,
+        outputFileName:  compConfig.outputFileName,
+        tournamentsCount: data.length,
         totalBatting,
         totalBowling,
         lastUpdated: now,
@@ -243,61 +337,39 @@ app.post('/api/generate', upload.fields(buildUploadFields()), (req, res) => {
   }
 });
 
-// GET /api/existing-json/:competition
-app.get('/api/existing-json/:competition', (req, res) => {
-  const competition = decodeURIComponent(req.params.competition);
-  const config = COMPETITIONS[competition];
-  if (!config) return res.status(400).json({ error: 'Unknown competition' });
-
-  const filePath = path.join(REPO_ROOT, config.targetRepoPath);
-  if (!fs.existsSync(filePath)) {
-    return res.json({ exists: false });
-  }
-  try {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    res.json({ exists: true, data });
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to read existing JSON' });
-  }
-});
-
 // POST /api/save-backup-and-replace
-app.post('/api/save-backup-and-replace', express.json({ limit: '50mb' }), (req, res) => {
+app.post('/api/save-backup-and-replace', (req, res) => {
   try {
     const { competition, newJson } = req.body;
-    if (!competition || !newJson) return res.status(400).json({ error: 'Missing competition or newJson' });
+    const config     = loadConfig();
+    const compConfig = config[competition];
+    if (!compConfig) return res.status(400).json({ error: `Unknown competition: ${competition}` });
 
-    const config = COMPETITIONS[competition];
-    if (!config) return res.status(400).json({ error: 'Unknown competition' });
-
-    const targetPath = path.join(REPO_ROOT, config.targetRepoPath);
-    const backupDirPath = path.join(REPO_ROOT, config.backupDir);
+    const targetPath = path.join(REPO_ROOT, compConfig.targetRepoPath);
+    const backupDir  = path.join(REPO_ROOT, compConfig.backupDir);
     const logs = [];
 
-    fs.mkdirSync(backupDirPath, { recursive: true });
+    fs.mkdirSync(backupDir, { recursive: true });
 
-    // Backup existing JSON if it exists
-    let backupPath = null;
+    let backupRelPath = null;
     if (fs.existsSync(targetPath)) {
-      const now = new Date();
-      const dateStr = now.toISOString().slice(0, 10);
-      const timeStr = now.toTimeString().slice(0, 5).replace(':', '');
-      const backupName = `${path.basename(config.outputFileName, '.json')}-${dateStr}-${timeStr}.json`;
-      backupPath = path.join(backupDirPath, backupName);
-      fs.copyFileSync(targetPath, backupPath);
-      logs.push(`Backup created: ${config.backupDir}/${backupName}`);
+      const now      = new Date();
+      const dateStr  = now.toISOString().slice(0, 10);
+      const timeStr  = now.toTimeString().slice(0, 5).replace(':', '');
+      const name     = `${path.basename(compConfig.outputFileName, '.json')}-${dateStr}-${timeStr}.json`;
+      const fullPath = path.join(backupDir, name);
+      fs.copyFileSync(targetPath, fullPath);
+      backupRelPath = path.relative(REPO_ROOT, fullPath);
+      logs.push(`Backup created: ${backupRelPath}`);
     } else {
-      logs.push('No existing file to backup — creating new file');
+      logs.push('No existing file found — creating new file');
     }
 
-    // Ensure target directory exists
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-
-    // Write new JSON
     fs.writeFileSync(targetPath, JSON.stringify(newJson, null, 2), 'utf8');
-    logs.push(`Repo JSON replaced: ${config.targetRepoPath}`);
+    logs.push(`Repo file updated: ${compConfig.targetRepoPath}`);
 
-    res.json({ success: true, logs, backupPath: backupPath ? path.relative(REPO_ROOT, backupPath) : null });
+    res.json({ success: true, logs, backupPath: backupRelPath });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -305,55 +377,39 @@ app.post('/api/save-backup-and-replace', express.json({ limit: '50mb' }), (req, 
 
 // POST /api/push-github
 app.post('/api/push-github', (req, res) => {
-  const { competition } = req.body;
-  if (!competition || !COMPETITIONS[competition]) {
-    return res.status(400).json({ error: 'Unknown competition' });
-  }
-
-  const config = COMPETITIONS[competition];
-  const logs = [];
-
   try {
+    const { competition } = req.body;
+    const config     = loadConfig();
+    const compConfig = config[competition];
+    if (!compConfig) return res.status(400).json({ error: `Unknown competition: ${competition}` });
+
     const today = new Date().toISOString().slice(0, 10);
+    const logs  = [];
 
-    logs.push('Running: git pull origin main');
-    execSync('git pull origin main', { cwd: REPO_ROOT, stdio: 'pipe' });
-    logs.push('git pull completed');
+    const run = (cmd) => {
+      logs.push(`$ ${cmd}`);
+      execSync(cmd, { cwd: REPO_ROOT, stdio: 'pipe' });
+    };
 
-    const targetFile = config.targetRepoPath;
-    logs.push(`Running: git add ${targetFile}`);
-    execSync(`git add "${targetFile}"`, { cwd: REPO_ROOT, stdio: 'pipe' });
-
-    const backupGlob = `${config.backupDir}/`;
-    logs.push(`Running: git add ${backupGlob}`);
-    execSync(`git add "${backupGlob}"`, { cwd: REPO_ROOT, stdio: 'pipe' });
-
-    const commitMsg = `Update ${competition} stats JSON - ${today}`;
-    logs.push(`Running: git commit -m "${commitMsg}"`);
-    execSync(`git commit -m "${commitMsg}"`, { cwd: REPO_ROOT, stdio: 'pipe' });
-    logs.push('Commit created');
-
-    logs.push('Running: git push origin main');
-    execSync('git push origin main', { cwd: REPO_ROOT, stdio: 'pipe' });
-    logs.push('Git push completed successfully');
+    run('git pull origin main');
+    logs.push('  ✓ pull done');
+    run(`git add "${compConfig.targetRepoPath}"`);
+    run(`git add "${compConfig.backupDir}/"`);
+    run(`git commit -m "Update ${competition} stats JSON - ${today}"`);
+    logs.push('  ✓ commit created');
+    run('git push origin main');
+    logs.push('  ✓ push done');
 
     res.json({ success: true, logs });
   } catch (err) {
-    const stderr = err.stderr?.toString() || '';
-    const stdout = err.stdout?.toString() || '';
-    const detail = stderr || stdout || err.message;
-    logs.push(`Error: ${detail}`);
-    res.status(500).json({ error: detail, logs });
+    const detail = err.stderr?.toString() || err.stdout?.toString() || err.message;
+    res.status(500).json({ error: detail });
   }
-});
-
-// GET /api/competitions
-app.get('/api/competitions', (req, res) => {
-  res.json(COMPETITIONS);
 });
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Stats Generator backend running on http://localhost:${PORT}`);
-  console.log(`Repo root: ${REPO_ROOT}`);
+  console.log(`Stats Generator backend  →  http://localhost:${PORT}`);
+  console.log(`Repo root                →  ${REPO_ROOT}`);
+  console.log(`Config                   →  ${CONFIG_PATH}`);
 });
