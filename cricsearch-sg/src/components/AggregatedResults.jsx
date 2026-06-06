@@ -891,14 +891,25 @@ function fmt(val) {
   return isNaN(n) ? val : n.toFixed(2).replace(/\.?0+$/, '');
 }
 
-// ── BPL 2025 player card (static, no API fetch) ───────────────────────────────
+// ── BPL player card (static, no API fetch) ───────────────────────────────────
+// Expects leaderboard format: batting/bowling use short field names
+// (mat, inns, runs, avg, sr, highest, no, balls, hand, fours, sixes, fifties,
+//  hundreds, wickets, econ, overs, maidens, style)
 
 function BPLPlayerCard({ player, isLast }) {
-  const { name, team, batting, bowling, lastUpdated } = player;
-  const [expanded, setExpanded] = useState(false);
+  const { name, team, batting: b, bowling: bwl, tournament, lastUpdated } = player;
+  const [battingOpen, setBattingOpen] = useState(false);
+  const [bowlingOpen, setBowlingOpen] = useState(false);
 
-  const hasBatting = batting && batting.innings > 0;
-  const hasBowling = bowling && bowling.innings > 0;
+  const d = (v, dec = 0) => (v === null || v === undefined ? '--' : dec > 0 ? Number(v).toFixed(dec) : String(v));
+
+  const hasBatting = b && b.inns > 0;
+  const hasBowling = bwl && bwl.inns > 0;
+
+  const fmtDate = (iso) => {
+    try { return new Date(iso).toLocaleDateString('en-SG', { day: '2-digit', month: 'short', year: 'numeric' }); }
+    catch { return iso; }
+  };
 
   return (
     <div style={{
@@ -919,110 +930,83 @@ function BPLPlayerCard({ player, isLast }) {
           <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '16px', fontWeight: '700', color: '#ffffff' }}>
             {name}
           </h4>
-          <div style={{ fontSize: '12px', color: '#e9d5ff', fontWeight: '500' }}>
-            {team}
-          </div>
+          <div style={{ fontSize: '12px', color: '#e9d5ff', fontWeight: '500' }}>{team}</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
           <span style={{
             backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
-            padding: '0.2rem 0.6rem', borderRadius: '4px',
-            fontSize: '10px', fontWeight: '700',
-          }}>BPL 2025</span>
-          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {lastUpdated}</span>
+            padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '10px', fontWeight: '700',
+          }}>{tournament || 'BPL'}</span>
+          <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {fmtDate(lastUpdated)}</span>
         </div>
       </div>
 
-      {/* Summary */}
+      {/* Summary stat boxes */}
       <div style={{ padding: '1rem 1.25rem' }}>
-        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-          {hasBatting && (
-            <div style={{ fontSize: '12px', color: '#374151' }}>
-              🏏 <strong>{batting.runs}</strong> runs
-              {batting.average != null && <span style={{ color: '#64748b' }}> · avg {fmt(batting.average)}</span>}
-              {batting.highest_score > 0 && <span style={{ color: '#64748b' }}> · HS {batting.highest_score}</span>}
-              <span style={{ color: '#64748b' }}> · {batting.matches}M</span>
-              {batting.batting_hand && <span style={{ color: '#9ca3af' }}> · {batting.batting_hand}</span>}
-            </div>
-          )}
-          {hasBowling && (
-            <div style={{ fontSize: '12px', color: '#374151' }}>
-              ⚽ <strong>{bowling.wickets}</strong> wkts
-              {bowling.economy != null && <span style={{ color: '#64748b' }}> · econ {fmt(bowling.economy)}</span>}
-              {bowling.bowling_style && <span style={{ color: '#9ca3af' }}> · {bowling.bowling_style}</span>}
-            </div>
-          )}
-          {!hasBatting && !hasBowling && (
-            <span style={{ fontSize: '12px', color: '#9ca3af' }}>No innings data yet</span>
-          )}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          <StatBox label="Matches"  value={hasBatting ? b.mat : hasBowling ? bwl.mat : null} highlight />
+          <StatBox label="Runs"     value={hasBatting ? b.runs : null} highlight />
+          <StatBox label="Bat Avg"  value={hasBatting ? d(b.avg, 2) : '--'} highlight />
+          <StatBox label="Wickets"  value={hasBowling ? bwl.wickets : '--'} highlight color="#7c3aed" />
         </div>
 
-        <button
-          onClick={() => setExpanded(!expanded)}
-          style={{
-            width: '100%', padding: '0.5rem',
-            backgroundColor: expanded ? '#f3e8ff' : '#f5f8fc',
-            border: '1px solid #d0dae8', borderRadius: '6px',
-            cursor: 'pointer', fontSize: '12px', color: '#7c3aed', fontWeight: '600',
-          }}
-        >
-          {expanded ? '▲ Hide stats' : '▼ Show full stats'}
-        </button>
-
-        {expanded && (
-          <div style={{ marginTop: '1rem' }}>
-            {hasBatting && (
-              <div style={{ marginBottom: '0.75rem' }}>
-                <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BATTING</div>
-                <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
-                  {[
-                    ['Mat', batting.matches], ['Inns', batting.innings], ['NO', batting.not_outs],
-                    ['Runs', batting.runs], ['Balls', batting.balls_faced], ['Avg', fmt(batting.average)],
-                    ['SR', fmt(batting.strike_rate)], ['HS', batting.highest_score],
-                    ['50s', batting.fifties], ['100s', batting.hundreds],
-                    ['4s', batting.fours], ['6s', batting.sixes],
-                  ].map(([label, val]) => val != null && (
-                    <div key={label} style={{
-                      backgroundColor: '#f5f8fc', borderRadius: '4px',
-                      padding: '0.3rem 0.4rem', textAlign: 'center',
-                    }}>
-                      <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {hasBowling && (
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '0.35rem' }}>BOWLING</div>
-                <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.4rem' }}>
-                  {[
-                    ['Mat', bowling.matches], ['Inns', bowling.innings], ['Overs', bowling.overs],
-                    ['Runs', bowling.runs_conceded], ['Wkts', bowling.wickets],
-                    ['BB', bowling.best_wickets], ['Econ', fmt(bowling.economy)],
-                    ['Ave', fmt(bowling.average)], ['SR', fmt(bowling.strike_rate)],
-                    ['Mdns', bowling.maidens], ['Dots', bowling.dot_balls],
-                  ].map(([label, val]) => val != null && (
-                    <div key={label} style={{
-                      backgroundColor: '#f5f8fc', borderRadius: '4px',
-                      padding: '0.3rem 0.4rem', textAlign: 'center',
-                    }}>
-                      <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
-                    </div>
-                  ))}
-                </div>
-                {bowling.bowling_style && (
-                  <div style={{ marginTop: '0.5rem', fontSize: '11px', color: '#64748b' }}>
-                    Style: {bowling.bowling_style}
-                  </div>
-                )}
+        {/* Batting detail */}
+        {hasBatting && (
+          <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
+            <button onClick={() => setBattingOpen((o) => !o)} style={expandBtnStyle('#7c3aed')}>
+              <span style={{ ...arrowStyle, transform: battingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+              🏏 Batting (Rank #{b.rank})
+            </button>
+            {battingOpen && (
+              <div style={{ marginTop: '0.6rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(68px,1fr))', gap: '0.4rem' }}>
+                <StatBox label="Inns"  value={b.inns}         small />
+                <StatBox label="Balls" value={b.balls}        small />
+                <StatBox label="HS"    value={b.highest}      small />
+                <StatBox label="NO"    value={b.no}           small />
+                <StatBox label="SR"    value={d(b.sr, 2)}     small />
+                <StatBox label="50s"   value={b.fifties}      small />
+                <StatBox label="100s"  value={b.hundreds}     small />
+                <StatBox label="4s"    value={b.fours}        small />
+                <StatBox label="6s"    value={b.sixes}        small />
+                {b.hand && <StatBox label="Hand" value={b.hand} small />}
               </div>
             )}
           </div>
         )}
+
+        {/* Bowling detail */}
+        {hasBowling && (
+          <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
+            <button onClick={() => setBowlingOpen((o) => !o)} style={expandBtnStyle('#7c3aed')}>
+              <span style={{ ...arrowStyle, transform: bowlingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+              ⚡ Bowling (Rank #{bwl.rank})
+            </button>
+            {bowlingOpen && (
+              <div style={{ marginTop: '0.6rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(68px,1fr))', gap: '0.4rem' }}>
+                <StatBox label="Overs"  value={bwl.overs}         small />
+                <StatBox label="Runs"   value={bwl.runs}          small />
+                <StatBox label="Best"   value={bwl.highest}       small />
+                <StatBox label="Mdns"   value={bwl.maidens}       small />
+                <StatBox label="Avg"    value={d(bwl.avg, 2)}     small />
+                <StatBox label="Econ"   value={d(bwl.econ, 2)}    small />
+                {bwl.style && <StatBox label="Style" value={bwl.style?.replace('Right-arm ', 'RA ').replace('Left-arm ', 'LA ')} small />}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!hasBatting && !hasBowling && (
+          <div style={{ fontSize: '12px', color: '#9ca3af', padding: '0.5rem 0' }}>No stats available</div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: '0.5rem 1.25rem',
+        background: 'linear-gradient(135deg, #3b0764 0%, #7c3aed 100%)',
+        fontSize: '11px', color: '#c4b5fd',
+      }}>
+        BPL · Static Data
       </div>
     </div>
   );
