@@ -393,3 +393,76 @@ h1 {
   animation: spin 0.65s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Register tournament form ───────────────────────── */
+.row-register td { background: #0a1628; }
+
+.register-form {
+  padding: 16px 20px;
+  border-top: 1px solid #1e3a5f;
+  background: #0c1929;
+}
+
+.register-form-title {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.register-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.register-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field-hint {
+  text-transform: none;
+  font-size: 0.68rem;
+  color: #475569;
+  letter-spacing: 0;
+}
+
+.register-fields input,
+.register-fields select {
+  background: #0f1f35;
+  border: 1px solid #2d3748;
+  border-radius: 5px;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.register-fields input:focus,
+.register-fields select:focus {
+  border-color: #a855f7;
+}
+
+.register-fields select option { background: #0f1f35; }
+
+.register-error {
+  color: #f87171;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.btn-register {
+  background: #7c3aed;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-register:hover:not(:disabled) { background: #6d28d9; }
+.btn-register:disabled { opacity: 0.5; cursor: not-allowed; }

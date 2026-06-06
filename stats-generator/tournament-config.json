@@ -26,6 +26,13 @@
     "outputFileName": "bplStats.json",
     "targetRepoPath": "cricsearch-sg/src/data/bplStats.json",
     "backupDir": "cricsearch-sg/src/data/backups",
-    "tournaments": {}
+    "tournaments": {
+      "1500354": {
+        "year": "2025",
+        "tournamentId": "bpl-2025",
+        "tournamentName": "BPL 2025",
+        "status": "on-going"
+      }
+    }
   }
 }
