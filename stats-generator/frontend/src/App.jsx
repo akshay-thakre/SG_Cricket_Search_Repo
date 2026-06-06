@@ -1,15 +1,21 @@
 import { useState, useRef, useCallback } from 'react';
 
-const COMPETITIONS = {
-  'SG IA': { fullName: 'Singapore Indian Association', outputFileName: 'sgiaStats.json' },
-  'BPL':   { fullName: 'Bengali Premier League',       outputFileName: 'bplStats.json' },
-  'YPL':   { fullName: 'Young Premier League',         outputFileName: 'yplStats.json' },
-  'SCA':   { fullName: 'Singapore Cricket Association', outputFileName: 'scaStats.json' },
-};
+// Only the competitions shown in UI — add more here as needed
+const COMPETITIONS = [
+  { key: 'SG IA', label: 'SG IA Competition',  accent: '#0ea5e9' },
+  { key: 'BPL',   label: 'BPL Competition',     accent: '#a855f7' },
+];
 
-const STATUS_OPTIONS = ['on-going', 'completed', 'upcoming'];
+// ─── Shared helpers ───────────────────────────────────────────────────────────
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+function logType(msg) {
+  const m = msg.toLowerCase();
+  if (m.includes('error') || m.includes('missing') || m.includes('cannot')) return 'error';
+  if (m.includes('✓') || m.includes('success') || m.includes('done') || m.includes('generated')) return 'success';
+  if (m.includes('warning') || m.includes('unknown')) return 'warn';
+  if (m.startsWith('$') || m.includes('running')) return 'action';
+  return 'info';
+}
 
 function LogPanel({ logs }) {
   const ref = useRef(null);
@@ -24,57 +30,55 @@ function LogPanel({ logs }) {
   );
 }
 
-function FileDropZone({ label, accept, multiple, files, onChange }) {
-  const [dragging, setDragging] = useState(false);
-  const inputRef = useRef(null);
+function MultiFileButton({ label, files, onChange, accent }) {
+  const ref = useRef(null);
+  function handleChange(e) {
+    const picked = Array.from(e.target.files);
+    onChange(prev => {
+      const existing = new Set(prev.map(f => f.name));
+      return [...prev, ...picked.filter(f => !existing.has(f.name))];
+    });
+    e.target.value = '';
+  }
+  function removeFile(name) {
+    onChange(prev => prev.filter(f => f.name !== name));
+  }
 
-  const handleDrop = useCallback((e) => {
+  const onDrop = useCallback(e => {
     e.preventDefault();
-    setDragging(false);
     const dropped = Array.from(e.dataTransfer.files).filter(f =>
       ['.csv', '.xlsx', '.xls'].some(ext => f.name.toLowerCase().endsWith(ext))
     );
-    if (dropped.length) onChange(multiple ? dropped : [dropped[0]]);
-  }, [multiple, onChange]);
-
-  function handleChange(e) {
-    const picked = Array.from(e.target.files);
-    onChange(multiple ? picked : [picked[0]]);
-    e.target.value = '';
-  }
+    if (dropped.length) onChange(prev => {
+      const existing = new Set(prev.map(f => f.name));
+      return [...prev, ...dropped.filter(f => !existing.has(f.name))];
+    });
+  }, [onChange]);
 
   return (
-    <div
-      className={`dropzone ${dragging ? 'dragging' : ''}`}
-      onDragOver={e => { e.preventDefault(); setDragging(true); }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={handleDrop}
-      onClick={() => inputRef.current?.click()}
-    >
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        multiple={multiple}
-        style={{ display: 'none' }}
-        onChange={handleChange}
-      />
-      <div className="dropzone-icon">📂</div>
-      <div className="dropzone-label">{label}</div>
-      <div className="dropzone-hint">
-        {files.length === 0
-          ? 'Click or drag & drop CSV / Excel files here'
-          : `${files.length} file${files.length > 1 ? 's' : ''} selected`}
+    <div className="mfb-wrap">
+      <div
+        className={`mfb-dropzone ${files.length > 0 ? 'has-files' : ''}`}
+        style={{ '--accent': accent }}
+        onDragOver={e => e.preventDefault()}
+        onDrop={onDrop}
+        onClick={() => ref.current?.click()}
+      >
+        <input ref={ref} type="file" multiple accept=".csv,.xlsx,.xls" style={{ display: 'none' }} onChange={handleChange} />
+        <span className="mfb-icon">📂</span>
+        <span className="mfb-label">{label}</span>
+        <span className="mfb-hint">
+          {files.length === 0
+            ? 'Click or drag files here (CSV / Excel, multiple allowed)'
+            : `${files.length} file${files.length > 1 ? 's' : ''} selected — click to add more`}
+        </span>
       </div>
       {files.length > 0 && (
-        <ul className="file-list">
-          {files.map((f, i) => (
-            <li key={i} onClick={e => e.stopPropagation()}>
-              <span className="file-chip">{f.name}</span>
-              <button
-                className="remove-file-btn"
-                onClick={e => { e.stopPropagation(); onChange(files.filter((_, j) => j !== i)); }}
-              >×</button>
+        <ul className="mfb-filelist">
+          {files.map(f => (
+            <li key={f.name}>
+              <span className="mfb-filename">{f.name}</span>
+              <button className="mfb-remove" onClick={e => { e.stopPropagation(); removeFile(f.name); }} title="Remove">×</button>
             </li>
           ))}
         </ul>
@@ -83,19 +87,16 @@ function FileDropZone({ label, accept, multiple, files, onChange }) {
   );
 }
 
-function TournamentReviewTable({ tournaments, onChange }) {
-  function update(index, field, value) {
-    onChange(tournaments.map((t, i) => i === index ? { ...t, [field]: value } : t));
-  }
-
+// Pairing status table shown after parsing
+function PairingStatus({ tournaments, competition }) {
+  if (!tournaments || tournaments.length === 0) return null;
   return (
-    <div className="review-table-wrap">
-      <table className="review-table">
+    <div className="pairing-table-wrap">
+      <table className="pairing-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Tournament ID</th>
-            <th>Tournament Name</th>
+            <th>Source ID</th>
+            <th>Tournament</th>
             <th>Year</th>
             <th>Batting</th>
             <th>Bowling</th>
@@ -103,269 +104,164 @@ function TournamentReviewTable({ tournaments, onChange }) {
           </tr>
         </thead>
         <tbody>
-          {tournaments.map((t, i) => (
-            <tr key={t.tournamentId + i}>
-              <td style={{ color: '#64748b' }}>{i + 1}</td>
-              <td>
-                <input
-                  type="text"
-                  className="inline-input"
-                  value={t.tournamentId}
-                  onChange={e => update(i, 'tournamentId', e.target.value)}
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  className="inline-input wide"
-                  value={t.tournamentName}
-                  onChange={e => update(i, 'tournamentName', e.target.value)}
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  className="inline-input narrow"
-                  value={t.year}
-                  onChange={e => update(i, 'year', e.target.value)}
-                />
-              </td>
-              <td>
-                <span className={`count-badge ${t.battingCount > 0 ? 'good' : 'warn'}`}>
-                  {t.battingCount}
-                </span>
-              </td>
-              <td>
-                <span className={`count-badge ${t.bowlingCount > 0 ? 'good' : 'warn'}`}>
-                  {t.bowlingCount}
-                </span>
-              </td>
-              <td>
-                <select
-                  className="inline-select"
-                  value={t.status}
-                  onChange={e => update(i, 'status', e.target.value)}
-                >
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </td>
-            </tr>
-          ))}
+          {tournaments.map(t => {
+            const ok = t.meta && t.hasBatting && t.hasBowling;
+            const unknownMeta = !t.meta;
+            const missingFile = t.meta && (!t.hasBatting || !t.hasBowling);
+            return (
+              <tr key={t.sourceId} className={ok ? 'row-ok' : 'row-err'}>
+                <td className="sid">{t.sourceId}</td>
+                <td>{t.meta ? t.meta.tournamentName : <span className="unknown-label">Unknown — add to config</span>}</td>
+                <td>{t.meta?.year || '—'}</td>
+                <td><span className={`pill ${t.hasBatting ? 'pill-green' : 'pill-red'}`}>{t.battingCount}</span></td>
+                <td><span className={`pill ${t.hasBowling ? 'pill-green' : 'pill-red'}`}>{t.bowlingCount}</span></td>
+                <td>
+                  {ok         && <span className="status-ok">✓ Ready</span>}
+                  {unknownMeta && <span className="status-err">✗ Unknown ID</span>}
+                  {missingFile && <span className="status-err">✗ {!t.hasBatting ? 'Batting missing' : 'Bowling missing'}</span>}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
-      <p className="review-hint">
-        All fields are editable. Tournament ID, Name, and Year are read from your files — correct them here if needed.
-      </p>
     </div>
   );
 }
 
-function SummaryCard({ summary }) {
+function SummaryBar({ summary }) {
   if (!summary) return null;
-  return (
-    <div className="summary-grid">
-      <div className="summary-item">
-        <div className="label">Competition</div>
-        <div className="value" style={{ fontSize: '1rem' }}>{summary.competition}</div>
-      </div>
-      <div className="summary-item">
-        <div className="label">Tournaments</div>
-        <div className="value">{summary.tournamentsCount}</div>
-      </div>
-      <div className="summary-item">
-        <div className="label">Batting Records</div>
-        <div className="value">{summary.totalBatting}</div>
-      </div>
-      <div className="summary-item">
-        <div className="label">Bowling Records</div>
-        <div className="value">{summary.totalBowling}</div>
-      </div>
-      <div className="summary-item">
-        <div className="label">Output File</div>
-        <div className="value" style={{ fontSize: '0.85rem' }}>{summary.outputFileName}</div>
-      </div>
-      <div className="summary-item">
-        <div className="label">Last Updated</div>
-        <div className="value" style={{ fontSize: '0.72rem' }}>{new Date(summary.lastUpdated).toLocaleString()}</div>
-      </div>
-    </div>
-  );
-}
-
-function ComparisonTable({ oldJson, newJson }) {
-  if (!oldJson || !newJson) return null;
-  const oldBatting   = oldJson.data?.reduce((s, e) => s + (e.batting?.length || 0), 0) ?? 0;
-  const newBatting   = newJson.data?.reduce((s, e) => s + (e.batting?.length || 0), 0) ?? 0;
-  const oldBowling   = oldJson.data?.reduce((s, e) => s + (e.bowling?.length || 0), 0) ?? 0;
-  const newBowling   = newJson.data?.reduce((s, e) => s + (e.bowling?.length || 0), 0) ?? 0;
-  const oldTourneys  = oldJson.data?.map(d => d.tournamentName) ?? [];
-  const newTourneys  = newJson.data?.map(d => d.tournamentName) ?? [];
-  const added        = newTourneys.filter(t => !oldTourneys.includes(t));
-  const removed      = oldTourneys.filter(t => !newTourneys.includes(t));
-
-  const rows = [
-    { label: 'Last Updated',    old: oldJson.lastUpdated ? new Date(oldJson.lastUpdated).toLocaleString() : '-', now: new Date(newJson.lastUpdated).toLocaleString(), changed: true },
-    { label: 'Batting Records', old: oldBatting, now: newBatting, changed: oldBatting !== newBatting },
-    { label: 'Bowling Records', old: oldBowling, now: newBowling, changed: oldBowling !== newBowling },
-    { label: 'Tournaments',     old: oldTourneys.join(', ') || '-', now: newTourneys.join(', '), changed: JSON.stringify([...oldTourneys].sort()) !== JSON.stringify([...newTourneys].sort()) },
+  const items = [
+    { label: 'Output file',       value: summary.outputFileName },
+    { label: 'Tournaments',       value: summary.tournamentsCount },
+    { label: 'Batting records',   value: summary.totalBatting },
+    { label: 'Bowling records',   value: summary.totalBowling },
+    { label: 'Last updated',      value: new Date(summary.lastUpdated).toLocaleString() },
   ];
-
   return (
-    <div>
-      <table className="compare-table">
-        <thead><tr><th>Field</th><th>Existing</th><th>New JSON</th></tr></thead>
-        <tbody>
-          {rows.map(r => (
-            <tr key={r.label}>
-              <td style={{ color: '#94a3b8' }}>{r.label}</td>
-              <td className={r.changed ? 'changed' : ''}>{String(r.old)}</td>
-              <td className="new-val">{String(r.now)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {(added.length > 0 || removed.length > 0) && (
-        <div style={{ marginTop: 10, fontSize: '0.8rem' }}>
-          {added.length   > 0 && <div style={{ color: '#4ade80' }}>+ Added: {added.join(', ')}</div>}
-          {removed.length > 0 && <div style={{ color: '#f87171' }}>− Removed: {removed.join(', ')}</div>}
+    <div className="summary-bar">
+      {items.map(item => (
+        <div key={item.label} className="summary-cell">
+          <div className="summary-label">{item.label}</div>
+          <div className="summary-value">{item.value}</div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
 
-// ─── Main App ────────────────────────────────────────────────────────────────
+// ─── Per-competition section ──────────────────────────────────────────────────
 
-export default function App() {
-  const [competition,   setCompetition]   = useState(null);
+function CompetitionSection({ compKey, label, accent }) {
   const [battingFiles,  setBattingFiles]  = useState([]);
   const [bowlingFiles,  setBowlingFiles]  = useState([]);
   const [parsing,       setParsing]       = useState(false);
   const [sessionId,     setSessionId]     = useState(null);
-  const [detectedTournaments, setDetectedTournaments] = useState([]); // editable review list
+  const [tournaments,   setTournaments]   = useState(null);   // null = not yet parsed
   const [generating,    setGenerating]    = useState(false);
   const [generatedJson, setGeneratedJson] = useState(null);
   const [summary,       setSummary]       = useState(null);
-  const [showPreview,   setShowPreview]   = useState(false);
-  const [existingJson,  setExistingJson]  = useState(null);
   const [saving,        setSaving]        = useState(false);
+  const [saved,         setSaved]         = useState(false);
   const [pushing,       setPushing]       = useState(false);
   const [backupPath,    setBackupPath]    = useState(null);
+  const [showJson,      setShowJson]      = useState(false);
   const [logs,          setLogs]          = useState([]);
-  const [error,         setError]         = useState(null);
-  const [successMsg,    setSuccessMsg]    = useState(null);
+  const [warnings,      setWarnings]      = useState([]);
+  const [errors,        setErrors]        = useState([]);
 
-  function addLog(msg, type = 'info') {
-    setLogs(prev => [...prev, { msg, type }]);
+  function addLog(msg, type) {
+    setLogs(prev => [...prev, { msg, type: type || logType(msg) }]);
   }
 
-  function resetOutput() {
-    setSessionId(null);
-    setDetectedTournaments([]);
+  function resetGenerated() {
     setGeneratedJson(null);
     setSummary(null);
-    setExistingJson(null);
+    setSaved(false);
     setBackupPath(null);
-    setError(null);
-    setSuccessMsg(null);
-    setLogs([]);
-    setShowPreview(false);
+    setShowJson(false);
   }
 
-  function selectCompetition(comp) {
-    setCompetition(comp);
-    setBattingFiles([]);
-    setBowlingFiles([]);
-    resetOutput();
-  }
-
-  // Step 2: Parse uploaded files
-  async function handleParseFiles() {
-    if (!competition) { setError('Select a competition first.'); return; }
-    if (battingFiles.length === 0 && bowlingFiles.length === 0) {
-      setError('Upload at least one batting or bowling file.'); return;
-    }
-    setError(null);
-    setSuccessMsg(null);
-    setLogs([]);
-    setDetectedTournaments([]);
+  // Called whenever files change — re-parse automatically if we already have a session
+  function handleBattingChange(updater) {
+    setBattingFiles(updater);
+    setTournaments(null);
     setSessionId(null);
-    setGeneratedJson(null);
-    setSummary(null);
+    resetGenerated();
+  }
+  function handleBowlingChange(updater) {
+    setBowlingFiles(updater);
+    setTournaments(null);
+    setSessionId(null);
+    resetGenerated();
+  }
 
+  async function handleParse() {
+    if (!battingFiles.length && !bowlingFiles.length) {
+      setErrors(['Upload at least one batting or bowling file.']);
+      return;
+    }
+    setLogs([]);
+    setWarnings([]);
+    setErrors([]);
+    setTournaments(null);
+    setSessionId(null);
+    resetGenerated();
     setParsing(true);
-    addLog('Reading uploaded files...', 'action');
+    addLog(`Reading files for ${compKey}...`, 'action');
 
     try {
-      const formData = new FormData();
-      battingFiles.forEach(f => formData.append('batting_files', f));
-      bowlingFiles.forEach(f => formData.append('bowling_files', f));
+      const form = new FormData();
+      form.append('competition', compKey);
+      battingFiles.forEach(f => form.append('batting_files', f));
+      bowlingFiles.forEach(f => form.append('bowling_files', f));
 
-      const resp = await fetch('/api/parse-files', { method: 'POST', body: formData });
+      const resp = await fetch('/api/parse-files', { method: 'POST', body: form });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || 'Parse failed');
 
-      data.logs?.forEach(msg => {
-        const type = msg.startsWith('  →') ? 'success'
-          : msg.toLowerCase().includes('warning') ? 'warn'
-          : 'info';
-        addLog(msg, type);
-      });
-
+      data.logs?.forEach(msg => addLog(msg));
+      setWarnings(data.warnings || []);
+      setErrors(data.errors || []);
       setSessionId(data.sessionId);
-      setDetectedTournaments(data.tournaments);
-      addLog(`Detected ${data.tournaments.length} tournament(s). Review below then click Generate.`, 'action');
+      setTournaments(data.tournaments || []);
+
+      if (!data.errors?.length && !data.warnings?.length) {
+        addLog(`All ${data.tournaments.length} tournament(s) ready — click Generate`, 'success');
+      }
     } catch (e) {
       addLog(e.message, 'error');
-      setError(e.message);
+      setErrors([e.message]);
     } finally {
       setParsing(false);
     }
   }
 
-  // Step 3: Generate JSON
   async function handleGenerate() {
-    if (!sessionId) { setError('Please parse files first.'); return; }
-    for (const t of detectedTournaments) {
-      if (!t.tournamentId || !t.tournamentName || !t.year) {
-        setError(`Tournament "${t.tournamentName || '(unnamed)'}" is missing ID, name, or year.`); return;
-      }
-    }
-    setError(null);
-    setSuccessMsg(null);
-    setGeneratedJson(null);
-    setSummary(null);
+    if (!sessionId) { setErrors(['Parse files first.']); return; }
+    setLogs([]);
+    setWarnings([]);
+    setErrors([]);
+    resetGenerated();
     setGenerating(true);
-    addLog('Generating JSON...', 'action');
+    addLog(`Generating ${compKey} JSON...`, 'action');
 
     try {
       const resp = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          competition,
-          tournaments: detectedTournaments.map(({ tournamentId, tournamentName, year, status }) =>
-            ({ tournamentId, tournamentName, year, status })
-          ),
-        }),
+        body: JSON.stringify({ sessionId, competition: compKey }),
       });
       const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Generation failed');
+      if (!resp.ok) throw new Error(data.error || 'Generate failed');
 
-      data.logs?.forEach(msg => {
-        const type = msg.toLowerCase().includes('warning') ? 'warn'
-          : msg.toLowerCase().includes('success') || msg.toLowerCase().includes('generated') ? 'success'
-          : 'info';
-        addLog(msg, type);
-      });
-
+      data.logs?.forEach(msg => addLog(msg));
       setGeneratedJson(data.json);
       setSummary(data.summary);
-      setSuccessMsg('JSON generated successfully!');
+      addLog(`JSON generated successfully — ${data.summary.outputFileName}`, 'success');
     } catch (e) {
       addLog(e.message, 'error');
-      setError(e.message);
+      setErrors([e.message]);
     } finally {
       setGenerating(false);
     }
@@ -374,247 +270,230 @@ export default function App() {
   function downloadJson() {
     if (!generatedJson || !summary) return;
     const blob = new Blob([JSON.stringify(generatedJson, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
     a.download = summary.outputFileName;
     a.click();
     URL.revokeObjectURL(url);
     addLog(`Downloaded ${summary.outputFileName}`, 'success');
   }
 
-  async function handleUploadExisting(file) {
-    if (!file) return;
-    addLog(`Reading existing JSON: ${file.name}`, 'action');
-    try {
-      const json = JSON.parse(await file.text());
-      setExistingJson(json);
-      addLog('Existing JSON loaded — comparison ready below', 'success');
-    } catch {
-      addLog('Failed to parse uploaded JSON', 'error');
-      setError('Invalid JSON file.');
-    }
-  }
-
   async function handleSaveAndReplace() {
-    if (!generatedJson || !competition) return;
+    if (!generatedJson) return;
     setSaving(true);
-    setError(null);
-    setSuccessMsg(null);
-    addLog('Creating backup and replacing repo JSON...', 'action');
+    addLog('Creating backup and replacing repo file...', 'action');
     try {
       const resp = await fetch('/api/save-backup-and-replace', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ competition, newJson: generatedJson }),
+        body: JSON.stringify({ competition: compKey, newJson: generatedJson }),
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || 'Save failed');
-      data.logs?.forEach(msg => addLog(msg, msg.toLowerCase().includes('backup') ? 'warn' : 'success'));
-      if (data.backupPath) setBackupPath(data.backupPath);
-      setSuccessMsg('Backup saved and repo JSON replaced!');
+      data.logs?.forEach(msg => addLog(msg));
+      if (data.backupPath) {
+        setBackupPath(data.backupPath);
+        addLog(`Backup saved at: ${data.backupPath}`, 'warn');
+      }
+      setSaved(true);
+      addLog('Repo file replaced — ready to push', 'success');
     } catch (e) {
       addLog(e.message, 'error');
-      setError(e.message);
+      setErrors([e.message]);
     } finally {
       setSaving(false);
     }
   }
 
-  async function handlePushToGitHub() {
-    if (!competition) return;
+  async function handlePush() {
     setPushing(true);
-    setError(null);
-    setSuccessMsg(null);
-    addLog('Starting git push to GitHub...', 'action');
+    addLog('Running git push...', 'action');
     try {
       const resp = await fetch('/api/push-github', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ competition }),
+        body: JSON.stringify({ competition: compKey }),
       });
       const data = await resp.json();
-      data.logs?.forEach(msg => {
-        const type = msg.toLowerCase().includes('error') ? 'error'
-          : msg.toLowerCase().includes('complet') || msg.toLowerCase().includes('success') ? 'success'
-          : 'action';
-        addLog(msg, type);
-      });
       if (!resp.ok) throw new Error(data.error || 'Push failed');
-      setSuccessMsg('Pushed to GitHub successfully!');
+      data.logs?.forEach(msg => addLog(msg));
+      addLog('Pushed to GitHub successfully', 'success');
     } catch (e) {
       addLog(e.message, 'error');
-      setError(e.message);
+      setErrors([e.message]);
     } finally {
       setPushing(false);
     }
   }
 
-  // ─── Render ────────────────────────────────────────────────────────────────
+  // Can generate if: session exists, no errors, every tournament has meta + both files
+  const canGenerate = sessionId
+    && !errors.length
+    && tournaments?.length > 0
+    && tournaments.every(t => t.meta && t.hasBatting && t.hasBowling);
+
+  const hasAnyFile = battingFiles.length > 0 || bowlingFiles.length > 0;
 
   return (
-    <div className="app">
-      <h1>Cricket Stats Generator</h1>
-      <p className="subtitle">Local tool · upload Excel/CSV files → generate and push stats JSON</p>
-
-      {/* Step 1: Competition */}
-      <div className="card">
-        <h2>1. Select Competition</h2>
-        <div className="competition-grid">
-          {Object.entries(COMPETITIONS).map(([key, val]) => (
-            <button
-              key={key}
-              className={`comp-btn ${competition === key ? 'active' : ''}`}
-              onClick={() => selectCompetition(key)}
-            >
-              <span className="comp-name">{key}</span>
-              <span className="comp-full">{val.fullName}</span>
-            </button>
-          ))}
-        </div>
+    <div className="comp-section" style={{ '--accent': accent }}>
+      <div className="comp-header">
+        <span className="comp-accent-bar" />
+        <h2>{label}</h2>
       </div>
 
-      {/* Step 2: Upload Files */}
-      {competition && (
-        <div className="card">
-          <h2>2. Upload Files</h2>
-          <p className="step-hint">
-            Upload all batting and/or bowling files for <strong>{competition}</strong>.
-            You can select <strong>multiple files</strong> at once — one file per tournament,
-            or a single file covering multiple tournaments if it has a <code>tournament_id</code> column.
-          </p>
+      {/* Upload row */}
+      <div className="upload-row">
+        <MultiFileButton
+          label={`Upload ${compKey} Batting Files`}
+          files={battingFiles}
+          onChange={handleBattingChange}
+          accent={accent}
+        />
+        <MultiFileButton
+          label={`Upload ${compKey} Bowling Files`}
+          files={bowlingFiles}
+          onChange={handleBowlingChange}
+          accent={accent}
+        />
+      </div>
 
-          <div className="upload-grid">
-            <FileDropZone
-              label="Batting Files"
-              accept=".csv,.xlsx,.xls"
-              multiple
-              files={battingFiles}
-              onChange={setBattingFiles}
-            />
-            <FileDropZone
-              label="Bowling Files"
-              accept=".csv,.xlsx,.xls"
-              multiple
-              files={bowlingFiles}
-              onChange={setBowlingFiles}
-            />
+      {/* Parse button */}
+      {hasAnyFile && !tournaments && (
+        <div style={{ marginTop: 14 }}>
+          <button className="btn btn-primary" style={{ '--btn-color': accent }} onClick={handleParse} disabled={parsing}>
+            {parsing ? <><span className="spinner" /> Detecting Tournaments...</> : 'Detect Tournaments from Files'}
+          </button>
+        </div>
+      )}
+
+      {/* Pairing status */}
+      {tournaments !== null && (
+        <div className="pairing-section">
+          <div className="pairing-title">
+            Tournament Detection — {tournaments.length} source{tournaments.length !== 1 ? 's' : ''} found
           </div>
+          <PairingStatus tournaments={tournaments} competition={compKey} />
 
-          <div className="hint-box">
-            <strong>Tournament info is read from your files.</strong>{' '}
-            Supported columns: <code>tournament_id</code>, <code>tournament_name</code>, <code>year</code>.
-            If absent, the filename is used as the tournament name and you can edit it in step 3.
-          </div>
+          {warnings.length > 0 && (
+            <div className="alert-box warn-box">
+              <strong>Warnings</strong>
+              <ul>{warnings.map((w, i) => <li key={i}>{w}</li>)}</ul>
+            </div>
+          )}
+          {errors.length > 0 && (
+            <div className="alert-box error-box">
+              <strong>Errors — fix before generating</strong>
+              <ul>{errors.map((e, i) => <li key={i}>{e}</li>)}</ul>
+            </div>
+          )}
 
-          <div className="actions-row" style={{ marginTop: 18 }}>
+          {/* Generate button */}
+          <div style={{ marginTop: 16 }}>
             <button
-              className="btn btn-primary"
-              onClick={handleParseFiles}
-              disabled={parsing || (battingFiles.length === 0 && bowlingFiles.length === 0)}
+              className="btn btn-generate"
+              style={{ '--btn-color': accent }}
+              onClick={handleGenerate}
+              disabled={!canGenerate || generating}
             >
-              {parsing ? <><span className="spinner" /> Reading Files...</> : 'Read & Detect Tournaments'}
+              {generating
+                ? <><span className="spinner" /> Generating...</>
+                : `Generate ${compKey} JSON`}
             </button>
+            {!canGenerate && !generating && tournaments?.length > 0 && (
+              <span className="generate-blocked">
+                {' '}Fix warnings/errors above before generating.
+              </span>
+            )}
           </div>
         </div>
       )}
 
-      {/* Step 3: Review detected tournaments */}
-      {detectedTournaments.length > 0 && (
-        <div className="card">
-          <h2>3. Review Detected Tournaments</h2>
-          <p className="step-hint">
-            {detectedTournaments.length} tournament{detectedTournaments.length > 1 ? 's' : ''} detected.
-            Edit any field inline, then set the <strong>status</strong> for each tournament.
-          </p>
-          <TournamentReviewTable
-            tournaments={detectedTournaments}
-            onChange={setDetectedTournaments}
-          />
-          <div className="actions-row" style={{ marginTop: 16 }}>
-            <button className="btn btn-primary" onClick={handleGenerate} disabled={generating}>
-              {generating ? <><span className="spinner" /> Generating...</> : 'Generate JSON'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Logs */}
+      {/* Activity log */}
       {logs.length > 0 && (
-        <div className="card">
-          <h2>Activity Log</h2>
+        <div style={{ marginTop: 16 }}>
           <LogPanel logs={logs} />
         </div>
       )}
 
-      {error      && <div className="error-banner">{error}</div>}
-      {successMsg && !error && <div className="success-banner">{successMsg}</div>}
-
-      {/* Step 4: Preview & Download */}
+      {/* Generated output */}
       {generatedJson && summary && (
-        <div className="card">
-          <h2>4. Preview &amp; Download</h2>
-          <SummaryCard summary={summary} />
-          <div className="actions-row">
-            <button className="btn btn-success" onClick={downloadJson}>
-              ↓ Download {summary.outputFileName}
+        <div className="output-section">
+          <div className="output-title">Generated: {summary.outputFileName}</div>
+          <SummaryBar summary={summary} />
+
+          <div className="output-actions">
+            <button className="btn btn-download" onClick={downloadJson}>
+              ↓ Download JSON
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => setShowPreview(v => !v)}>
-              {showPreview ? 'Hide JSON' : 'Show JSON Preview'}
+            <button className="btn btn-ghost" onClick={() => setShowJson(v => !v)}>
+              {showJson ? 'Hide Preview' : 'Preview JSON'}
             </button>
           </div>
-          {showPreview && (
-            <div className="json-preview" style={{ marginTop: 14 }}>
+
+          {showJson && (
+            <div className="json-preview">
               {(() => {
-                const str = JSON.stringify(generatedJson, null, 2);
-                return str.length > 4000 ? str.slice(0, 4000) + '\n... (truncated)' : str;
+                const s = JSON.stringify(generatedJson, null, 2);
+                return s.length > 4000 ? s.slice(0, 4000) + '\n… (truncated)' : s;
               })()}
             </div>
           )}
-        </div>
-      )}
 
-      {/* Step 5: Compare & Push */}
-      {generatedJson && (
-        <div className="card">
-          <h2>5. Compare &amp; Push to GitHub</h2>
+          <hr className="divider" />
 
-          <div className="sub-section">
-            <h3>Upload Existing JSON (optional — for comparison)</h3>
-            <input
-              type="file"
-              accept=".json"
-              onChange={e => handleUploadExisting(e.target.files[0])}
-              style={{ marginTop: 8 }}
-            />
-            {existingJson && (
-              <div style={{ marginTop: 16 }}>
-                <ComparisonTable oldJson={existingJson} newJson={generatedJson} />
-              </div>
-            )}
-          </div>
-
-          <hr className="section-divider" />
-
-          <div className="sub-section">
-            <h3>Save &amp; Push</h3>
-            <p className="step-hint">
-              Creates a timestamped backup, replaces the repo JSON, then runs git push.
-            </p>
+          <div className="push-section">
             {backupPath && (
-              <div className="backup-notice">Backup saved at: {backupPath}</div>
+              <div className="backup-notice">Backup saved: {backupPath}</div>
             )}
-            <div className="actions-row" style={{ marginTop: 14 }}>
-              <button className="btn btn-warning" onClick={handleSaveAndReplace} disabled={saving || pushing}>
-                {saving ? <><span className="spinner" /> Saving...</> : 'Save Backup & Replace JSON'}
+            <div className="output-actions">
+              <button
+                className="btn btn-backup"
+                onClick={handleSaveAndReplace}
+                disabled={saving || pushing}
+              >
+                {saving ? <><span className="spinner" /> Saving...</> : 'Backup Old JSON and Replace Repo File'}
               </button>
-              <button className="btn btn-primary" onClick={handlePushToGitHub} disabled={pushing || saving}>
+              <button
+                className="btn btn-push"
+                onClick={handlePush}
+                disabled={!saved || pushing || saving}
+                title={!saved ? 'Save & replace the repo file first' : ''}
+              >
                 {pushing ? <><span className="spinner" /> Pushing...</> : 'Push to GitHub'}
               </button>
             </div>
+            {!saved && generatedJson && (
+              <p className="push-hint">Save & replace the repo file before pushing to GitHub.</p>
+            )}
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── App root ─────────────────────────────────────────────────────────────────
+
+export default function App() {
+  return (
+    <div className="app">
+      <header className="app-header">
+        <h1>Cricket Stats JSON Generator</h1>
+        <p className="app-subtitle">
+          Upload batting and bowling files · auto-detect tournaments · generate, backup, and push JSON
+        </p>
+      </header>
+
+      <div className="config-hint">
+        Tournament names, IDs, and years are read from{' '}
+        <code>stats-generator/tournament-config.json</code>.
+        Edit that file to add new tournament source IDs.
+      </div>
+
+      {COMPETITIONS.map(c => (
+        <CompetitionSection key={c.key} compKey={c.key} label={c.label} accent={c.accent} />
+      ))}
     </div>
   );
 }
