@@ -126,8 +126,8 @@ function aggregateAll(normalizedList) {
   let mat=0, inns=0, notOuts=0, runs=0, balls=0, overs=0, runsConceded=0, wickets=0;
   let hasBat=false, hasBowl=false;
   for (const n of normalizedList) {
-    if (n.batting) { hasBat=true; mat+=n.batting.mat; inns+=n.batting.inns; notOuts+=n.batting.notOuts; runs+=n.batting.runs; balls+=n.batting.balls; }
-    if (n.bowling) { hasBowl=true; overs+=n.bowling.overs; runsConceded+=n.bowling.runs; wickets+=n.bowling.wickets; }
+    if (n.batting) { hasBat=true; mat+=(Number(n.batting.mat)||0); inns+=(Number(n.batting.inns)||0); notOuts+=(Number(n.batting.notOuts)||0); runs+=(Number(n.batting.runs)||0); balls+=(Number(n.batting.balls)||0); }
+    if (n.bowling) { hasBowl=true; overs+=(Number(n.bowling.overs)||0); runsConceded+=(Number(n.bowling.runs)||0); wickets+=(Number(n.bowling.wickets)||0); }
   }
   const dismissals = inns - notOuts;
   const d = (v, dec=2) => (v == null || isNaN(v) ? '—' : Number(v).toFixed(dec));
@@ -270,6 +270,24 @@ function AggregatedStatsPanel({ agg, playerName }) {
   );
 }
 
+// ── Background stats fetcher — fires for all SCA live players immediately,
+//    independent of whether the accordion section is open. This ensures
+//    allLoaded becomes true as soon as all stats resolve, not when user expands.
+
+function ScaBackgroundFetcher({ players, onStatsResolved }) {
+  useEffect(() => {
+    for (const player of players) {
+      if (!player.id) { onStatsResolved(player.id, null); continue; }
+      fetchAnyPlayerStats(player)
+        .then(data => onStatsResolved(player.id, normalizeStats(data)))
+        .catch(() => onStatsResolved(player.id, null));
+    }
+  // Run once per player list — query changes cause parent to remount this anyway
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null; // renders nothing
+}
+
 // ── Main aggregated results component ────────────────────────────────────────
 
 export function AggregatedResults({ searchResults }) {
@@ -279,7 +297,7 @@ export function AggregatedResults({ searchResults }) {
   const [scaStatsMap, setScaStatsMap]           = useState(new Map());
   const [resolvedCount, setResolvedCount]       = useState(0);
 
-  // Count SCA live players that need async stats fetch
+  // All SCA live players — fetched in background regardless of accordion state
   const scaLivePlayers = (results['SCA']?.players || []).filter(p => p.source === 'sca');
   const totalScaLive   = scaLivePlayers.length;
   const allLoaded      = totalScaLive === 0 || resolvedCount >= totalScaLive;
@@ -328,6 +346,15 @@ export function AggregatedResults({ searchResults }) {
         </div>
       </div>
 
+      {/* Background fetcher — mounts immediately, fetches all SCA live stats
+          regardless of whether the SCA accordion is open */}
+      {scaLivePlayers.length > 0 && (
+        <ScaBackgroundFetcher
+          players={scaLivePlayers}
+          onStatsResolved={handleStatsResolved}
+        />
+      )}
+
       <div style={{ display: 'grid', gap: '1.5rem' }}>
         {Object.entries(results)
           .filter(([, p]) => !p.noResults || p.error)
@@ -339,7 +366,6 @@ export function AggregatedResults({ searchResults }) {
               onToggle={() =>
                 setExpandedPlatform(expandedPlatform === platformKey ? null : platformKey)
               }
-              onStatsResolved={handleStatsResolved}
             />
           ))}
       </div>
@@ -356,7 +382,7 @@ export function AggregatedResults({ searchResults }) {
 
 // ── Platform section ──────────────────────────────────────────────────────────
 
-function PlatformSection({ platformData, isExpanded, onToggle, onStatsResolved }) {
+function PlatformSection({ platformData, isExpanded, onToggle }) {
   const { platformName, count, players, noResults, icon, disabled, disabledReason, error } = platformData;
   const isLive = !disabled;
 
@@ -464,7 +490,6 @@ function PlatformSection({ platformData, isExpanded, onToggle, onStatsResolved }
                 player={player}
                 platformName={platformName}
                 isLast={idx === players.length - 1}
-                onStatsResolved={onStatsResolved}
               />
             )
           )}
@@ -482,33 +507,19 @@ function PlatformSection({ platformData, isExpanded, onToggle, onStatsResolved }
 
 // ── Player card with auto-fetched stats ───────────────────────────────────────
 
-function PlayerCard({ player, platformName, isLast, onStatsResolved }) {
+function PlayerCard({ player, platformName, isLast }) {
   const { id, name, team, role, profileUrl, verified } = player;
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(!!id);
   const [statsError, setStatsError] = useState(!id ? 'Player ID unavailable — cannot load stats.' : null);
 
   useEffect(() => {
-    if (!id) {
-      onStatsResolved?.(id, null);
-      return;
-    }
-
+    if (!id) return;
     setStatsLoading(true);
     setStatsError(null);
-
     fetchAnyPlayerStats(player)
-      .then((data) => {
-        const normalized = normalizeStats(data);
-        setStats(normalized);
-        onStatsResolved?.(id, normalized);
-        setStatsLoading(false);
-      })
-      .catch((err) => {
-        onStatsResolved?.(id, null);
-        setStatsError(err.message || 'Could not load player statistics.');
-        setStatsLoading(false);
-      });
+      .then((data) => { setStats(normalizeStats(data)); setStatsLoading(false); })
+      .catch((err) => { setStatsError(err.message || 'Could not load player statistics.'); setStatsLoading(false); });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
