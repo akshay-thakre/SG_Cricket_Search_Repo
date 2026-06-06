@@ -90,7 +90,7 @@ function identifyStrengths(batting, bowling) {
   }
   if (bowling&&bowling.innings) {
     if ((bowling.economy||99)<=6) s.push(`Economical bowling (econ ${bowling.economy.toFixed(2)})`);
-    if ((bowling.wickets||0)>=10) s.push(`Consistent wicket taker (${bowling.wickets} wkts)`);
+    if (bowling.strikeRate && bowling.strikeRate < 24) s.push(`Consistent wicket taker (SR ${bowling.strikeRate.toFixed(1)} balls/wkt)`);
     if (bowling.average&&bowling.average<20) s.push('Excellent bowling average');
     if (bowling.strikeRate&&bowling.strikeRate<15) s.push('Strikes every 15 balls');
   }
@@ -101,7 +101,7 @@ function identifyStrengths(batting, bowling) {
 function identifyImprovements(batting, bowling) {
   const a=[];
   if (batting&&(batting.innings||0)>3) {
-    if ((batting.average||0)<20) a.push(`Build bigger innings (avg ${batting.average?.toFixed(1)})`);
+    if ((batting.average||0)<15) a.push(`Build bigger innings (avg ${batting.average?.toFixed(1)})`);
     if ((batting.strikeRate||0)<90) a.push(`Increase scoring rate (SR ${batting.strikeRate?.toFixed(1)})`);
     if ((batting.ducks||0)>=3) a.push(`Reduce early dismissals (${batting.ducks} ducks)`);
   }
