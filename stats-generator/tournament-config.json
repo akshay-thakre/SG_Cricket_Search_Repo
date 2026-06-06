@@ -1,0 +1,31 @@
+{
+  "SG IA": {
+    "competition": "SG IA",
+    "fullName": "Singapore Indian Association",
+    "outputFileName": "sgiaStats.json",
+    "targetRepoPath": "cricsearch-sg/src/data/sgiaStats.json",
+    "backupDir": "cricsearch-sg/src/data/backups",
+    "tournaments": {
+      "1986843": {
+        "year": "2025",
+        "tournamentId": "shl3",
+        "tournamentName": "SGIA SHL 3",
+        "status": "on-going"
+      },
+      "1575484": {
+        "year": "2025",
+        "tournamentId": "champions-cup-3",
+        "tournamentName": "SGIA Champions Cup Season 3",
+        "status": "completed"
+      }
+    }
+  },
+  "BPL": {
+    "competition": "BPL",
+    "fullName": "BPL",
+    "outputFileName": "bplStats.json",
+    "targetRepoPath": "cricsearch-sg/src/data/bplStats.json",
+    "backupDir": "cricsearch-sg/src/data/backups",
+    "tournaments": {}
+  }
+}
