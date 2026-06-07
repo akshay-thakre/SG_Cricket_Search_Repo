@@ -153,11 +153,11 @@ function aggregateAll(normalizedList) {
 // ── Source label helper ───────────────────────────────────────────────────────
 
 const SOURCE_LABEL = {
-  'sca':           { label: 'SCA Live',   color: '#1e40af', bg: '#e8f1ff' },
-  'sca-corporate': { label: 'SCA Corp',   color: '#1e40af', bg: '#dbeafe' },
-  'sgia-static':   { label: 'SG IA',      color: '#dc2626', bg: '#fef2f2' },
-  'bpl-static':    { label: 'BPL',        color: '#7c3aed', bg: '#f3e8ff' },
-  'ypl-static':    { label: 'YPL',        color: '#b45309', bg: '#fef3c7' },
+  'sca':           { label: 'SCA Live',  color: '#2563EB', bg: '#EFF6FF' },
+  'sca-corporate': { label: 'SCA Corp',  color: '#0E7490', bg: '#ECFEFF' },
+  'sgia-static':   { label: 'SG IA',     color: '#DC2626', bg: '#FEF2F2' },
+  'bpl-static':    { label: 'BPL',       color: '#7C3AED', bg: '#F5F3FF' },
+  'ypl-static':    { label: 'YPL',       color: '#D97706', bg: '#FFFBEB' },
 };
 
 function playerKey(p) {
@@ -252,15 +252,15 @@ function YearlyPerformanceSection({ players, scaStatsMap }) {
     <div style={{
       marginTop: '1.25rem',
       padding: '1.25rem',
-      backgroundColor: '#f5f8fc',
-      border: '1px solid #d0dae8',
-      borderRadius: '12px',
-      boxShadow: '0 2px 8px rgba(6,28,84,0.07)',
+      backgroundColor: 'var(--surface-muted)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-lg)',
+      boxShadow: 'var(--shadow-sm)',
     }}>
-      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         📊 Yearly Performance Trend
       </div>
-      <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '1rem' }}>
+      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
         Stacked by league · SCA live excluded (career aggregate only)
       </div>
 
@@ -271,7 +271,7 @@ function YearlyPerformanceSection({ players, scaStatsMap }) {
       }}>
         {activeRunsLeagues.length > 0 && (
           <div>
-            <div style={{ fontSize: '11px', fontWeight: '600', color: '#0066cc', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+            <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--data-blue)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
               🏏 Runs Scored per Year
             </div>
             <ResponsiveContainer width="100%" height={240}>
@@ -292,7 +292,7 @@ function YearlyPerformanceSection({ players, scaStatsMap }) {
 
         {activeWicketsLeagues.length > 0 && (
           <div>
-            <div style={{ fontSize: '11px', fontWeight: '600', color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+            <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--data-purple)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
               ⚡ Wickets Taken per Year
             </div>
             <ResponsiveContainer width="100%" height={240}>
@@ -333,8 +333,8 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
     return (
       <div style={{
         marginTop: '1.5rem', padding: '1rem 1.25rem',
-        backgroundColor: '#fef9ec', border: '1px solid #fcd34d',
-        borderRadius: '10px', fontSize: '13px', color: '#92400e',
+        backgroundColor: 'var(--warning-bg)', border: '1px solid var(--warning-border)',
+        borderRadius: 'var(--radius-lg)', fontSize: '13px', color: '#92400e',
       }}>
         <strong>Cross-league aggregation not feasible</strong> — name check failed for:{' '}
         <em>{failedNames.join(', ')}</em>. Results contain players with names unrelated to the search query.
@@ -367,26 +367,16 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
 
       {/* ── Primary action button ── */}
       {!allLoaded ? (
-        <button disabled style={{
-          display: 'flex', alignItems: 'center', gap: '0.6rem',
-          padding: '0.75rem 1.5rem', borderRadius: '8px',
-          backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1',
-          color: '#64748b', fontSize: '13px', fontWeight: '600', cursor: 'not-allowed',
-        }}>
-          <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #94a3b8', borderTopColor: '#0066cc', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <button disabled className="btn btn-outline" style={{ gap: '0.6rem', fontSize: '13px', cursor: 'not-allowed' }}>
+          <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid var(--text-muted)', borderTopColor: 'var(--data-blue)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           Waiting for data load...
         </button>
       ) : (
         <button
           onClick={() => setShowPanel(v => !v)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.6rem',
-            padding: '0.75rem 1.5rem', borderRadius: '8px',
-            backgroundColor: showPanel ? '#e8f1ff' : '#0066cc',
-            border: `1px solid ${showPanel ? '#bcd0f0' : '#0050aa'}`,
-            color: showPanel ? '#0066cc' : '#fff',
-            fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s',
-          }}
+          aria-expanded={showPanel}
+          className={showPanel ? 'btn btn-outline' : 'btn btn-data-blue'}
+          style={{ gap: '0.6rem', fontSize: '13px' }}
         >
           <span>✅</span>
           {showPanel ? 'Hide cross-league performance' : 'Data load complete — View performance across leagues'}
@@ -400,22 +390,17 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
           <AggregatedStatsPanel
             agg={fullAgg}
             title="Aggregated performance across all leagues"
-            accentBat="#0066cc"
-            accentBowl="#7c3aed"
+            accentBat="var(--data-blue)"
+            accentBowl="var(--data-purple)"
           />
 
           {/* ── Section 2: Yearly graph toggle ── */}
           <div style={{ marginTop: '1rem' }}>
             <button
               onClick={() => setShowGraph(v => !v)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.6rem 1.1rem', borderRadius: '7px',
-                backgroundColor: showGraph ? '#f0f4ff' : '#f8fafc',
-                border: `1px solid ${showGraph ? '#bcd0f0' : '#d0dae8'}`,
-                cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                color: showGraph ? '#0066cc' : '#1e293b',
-              }}
+              aria-expanded={showGraph}
+              className="btn btn-sm btn-outline"
+              style={{ gap: '0.5rem' }}
             >
               <span>📊</span>
               {showGraph ? 'Hide Yearly Performance Graph' : 'View Yearly Performance Graph'}
@@ -429,13 +414,9 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
           <div style={{ marginTop: '1rem' }}>
             <button
               onClick={() => setShowNames(v => !v)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.6rem 1.1rem', borderRadius: '7px',
-                backgroundColor: showNames ? '#f1f5f9' : '#f8fafc',
-                border: '1px solid #d0dae8', cursor: 'pointer',
-                fontSize: '12px', fontWeight: '600', color: '#1e293b',
-              }}
+              aria-expanded={showNames}
+              className="btn btn-sm btn-outline"
+              style={{ gap: '0.5rem' }}
             >
               <span>{showNames ? '▲' : '▼'}</span>
               Players considered for aggregation ({allPlayers.length})
@@ -449,25 +430,25 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
             {showNames && (
               <div style={{
                 marginTop: '0.5rem', padding: '1rem',
-                backgroundColor: '#f8fafc', border: '1px solid #e2e8f0',
-                borderRadius: '10px',
+                backgroundColor: 'var(--surface-muted)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
               }}>
-                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
                   Click ✕ to exclude a player from aggregation. Click again to restore.
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                   {allPlayers.map(p => {
                     const key   = playerKey(p);
                     const isOut = excluded.has(key);
-                    const src   = SOURCE_LABEL[p.source] || { label: p.source, color: '#64748b', bg: '#f1f5f9' };
+                    const src   = SOURCE_LABEL[p.source] || { label: p.source, color: 'var(--text-secondary)', bg: 'var(--surface-muted)' };
                     return (
                       <div
                         key={key}
                         style={{
                           display: 'flex', alignItems: 'center', gap: '0.4rem',
-                          padding: '0.35rem 0.65rem', borderRadius: '6px',
-                          backgroundColor: isOut ? '#fef2f2' : '#fff',
-                          border: `1px solid ${isOut ? '#fecaca' : '#d0dae8'}`,
+                          padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-sm)',
+                          backgroundColor: isOut ? 'var(--danger-bg)' : 'var(--surface)',
+                          border: `1px solid ${isOut ? 'var(--danger-border)' : 'var(--border)'}`,
                           opacity: isOut ? 0.6 : 1,
                           transition: 'all 0.15s',
                         }}
@@ -477,16 +458,18 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
                           color: src.color, backgroundColor: src.bg,
                           padding: '1px 5px', borderRadius: '3px',
                         }}>{src.label}</span>
-                        <span style={{ fontSize: '12px', fontWeight: '500', color: isOut ? '#94a3b8' : '#1e293b' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '500', color: isOut ? 'var(--text-muted)' : 'var(--text-primary)' }}>
                           {p.name}
                         </span>
                         <button
                           onClick={() => toggleExclude(p)}
+                          aria-label={isOut ? `Restore ${p.name}` : `Exclude ${p.name} from aggregation`}
                           title={isOut ? 'Restore player' : 'Exclude from aggregation'}
                           style={{
                             background: 'none', border: 'none', cursor: 'pointer',
-                            fontSize: '13px', lineHeight: 1, padding: '0 1px',
-                            color: isOut ? '#16a34a' : '#dc2626', fontWeight: '700',
+                            fontSize: '13px', lineHeight: 1, padding: '2px 4px',
+                            color: isOut ? 'var(--primary)' : 'var(--data-red)', fontWeight: '700',
+                            minWidth: '32px', minHeight: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                           }}
                         >
                           {isOut ? '↩' : '✕'}
@@ -505,8 +488,8 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
               <AggregatedStatsPanel
                 agg={adjustedAgg}
                 title={`Adjusted performance — excluding ${excludedPlayers.map(p => p.name).join(', ')}`}
-                accentBat="#16a34a"
-                accentBowl="#0891b2"
+                accentBat="var(--primary)"
+                accentBowl="var(--data-teal)"
                 adjusted
               />
             </div>
@@ -522,30 +505,27 @@ function AggregatedStatsPanel({ agg, title, accentBat, accentBowl, adjusted }) {
   const { batting: b, bowling: bwl, hasBat, hasBowl } = agg;
 
   const Cell = ({ label, value, accent }) => (
-    <div style={{
-      backgroundColor: '#fff', border: '1px solid #d0dae8', borderRadius: '10px',
-      padding: '1rem', textAlign: 'center', boxShadow: '0 1px 3px rgba(6,28,84,0.05)',
-    }}>
-      <div style={{ fontSize: '22px', fontWeight: '700', color: accent }}>{value}</div>
-      <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '4px' }}>{label}</div>
+    <div className="stat-cell">
+      <div className="stat-cell-value" style={{ color: accent, fontSize: '28px' }}>{value}</div>
+      <div className="stat-cell-label">{label}</div>
     </div>
   );
 
   return (
     <div style={{
       padding: '1.25rem',
-      backgroundColor: adjusted ? '#f0fdf4' : '#f5f8fc',
-      border: `1px solid ${adjusted ? '#bbf7d0' : '#d0dae8'}`,
-      borderRadius: '12px', boxShadow: '0 2px 8px rgba(6,28,84,0.07)',
+      backgroundColor: adjusted ? 'var(--success-bg)' : 'var(--surface-muted)',
+      border: `1px solid ${adjusted ? 'var(--success-border)' : 'var(--border)'}`,
+      borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)',
     }}>
-      <div style={{ fontSize: '12px', fontWeight: '700', color: adjusted ? '#15803d' : '#1e293b', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: adjusted ? 'var(--primary)' : 'var(--text-primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         {adjusted && '↻ '}{title}
       </div>
 
       {hasBat && (
         <div style={{ marginBottom: '1rem' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: accentBat, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>🏏 Batting</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>🏏 Batting</div>
+          <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
             <Cell label="Matches" value={b.mat}  accent={accentBat} />
             <Cell label="Runs"    value={b.runs} accent={accentBat} />
             <Cell label="Bat Avg" value={b.avg}  accent={accentBat} />
@@ -556,8 +536,8 @@ function AggregatedStatsPanel({ agg, title, accentBat, accentBowl, adjusted }) {
 
       {hasBowl && (
         <div>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: accentBowl, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>⚡ Bowling</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--data-purple)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>⚡ Bowling</div>
+          <div className="stats-cell-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
             <Cell label="Overs"   value={bwl.overs}   accent={accentBowl} />
             <Cell label="Wickets" value={bwl.wickets} accent={accentBowl} />
             <Cell label="Economy" value={bwl.econ}    accent={accentBowl} />
@@ -567,12 +547,12 @@ function AggregatedStatsPanel({ agg, title, accentBat, accentBowl, adjusted }) {
       )}
 
       {!hasBat && !hasBowl && (
-        <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '1rem 0' }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', padding: '1rem 0' }}>
           No stats available.
         </div>
       )}
 
-      <div style={{ marginTop: '0.75rem', fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>
+      <div style={{ marginTop: '0.75rem', fontSize: '10px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
         Batting avg = runs ÷ dismissals · Batting SR = (runs ÷ balls) × 100 ·
         Economy = runs ÷ overs · Bowl SR = balls ÷ wickets.
         SCA live balls estimated from runs ÷ strike rate.
@@ -623,19 +603,19 @@ export function AggregatedResults({ searchResults }) {
     const errors = Object.values(results).filter((p) => p.error);
     return (
       <div style={{
-        padding: '3rem 1.5rem', textAlign: 'center', color: '#64748b',
-        backgroundColor: '#eef2f9', borderRadius: '12px',
-        border: '1px solid #d0dae8', marginTop: '2rem',
+        padding: '3rem 1.5rem', textAlign: 'center', color: 'var(--text-secondary)',
+        backgroundColor: 'var(--surface-muted)', borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border)', marginTop: '2rem',
       }}>
         <div style={{ fontSize: '56px', marginBottom: '1rem' }}>🔍</div>
-        <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '0.5rem', color: '#1e293b' }}>
+        <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
           No results found
         </div>
         <div style={{ fontSize: '14px' }}>
           No players matching "<strong>{query}</strong>" found on live platforms
         </div>
         {errors.length > 0 && (
-          <div style={{ marginTop: '1rem', fontSize: '13px', color: '#dc2626' }}>
+          <div style={{ marginTop: '1rem', fontSize: '13px', color: 'var(--data-red)' }}>
             ⚠️ {errors.length} platform{errors.length > 1 ? 's' : ''} returned errors. Check backend connectivity.
           </div>
         )}
@@ -646,13 +626,13 @@ export function AggregatedResults({ searchResults }) {
   return (
     <div style={{ marginTop: '2rem' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ margin: '0 0 0.75rem 0', fontSize: '20px', fontWeight: '600', color: '#1e293b' }}>
-          Results for "<span style={{ color: '#0066cc' }}>{query}</span>"
+        <h2 style={{ margin: '0 0 0.75rem 0', fontSize: '20px', fontWeight: '600', color: 'var(--text-primary)' }}>
+          Results for "<span style={{ color: 'var(--data-blue)' }}>{query}</span>"
         </h2>
-        <div style={{ fontSize: '14px', color: '#64748b' }}>
-          Found <strong style={{ color: '#0066cc' }}>{totalFound}</strong> player{totalFound !== 1 ? 's' : ''} across platforms
-          {meta?.live && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#16a34a' }}>● {meta.live.length} live</span>}
-          {meta?.static && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: '#b45309' }}>● {meta.static.length} static</span>}
+        <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+          Found <strong style={{ color: 'var(--data-blue)' }}>{totalFound}</strong> player{totalFound !== 1 ? 's' : ''} across platforms
+          {meta?.live && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: 'var(--primary)' }}>● {meta.live.length} live</span>}
+          {meta?.static && <span style={{ marginLeft: '0.5rem', fontSize: '12px', color: 'var(--data-amber)' }}>● {meta.static.length} static</span>}
         </div>
       </div>
 
@@ -704,78 +684,71 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
   const isLive = !disabled;
 
   return (
-    <div style={{
-      backgroundColor: '#f5f8fc',
-      border: `1px solid ${error ? '#fecaca' : '#d0dae8'}`,
-      borderRadius: '12px',
+    <div className="card" style={{
+      border: `1px solid ${error ? 'var(--danger-border)' : 'var(--border)'}`,
       overflow: 'hidden',
-      boxShadow: '0 2px 6px rgba(6, 28, 84, 0.08)',
       opacity: disabled ? 0.6 : 1,
     }}>
       <button
         onClick={disabled ? undefined : onToggle}
+        aria-expanded={isExpanded}
+        aria-label={`${platformName} — ${count} players found`}
+        className="accordion-btn"
         style={{
-          width: '100%', padding: '1.5rem',
-          backgroundColor: error ? '#fef2f2' : '#f5f8fc',
-          border: 'none',
-          borderBottom: isExpanded ? '1px solid #d0dae8' : 'none',
+          borderBottom: isExpanded ? '1px solid var(--border)' : 'none',
+          backgroundColor: error ? 'var(--danger-bg)' : 'var(--surface)',
           cursor: disabled ? 'default' : 'pointer',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{
             width: '40px', height: '40px', borderRadius: '50%',
-            backgroundColor: isLive ? '#e8f1ff' : '#f3f4f6',
+            backgroundColor: isLive ? 'var(--data-blue-light)' : 'var(--surface-muted)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: isLive ? '#0066cc' : '#9ca3af',
+            color: isLive ? 'var(--data-blue)' : 'var(--text-muted)',
             fontWeight: 'bold', fontSize: '16px',
           }}>
             {icon.code}
           </div>
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontWeight: '600', fontSize: '15px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {platformName}
-              {isLive && <span style={{ fontSize: '8px', color: '#16a34a' }}>●</span>}
-              {isLive && <span style={{ fontSize: '10px', color: '#16a34a', fontWeight: '500' }}>LIVE</span>}
+              {isLive && <span style={{ fontSize: '8px', color: 'var(--primary)' }}>●</span>}
+              {isLive && <span style={{ fontSize: '10px', color: 'var(--primary)', fontWeight: '600' }}>LIVE</span>}
               {disabled && (
-                <span style={{ fontSize: '10px', color: '#9ca3af', fontWeight: '500', backgroundColor: '#f3f4f6', padding: '2px 6px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '500', backgroundColor: 'var(--surface-muted)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }}>
                   {disabledReason}
                 </span>
               )}
             </div>
             {platformName === 'SCA' && (
-              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                 live + static corporate · cognizant
               </div>
             )}
-            {error && <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '2px' }}>Error: {error}</div>}
+            {error && <div style={{ fontSize: '11px', color: 'var(--data-red)', marginTop: '2px' }}>Error: {error}</div>}
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           {noResults && !error && !disabled ? (
-            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>No results</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '500' }}>No results</span>
           ) : !disabled && !error && count > 0 ? (
-            <span style={{
-              backgroundColor: '#e8f1ff', color: '#0066cc',
-              padding: '0.375rem 0.875rem', borderRadius: '6px',
-              fontSize: '12px', fontWeight: '600',
-            }}>
+            <span className="badge badge-info">
               {count} found
             </span>
           ) : null}
           {!disabled && (
             <span style={{
               transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s', fontSize: '16px', color: '#0066cc', fontWeight: 'bold',
+              transition: 'transform 0.2s', fontSize: '16px', color: 'var(--data-blue)', fontWeight: 'bold',
             }}>▼</span>
           )}
         </div>
       </button>
 
       {isExpanded && !noResults && !disabled && (
-        <div style={{ padding: '1.25rem', borderTop: '1px solid #d0dae8' }}>
+        <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border)' }}>
           {players.map((player, idx) =>
             player.source === 'ypl-static' ? (
               <YPLPlayerCard
@@ -814,7 +787,7 @@ function PlatformSection({ platformData, isExpanded, onToggle }) {
       )}
 
       {isExpanded && noResults && !disabled && !error && (
-        <div style={{ padding: '2.5rem', textAlign: 'center', color: '#64748b', fontSize: '14px', backgroundColor: '#eef2f9' }}>
+        <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '14px', backgroundColor: 'var(--surface-muted)' }}>
           No players found matching your search on {platformName}.
         </div>
       )}
@@ -846,21 +819,21 @@ function PlayerCard({ player, platformName, isLast }) {
   return (
     <div style={{
       marginBottom: isLast ? 0 : '1.5rem',
-      backgroundColor: '#ffffff',
-      border: '1px solid #d0dae8',
-      borderRadius: '10px',
+      backgroundColor: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
       overflow: 'hidden',
-      boxShadow: '0 1px 4px rgba(6, 28, 84, 0.06)',
+      boxShadow: 'var(--shadow-sm)',
     }}>
       {/* ── Player identity header ── */}
       <div style={{
         padding: '1rem 1.25rem',
-        backgroundColor: '#eef2f9',
-        borderBottom: '1px solid #d0dae8',
+        backgroundColor: 'var(--surface-muted)',
+        borderBottom: '1px solid var(--border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <div>
-          <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '16px', fontWeight: '700', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {name}
             {verified !== undefined && (
               <span title={verified ? 'Verified Player' : 'Not Verified'} style={{ fontSize: '14px' }}>
@@ -868,17 +841,13 @@ function PlayerCard({ player, platformName, isLast }) {
               </span>
             )}
           </h4>
-          <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
-            {team} · <span style={{ color: '#0066cc', fontSize: '12px' }}>{platformName}</span>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>
+            {team} · <span style={{ color: 'var(--data-blue)', fontSize: '12px' }}>{platformName}</span>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {role && (
-            <span style={{
-              backgroundColor: '#e8f1ff', color: '#0066cc',
-              padding: '0.25rem 0.75rem', borderRadius: '6px',
-              fontSize: '11px', fontWeight: '600', whiteSpace: 'nowrap',
-            }}>
+            <span className="badge badge-info">
               {role}
             </span>
           )}
@@ -890,10 +859,9 @@ function PlayerCard({ player, platformName, isLast }) {
 
         {/* Loading state */}
         {statsLoading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 0', color: '#64748b' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 0', color: 'var(--text-secondary)' }}>
             <span style={{ fontSize: '18px', animation: 'statspin 1s linear infinite', display: 'inline-block' }}>⟳</span>
             <span style={{ fontSize: '13px' }}>Loading stats...</span>
-            <style>{`@keyframes statspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
 
@@ -924,14 +892,14 @@ function PlayerCard({ player, platformName, isLast }) {
               label="Wickets"
               value={hasBowling ? stats.bowling.wickets : null}
               highlight
-              color="#7c3aed"
+              color="var(--data-purple)"
             />
           </div>
         )}
 
         {/* No stats at all */}
         {!statsLoading && !statsError && stats && !hasBatting && !hasBowling && (
-          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '0.5rem' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
             No match statistics recorded for this player yet.
           </div>
         )}
@@ -945,7 +913,7 @@ function PlayerCard({ player, platformName, isLast }) {
 
         {/* ── DETAILED BATTING (collapsible) ── */}
         {!statsLoading && hasBatting && (
-          <ExpandableSection label="🏏 Full Batting" accentColor="#0066cc">
+          <ExpandableSection label="🏏 Full Batting" accentColor="var(--data-blue)">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
               <StatBox label="Innings" value={stats.batting.innings} small />
               <StatBox label="NO" value={stats.batting.notOuts} small />
@@ -961,7 +929,7 @@ function PlayerCard({ player, platformName, isLast }) {
 
         {/* ── DETAILED BOWLING (collapsible) ── */}
         {!statsLoading && hasBowling && (
-          <ExpandableSection label="⚡ Full Bowling" accentColor="#7c3aed">
+          <ExpandableSection label="⚡ Full Bowling" accentColor="var(--data-purple)">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
               <StatBox label="Overs" value={stats.bowling.overs} small />
               <StatBox label="Mdns" value={stats.bowling.maidens} small />
@@ -982,13 +950,13 @@ function PlayerCard({ player, platformName, isLast }) {
       {/* ── Footer: source attribution ── */}
       <div style={{
         padding: '0.6rem 1.25rem',
-        backgroundColor: '#f8fafc',
-        borderTop: '1px solid #e8eef5',
+        backgroundColor: 'var(--surface-muted)',
+        borderTop: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
       }}>
-        <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
           Source: {platformName}
         </span>
         {profileUrl && (
@@ -996,7 +964,7 @@ function PlayerCard({ player, platformName, isLast }) {
             href={profileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: '11px', color: '#94a3b8', textDecoration: 'none', fontWeight: '500' }}
+            style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: '500' }}
           >
             Source Profile ↗
           </a>
@@ -1012,12 +980,13 @@ function CompetitionsPanel({ competitions }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div style={{ marginTop: '1rem', borderTop: '1px solid #e8eef5', paddingTop: '0.75rem' }}>
+    <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '12px', color: '#0066cc', fontWeight: '600', padding: 0,
+          fontSize: '12px', color: 'var(--data-blue)', fontWeight: '600', padding: 0,
           display: 'flex', alignItems: 'center', gap: '0.4rem',
         }}
       >
@@ -1030,15 +999,15 @@ function CompetitionsPanel({ competitions }) {
           {competitions.map((c, i) => (
             <div key={i} style={{
               padding: '0.6rem 0.75rem',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '6px',
+              backgroundColor: 'var(--surface-muted)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '12px',
             }}>
-              <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
-                {c.competition} <span style={{ color: '#94a3b8', fontSize: '10px', textTransform: 'uppercase' }}>{c.type}</span>
+              <div style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+                {c.competition} <span style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase' }}>{c.type}</span>
               </div>
-              <div style={{ display: 'flex', gap: '1rem', color: '#64748b' }}>
+              <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-secondary)' }}>
                 {c.matches != null && <span>M: <strong>{c.matches}</strong></span>}
                 {c.runs != null && <span>Runs: <strong>{c.runs}</strong></span>}
                 {c.average != null && <span>Avg: <strong>{c.average}</strong></span>}
@@ -1079,21 +1048,21 @@ function ExpandableSection({ label, accentColor, children }) {
 
 // ── Stat box ──────────────────────────────────────────────────────────────────
 
-function StatBox({ label, value, highlight = false, color = '#0066cc', small = false }) {
+function StatBox({ label, value, highlight = false, color = 'var(--data-blue)', small = false }) {
   const displayValue = value !== null && value !== undefined ? String(value) : 'N/A';
   return (
     <div style={{
-      backgroundColor: highlight ? '#f0f6ff' : '#f8fafc',
+      backgroundColor: highlight ? 'var(--data-blue-light)' : 'var(--surface-muted)',
       padding: small ? '0.4rem 0.35rem' : '0.65rem 0.5rem',
-      borderRadius: '6px',
+      borderRadius: 'var(--radius-sm)',
       textAlign: 'center',
-      border: `1px solid ${highlight ? '#bcd0f0' : '#e2e8f0'}`,
+      border: `1px solid ${highlight ? 'var(--data-blue-border)' : 'var(--border)'}`,
       minWidth: small ? '50px' : '60px',
     }}>
-      <div style={{ fontSize: small ? '12px' : '15px', fontWeight: '700', color: highlight ? color : '#1e293b' }}>
+      <div style={{ fontSize: small ? '12px' : '15px', fontWeight: '700', color: highlight ? color : 'var(--text-primary)' }}>
         {displayValue}
       </div>
-      <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: '600', marginTop: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: '600', marginTop: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {label}
       </div>
     </div>
@@ -1121,42 +1090,34 @@ function YPLPlayerCard({ player, isLast }) {
   return (
     <div style={{
       marginBottom: isLast ? 0 : '1.5rem',
-      backgroundColor: '#fff',
-      border: '1px solid #d0dae8',
-      borderRadius: '10px',
+      backgroundColor: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
       overflow: 'hidden',
-      boxShadow: '0 1px 4px rgba(6,28,84,0.06)',
+      boxShadow: 'var(--shadow-sm)',
     }}>
       {/* Header */}
       <div style={{
         padding: '1rem 1.25rem',
-        backgroundColor: '#fdf8f0',
-        borderBottom: '1px solid #f0d9a8',
+        backgroundColor: 'var(--data-amber-light)',
+        borderBottom: '1px solid var(--warning-border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
       }}>
         <div>
-          <h4 style={{ margin: '0 0 0.25rem', fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
+          <h4 style={{ margin: '0 0 0.25rem', fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
             {name}
           </h4>
-          <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>
             {team}
-            <span style={{ margin: '0 0.4rem', color: '#d0dae8' }}>·</span>
-            <span style={{ color: '#b45309' }}>YPL Elite</span>
+            <span style={{ margin: '0 0.4rem', color: 'var(--border)' }}>·</span>
+            <span style={{ color: 'var(--data-amber)' }}>YPL Elite</span>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {seasons.map((s) => (
-            <span key={s} style={{
-              backgroundColor: '#fef3c7', color: '#92400e',
-              padding: '0.2rem 0.6rem', borderRadius: '5px',
-              fontSize: '11px', fontWeight: '600',
-            }}>{s}</span>
+            <span key={s} className="badge badge-warning">{s}</span>
           ))}
-          <span style={{
-            backgroundColor: '#e8f1ff', color: '#0066cc',
-            padding: '0.2rem 0.6rem', borderRadius: '5px',
-            fontSize: '11px', fontWeight: '600',
-          }}>{competition}</span>
+          <span className="badge badge-info">{competition}</span>
         </div>
       </div>
 
@@ -1171,15 +1132,16 @@ function YPLPlayerCard({ player, isLast }) {
           <StatBox label="Matches"  value={b?.matches}  highlight />
           <StatBox label="Runs"     value={b?.runs}     highlight />
           <StatBox label="Bat Avg"  value={d(b?.average, 2)} highlight />
-          <StatBox label="Wickets"  value={hasBowling ? bwl.wickets : '--'} highlight color="#7c3aed" />
+          <StatBox label="Wickets"  value={hasBowling ? bwl.wickets : '--'} highlight color="var(--data-purple)" />
         </div>
 
         {/* Batting details */}
         {hasBatting && (
-          <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
+          <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
             <button
               onClick={() => setBattingOpen((o) => !o)}
-              style={expandBtnStyle('#0066cc')}
+              aria-expanded={battingOpen}
+              style={expandBtnStyle('var(--data-blue)')}
             >
               <span style={{ ...arrowStyle, transform: battingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
               🏏 Batting Stats
@@ -1209,12 +1171,13 @@ function YPLPlayerCard({ player, isLast }) {
         )}
 
         {/* Bowling details */}
-        <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
+        <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
           {hasBowling ? (
             <>
               <button
                 onClick={() => setBowlingOpen((o) => !o)}
-                style={expandBtnStyle('#7c3aed')}
+                aria-expanded={bowlingOpen}
+                style={expandBtnStyle('var(--data-purple)')}
               >
                 <span style={{ ...arrowStyle, transform: bowlingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
                 ⚡ Bowling Stats
@@ -1240,7 +1203,7 @@ function YPLPlayerCard({ player, isLast }) {
               )}
             </>
           ) : (
-            <div style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
               No bowling record available
             </div>
           )}
@@ -1249,10 +1212,10 @@ function YPLPlayerCard({ player, isLast }) {
         {/* All-round summary when player has both */}
         {hasBatting && hasBowling && bwl.wickets > 0 && (
           <div style={{
-            marginTop: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem',
-            fontSize: '12px', color: '#64748b',
+            marginTop: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem',
+            fontSize: '12px', color: 'var(--text-secondary)',
           }}>
-            <strong style={{ color: '#1e293b' }}>All-Round:</strong>
+            <strong style={{ color: 'var(--text-primary)' }}>All-Round:</strong>
             {' '}{b.runs} runs · {bwl.wickets} wickets
           </div>
         )}
@@ -1261,9 +1224,9 @@ function YPLPlayerCard({ player, isLast }) {
       {/* Footer */}
       <div style={{
         padding: '0.5rem 1.25rem',
-        backgroundColor: '#fdf8f0',
-        borderTop: '1px solid #f0d9a8',
-        fontSize: '11px', color: '#b45309',
+        backgroundColor: 'var(--data-amber-light)',
+        borderTop: '1px solid var(--warning-border)',
+        fontSize: '11px', color: 'var(--data-amber)',
       }}>
         YPL Elite · Assasins CC · Seasons {seasons.join(', ')} · Static Data
       </div>
@@ -1275,10 +1238,10 @@ function BattingRow({ label, value }) {
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '0.3rem 0', borderBottom: '1px solid #f1f5f9', fontSize: '13px',
+      padding: '0.3rem 0', borderBottom: '1px solid var(--border)', fontSize: '13px',
     }}>
-      <span style={{ color: '#64748b' }}>{label}</span>
-      <span style={{ fontWeight: '600', color: '#1e293b' }}>{value}</span>
+      <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+      <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{value}</span>
     </div>
   );
 }
@@ -1316,35 +1279,32 @@ function SGIAPlayerCard({ player, isLast }) {
   return (
     <div style={{
       marginBottom: isLast ? 0 : '1.5rem',
-      backgroundColor: '#fff',
-      border: '1px solid #d0dae8',
-      borderRadius: '10px',
+      backgroundColor: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
       overflow: 'hidden',
-      boxShadow: '0 1px 4px rgba(6,28,84,0.06)',
+      boxShadow: 'var(--shadow-sm)',
     }}>
       {/* Header */}
       <div style={{
         padding: '1rem 1.25rem',
-        background: 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)',
-        borderBottom: '1px solid #fecaca',
+        backgroundColor: 'var(--data-red-light)',
+        borderBottom: '1px solid var(--data-red-border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
       }}>
         <div>
-          <h4 style={{ margin: '0 0 0.25rem', fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
+          <h4 style={{ margin: '0 0 0.25rem', fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
             {name}
           </h4>
-          <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>
             {team}
-            <span style={{ margin: '0 0.4rem', color: '#d0dae8' }}>·</span>
-            <span style={{ color: '#dc2626', fontWeight: '600' }}>SG IA</span>
+            <span style={{ margin: '0 0.4rem', color: 'var(--border)' }}>·</span>
+            <span style={{ color: 'var(--data-red)', fontWeight: '600' }}>SG IA</span>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <span style={{
-            backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
-            padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '11px', fontWeight: '600',
-          }}>🇸🇬 SIA</span>
-          <div style={{ marginTop: '0.4rem', fontSize: '10px', color: '#94a3b8' }}>
+          <span className="badge badge-danger">🇸🇬 SIA</span>
+          <div style={{ marginTop: '0.4rem', fontSize: '10px', color: 'var(--text-muted)' }}>
             Updated: {fmtDate(lastUpdated)}
           </div>
         </div>
@@ -1360,9 +1320,9 @@ function SGIAPlayerCard({ player, isLast }) {
       {/* Footer */}
       <div style={{
         padding: '0.5rem 1.25rem',
-        background: 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)',
-        borderTop: '1px solid #fecaca',
-        fontSize: '11px', color: '#dc2626',
+        backgroundColor: 'var(--data-red-light)',
+        borderTop: '1px solid var(--data-red-border)',
+        fontSize: '11px', color: 'var(--data-red)',
       }}>
         Singapore Indian Association · Season 2025 · Static Data (updated ~15 days)
       </div>
@@ -1386,14 +1346,8 @@ function SGIATournamentEntry({ entry, isLast, d }) {
     }}>
       {/* Tournament badge row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-        <span style={{
-          backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
-          padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '11px', fontWeight: '700',
-        }}>{tournamentName}</span>
-        <span style={{
-          backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0',
-          padding: '0.2rem 0.5rem', borderRadius: '5px', fontSize: '10px', fontWeight: '600',
-        }}>{year}</span>
+        <span className="badge badge-danger">{tournamentName}</span>
+        <span className="badge badge-success">{year}</span>
         <span style={{
           backgroundColor: status === 'completed' ? '#f0fdf4' : status === 'on-going' ? '#eff6ff' : '#fefce8',
           color: status === 'completed' ? '#15803d' : status === 'on-going' ? '#1d4ed8' : '#a16207',
@@ -1412,13 +1366,13 @@ function SGIATournamentEntry({ entry, isLast, d }) {
         <StatBox label="Matches" value={hasBatting ? b.mat : hasBowling ? bwl.mat : null} highlight />
         <StatBox label="Runs" value={hasBatting ? b.runs : null} highlight />
         <StatBox label="Bat Avg" value={hasBatting ? d(b.avg, 2) : '--'} highlight />
-        <StatBox label="Wickets" value={hasBowling ? bwl.wickets : '--'} highlight color="#dc2626" />
+        <StatBox label="Wickets" value={hasBowling ? bwl.wickets : '--'} highlight color="var(--data-red)" />
       </div>
 
       {/* Batting detail */}
       {hasBatting && (
-        <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
-          <button onClick={() => setBattingOpen((o) => !o)} style={expandBtnStyle('#dc2626')}>
+        <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.6rem' }}>
+          <button onClick={() => setBattingOpen((o) => !o)} aria-expanded={battingOpen} style={expandBtnStyle('var(--data-red)')}>
             <span style={{ ...arrowStyle, transform: battingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
             🏏 Batting (Rank #{b.rank})
           </button>
@@ -1441,8 +1395,8 @@ function SGIATournamentEntry({ entry, isLast, d }) {
 
       {/* Bowling detail */}
       {hasBowling && (
-        <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
-          <button onClick={() => setBowlingOpen((o) => !o)} style={expandBtnStyle('#7c3aed')}>
+        <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.6rem' }}>
+          <button onClick={() => setBowlingOpen((o) => !o)} aria-expanded={bowlingOpen} style={expandBtnStyle('var(--data-purple)')}>
             <span style={{ ...arrowStyle, transform: bowlingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
             ⚡ Bowling (Rank #{bwl.rank})
           </button>
@@ -1494,11 +1448,11 @@ function BPLPlayerCard({ player, isLast }) {
   return (
     <div style={{
       marginBottom: isLast ? 0 : '1.5rem',
-      backgroundColor: '#ffffff',
-      border: '1px solid #d0dae8',
-      borderRadius: '10px',
+      backgroundColor: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
       overflow: 'hidden',
-      boxShadow: '0 1px 4px rgba(6, 28, 84, 0.06)',
+      boxShadow: 'var(--shadow-sm)',
     }}>
       {/* Header */}
       <div style={{
@@ -1515,7 +1469,7 @@ function BPLPlayerCard({ player, isLast }) {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
           <span style={{
             backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff',
-            padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '10px', fontWeight: '700',
+            padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-sm)', fontSize: '10px', fontWeight: '700',
           }}>{tournament || 'BPL'}</span>
           <span style={{ fontSize: '9px', color: '#c4b5fd' }}>as of {fmtDate(lastUpdated)}</span>
         </div>
@@ -1527,13 +1481,13 @@ function BPLPlayerCard({ player, isLast }) {
           <StatBox label="Matches"  value={hasBatting ? b.mat : hasBowling ? bwl.mat : null} highlight />
           <StatBox label="Runs"     value={hasBatting ? b.runs : null} highlight />
           <StatBox label="Bat Avg"  value={hasBatting ? d(b.avg, 2) : '--'} highlight />
-          <StatBox label="Wickets"  value={hasBowling ? bwl.wickets : '--'} highlight color="#7c3aed" />
+          <StatBox label="Wickets"  value={hasBowling ? bwl.wickets : '--'} highlight color="var(--data-purple)" />
         </div>
 
         {/* Batting detail */}
         {hasBatting && (
-          <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
-            <button onClick={() => setBattingOpen((o) => !o)} style={expandBtnStyle('#7c3aed')}>
+          <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.6rem' }}>
+            <button onClick={() => setBattingOpen((o) => !o)} aria-expanded={battingOpen} style={expandBtnStyle('var(--data-purple)')}>
               <span style={{ ...arrowStyle, transform: battingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
               🏏 Batting (Rank #{b.rank})
             </button>
@@ -1556,8 +1510,8 @@ function BPLPlayerCard({ player, isLast }) {
 
         {/* Bowling detail */}
         {hasBowling && (
-          <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.6rem' }}>
-            <button onClick={() => setBowlingOpen((o) => !o)} style={expandBtnStyle('#7c3aed')}>
+          <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.6rem' }}>
+            <button onClick={() => setBowlingOpen((o) => !o)} aria-expanded={bowlingOpen} style={expandBtnStyle('var(--data-purple)')}>
               <span style={{ ...arrowStyle, transform: bowlingOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
               ⚡ Bowling (Rank #{bwl.rank})
             </button>
@@ -1576,7 +1530,7 @@ function BPLPlayerCard({ player, isLast }) {
         )}
 
         {!hasBatting && !hasBowling && (
-          <div style={{ fontSize: '12px', color: '#9ca3af', padding: '0.5rem 0' }}>No stats available</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '0.5rem 0' }}>No stats available</div>
         )}
       </div>
 
@@ -1603,11 +1557,11 @@ function SCACorpPlayerCard({ player, isLast }) {
   return (
     <div style={{
       marginBottom: isLast ? 0 : '1.5rem',
-      backgroundColor: '#ffffff',
-      border: '1px solid #d0dae8',
-      borderRadius: '10px',
+      backgroundColor: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
       overflow: 'hidden',
-      boxShadow: '0 1px 4px rgba(6, 28, 84, 0.06)',
+      boxShadow: 'var(--shadow-sm)',
     }}>
       {/* Header */}
       <div style={{
@@ -1654,12 +1608,9 @@ function SCACorpPlayerCard({ player, isLast }) {
 
         <button
           onClick={() => setExpanded(!expanded)}
-          style={{
-            marginTop: '0.75rem', width: '100%',
-            padding: '0.5rem', backgroundColor: expanded ? '#e8f1ff' : '#f5f8fc',
-            border: '1px solid #d0dae8', borderRadius: '6px',
-            cursor: 'pointer', fontSize: '12px', color: '#0066cc', fontWeight: '600',
-          }}
+          aria-expanded={expanded}
+          className="btn btn-sm btn-outline"
+          style={{ marginTop: '0.75rem', width: '100%' }}
         >
           {expanded ? '▲ Hide detailed stats' : '▼ Show detailed stats'}
         </button>
@@ -1687,10 +1638,10 @@ function SCACorpSeasonEntry({ season, isLast }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
         <span style={{
           backgroundColor: '#1e3a5f', color: '#ffffff',
-          padding: '0.15rem 0.6rem', borderRadius: '4px',
+          padding: '0.15rem 0.6rem', borderRadius: 'var(--radius-sm)',
           fontSize: '11px', fontWeight: '700',
         }}>{year}</span>
-        <span style={{ fontSize: '12px', color: '#64748b' }}>{competition}</span>
+        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{competition}</span>
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -1721,7 +1672,7 @@ function SCACorpSeasonDetail({ season }) {
   const { year, batting, bowling } = season;
   return (
     <div style={{ marginBottom: '1rem' }}>
-      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e3a5f', marginBottom: '0.5rem' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--data-blue)', marginBottom: '0.5rem' }}>
         {year} — Detailed
       </div>
 
@@ -1737,11 +1688,11 @@ function SCACorpSeasonDetail({ season }) {
               ['Ducks', batting.ducks], ['6s', batting.sixes], ['4s', batting.fours],
             ].map(([label, val]) => val != null && (
               <div key={label} style={{
-                backgroundColor: '#f5f8fc', borderRadius: '4px',
+                backgroundColor: 'var(--surface-muted)', borderRadius: 'var(--radius-sm)',
                 padding: '0.3rem 0.5rem', textAlign: 'center',
               }}>
-                <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{label}</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{val ?? '—'}</div>
               </div>
             ))}
           </div>
@@ -1759,11 +1710,11 @@ function SCACorpSeasonDetail({ season }) {
               ['Mdns', bowling.mdns],
             ].map(([label, val]) => val != null && (
               <div key={label} style={{
-                backgroundColor: '#f5f8fc', borderRadius: '4px',
+                backgroundColor: 'var(--surface-muted)', borderRadius: 'var(--radius-sm)',
                 padding: '0.3rem 0.5rem', textAlign: 'center',
               }}>
-                <div style={{ fontSize: '10px', color: '#64748b' }}>{label}</div>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{val ?? '—'}</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{label}</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{val ?? '—'}</div>
               </div>
             ))}
           </div>
@@ -1834,10 +1785,10 @@ function InsightsPanel({ insights }) {
       border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem',
     }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.1rem', alignItems: 'center' }}>
-        <InsightChip icon="🎯" label="Suggested Role" value={suggestedRole} color="#0066cc" />
+        <InsightChip icon="🎯" label="Suggested Role" value={suggestedRole} color="var(--data-blue)" />
         <InsightChip icon="📊" label="Confidence" value={confidence.label} color={confidence.color} />
         {leaguesContributed.length > 0 && (
-          <InsightChip icon="🏏" label="Leagues" value={leaguesContributed.join(', ')} color="#b45309" />
+          <InsightChip icon="🏏" label="Leagues" value={leaguesContributed.join(', ')} color="var(--data-amber)" />
         )}
       </div>
 
@@ -1850,11 +1801,11 @@ function InsightsPanel({ insights }) {
         </div>
       )}
 
-      <InsightBlock title="Impact Scores" accentColor="#0066cc">
+      <InsightBlock title="Impact Scores" accentColor="var(--data-blue)">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.6rem' }}>
-          <ScoreCard label="Batting Score" score={battingScore} color="#16a34a" show={battingScore > 0} />
-          <ScoreCard label="Bowling Score" score={bowlingScore} color="#7c3aed" show={bowlingScore > 0} />
-          <ScoreCard label="Overall Score" score={overallScore} color="#0066cc" show={overallScore > 0} />
+          <ScoreCard label="Batting Score" score={battingScore} color="var(--primary)" show={battingScore > 0} />
+          <ScoreCard label="Bowling Score" score={bowlingScore} color="var(--data-purple)" show={bowlingScore > 0} />
+          <ScoreCard label="Overall Score" score={overallScore} color="var(--data-blue)" show={overallScore > 0} />
         </div>
       </InsightBlock>
 
@@ -1973,14 +1924,9 @@ function PlayerInsightsSection({ results, scaStatsMap }) {
     <div style={{ marginTop: '1rem' }}>
       <button
         onClick={handleClick}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '0.5rem',
-          padding: '0.7rem 1.25rem', borderRadius: '8px',
-          backgroundColor: open ? '#e8f1ff' : '#fff',
-          border: `1px solid ${open ? '#0066cc' : '#d0dae8'}`,
-          color: '#0066cc', fontSize: '13px', fontWeight: '600',
-          cursor: 'pointer',
-        }}
+        aria-expanded={open}
+        className={open ? 'btn btn-sm btn-outline' : 'btn btn-sm btn-data-blue'}
+        style={{ gap: '0.5rem' }}
       >
         <span style={{ fontSize: '15px' }}>✦</span>
         {open ? 'Hide Player Insights' : 'View Player Insights'}
