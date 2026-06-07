@@ -36,6 +36,7 @@ export function searchBPLStats(query) {
           team: battingRecord.team,
           source: 'bpl-static',
           tournament: tournament.tournamentName,
+          year: tournament.year,
           lastUpdated: bplStats.lastUpdated,
           batting: battingRecord,
           bowling: bowlingRecord,

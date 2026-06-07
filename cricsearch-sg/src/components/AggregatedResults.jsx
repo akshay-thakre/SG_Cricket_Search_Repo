@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAnyPlayerStats } from '../services/apiService';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+} from 'recharts';
 import { generatePlayerInsights } from '../utils/playerInsights';
 
 // ── Stats format normalizer ───────────────────────────────────────────────────
@@ -161,11 +164,151 @@ function playerKey(p) {
   return p.id || `${p.source}-${p.name}`;
 }
 
+// ── Yearly performance helpers ────────────────────────────────────────────────
+
+const CHART_COLORS = ['#0066cc', '#dc2626', '#7c3aed', '#16a34a', '#b45309', '#0891b2'];
+
+function calculateYearlyPlayerPerformance(players) {
+  // keyed by playerName → year → { runs, wickets }
+  const byPlayer = {};
+
+  for (const player of players) {
+    const pname = player.name;
+    if (!byPlayer[pname]) byPlayer[pname] = {};
+
+    const add = (yr, runs, wkts) => {
+      const y = String(yr);
+      if (!byPlayer[pname][y]) byPlayer[pname][y] = { runs: 0, wickets: 0 };
+      byPlayer[pname][y].runs    += Number(runs)   || 0;
+      byPlayer[pname][y].wickets += Number(wkts)   || 0;
+    };
+
+    const src = player.source;
+
+    if (src === 'sgia-static') {
+      for (const entry of player.entries || []) {
+        if (entry.year) add(entry.year, entry.batting?.runs, entry.bowling?.wickets);
+      }
+    } else if (src === 'bpl-static') {
+      if (player.year) add(player.year, player.batting?.runs, player.bowling?.wickets);
+    } else if (src === 'sca-corporate') {
+      for (const season of player.seasons || []) {
+        if (season.year) add(season.year, season.batting?.runs, season.bowling?.wkts);
+      }
+    } else if (src === 'ypl-static') {
+      // YPL is career aggregate — attribute to first season year
+      const yr = player.seasons?.[0];
+      if (yr) add(yr, player.inlineStats?.batting?.runs, player.inlineStats?.bowling?.wickets);
+    }
+    // sca (live) excluded — career aggregate only
+  }
+
+  const playerNames = Object.keys(byPlayer);
+  if (playerNames.length === 0) return null;
+
+  const allYears = [...new Set(
+    playerNames.flatMap(n => Object.keys(byPlayer[n]))
+  )].sort();
+
+  if (allYears.length === 0) return null;
+
+  // Build flat chart data: [{ year, [playerName]: runs }, ...]
+  const runsData = allYears.map(yr => {
+    const row = { year: yr };
+    for (const n of playerNames) row[n] = byPlayer[n][yr]?.runs ?? 0;
+    return row;
+  });
+
+  const wicketsData = allYears.map(yr => {
+    const row = { year: yr };
+    for (const n of playerNames) row[n] = byPlayer[n][yr]?.wickets ?? 0;
+    return row;
+  });
+
+  return { playerNames, runsData, wicketsData };
+}
+
+function YearlyPerformanceSection({ players }) {
+  const data = calculateYearlyPlayerPerformance(players);
+  if (!data) return null;
+
+  const { playerNames, runsData, wicketsData } = data;
+  const hasRuns    = runsData.some(row    => playerNames.some(n => row[n] > 0));
+  const hasWickets = wicketsData.some(row => playerNames.some(n => row[n] > 0));
+
+  if (!hasRuns && !hasWickets) return null;
+
+  return (
+    <div style={{
+      marginTop: '1.25rem',
+      padding: '1.25rem',
+      backgroundColor: '#f5f8fc',
+      border: '1px solid #d0dae8',
+      borderRadius: '12px',
+      boxShadow: '0 2px 8px rgba(6,28,84,0.07)',
+    }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        📊 Yearly Performance Trend
+      </div>
+      <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '1rem' }}>
+        SG IA, BPL, SCA Corporate, YPL · SCA live excluded (career aggregate only)
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '1.25rem',
+      }}>
+        {hasRuns && (
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: '600', color: '#0066cc', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+              🏏 Runs Scored per Year
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={runsData} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="year" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip contentStyle={{ fontSize: 12 }} />
+                {playerNames.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
+                {playerNames.map((n, i) => (
+                  <Bar key={n} dataKey={n} name={n} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[3, 3, 0, 0]} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {hasWickets && (
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: '600', color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+              ⚡ Wickets Taken per Year
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={wicketsData} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="year" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip contentStyle={{ fontSize: 12 }} />
+                {playerNames.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
+                {playerNames.map((n, i) => (
+                  <Bar key={n} dataKey={n} name={n} fill={CHART_COLORS[(i + 2) % CHART_COLORS.length]} radius={[3, 3, 0, 0]} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Cross-league panel ────────────────────────────────────────────────────────
 
 function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
   const [showPanel,   setShowPanel]   = useState(false);
   const [showNames,   setShowNames]   = useState(false);
+  const [showGraph,   setShowGraph]   = useState(false);
   const [excluded,    setExcluded]    = useState(new Set());
 
   // Collect all players across all platforms
@@ -249,7 +392,28 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
             accentBowl="#7c3aed"
           />
 
-          {/* ── Section 2: Players considered ── */}
+          {/* ── Section 2: Yearly graph toggle ── */}
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={() => setShowGraph(v => !v)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.6rem 1.1rem', borderRadius: '7px',
+                backgroundColor: showGraph ? '#f0f4ff' : '#f8fafc',
+                border: `1px solid ${showGraph ? '#bcd0f0' : '#d0dae8'}`,
+                cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                color: showGraph ? '#0066cc' : '#1e293b',
+              }}
+            >
+              <span>📊</span>
+              {showGraph ? 'Hide Yearly Performance Graph' : 'View Yearly Performance Graph'}
+            </button>
+            {showGraph && (
+              <YearlyPerformanceSection players={includedPlayers} />
+            )}
+          </div>
+
+          {/* ── Section 3: Players considered ── */}
           <div style={{ marginTop: '1rem' }}>
             <button
               onClick={() => setShowNames(v => !v)}
@@ -323,7 +487,7 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
             )}
           </div>
 
-          {/* ── Section 3: Adjusted performance (only when exclusions exist) ── */}
+          {/* ── Section 4: Adjusted performance (only when exclusions exist) ── */}
           {hasExclusions && (
             <div style={{ marginTop: '1rem' }}>
               <AggregatedStatsPanel
