@@ -49,45 +49,48 @@ export default function CricSearchApp() {
     setError(null);
   };
 
+  const statusBadgeClass = backendStatus === 'online'
+    ? 'badge badge-success'
+    : backendStatus === 'offline'
+    ? 'badge badge-danger'
+    : 'badge badge-warning';
+
+  const statusLabel = backendStatus === 'online'
+    ? 'API Online'
+    : backendStatus === 'offline'
+    ? 'API Offline'
+    : 'Checking...';
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#dfe7f0' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--app-bg)' }}>
       {/* Header */}
       <div style={{
-        backgroundColor: '#f5f8fc',
-        borderBottom: '1px solid #d0dae8',
-        padding: '1.5rem',
-        boxShadow: '0 2px 8px rgba(6, 28, 84, 0.06)',
+        backgroundColor: 'var(--surface-dark)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        padding: '1rem 1.5rem',
+        boxShadow: 'var(--shadow-md)',
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="app-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: '#0066cc', lineHeight: '1.3' }}>
-                🏏 Changi Risers Cricket Search SG
+              <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--text-on-dark)', lineHeight: '1.3', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: 'var(--primary)', fontSize: '22px' }}>🏏</span>
+                <span>Changi Risers Cricket Search SG</span>
               </h1>
-              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)', marginTop: '0.2rem' }}>
                 Singapore Cricket Player Search — Live Data
               </div>
             </div>
             <div className="app-header-badges" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                backgroundColor: backendStatus === 'online' ? '#f0fdf4' : backendStatus === 'offline' ? '#fef2f2' : '#fefce8',
-                padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '12px', fontWeight: '600',
-                color: backendStatus === 'online' ? '#16a34a' : backendStatus === 'offline' ? '#dc2626' : '#ca8a04',
-                border: `1px solid ${backendStatus === 'online' ? '#bbf7d0' : backendStatus === 'offline' ? '#fecaca' : '#fef08a'}`,
-              }}>
+              <span className={statusBadgeClass}>
                 <span style={{ fontSize: '8px' }}>●</span>
-                {backendStatus === 'online' ? 'API Online' : backendStatus === 'offline' ? 'API Offline' : 'Checking...'}
-              </div>
-              <div style={{
-                backgroundColor: '#e8f1ff', padding: '0.5rem 1rem', borderRadius: '6px',
-                fontSize: '12px', fontWeight: '600', color: '#0066cc', border: '1px solid #d0dae8',
-              }}>
+                {statusLabel}
+              </span>
+              <span className="badge badge-info">
                 🇸🇬 Only
-              </div>
+              </span>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -97,14 +100,14 @@ export default function CricSearchApp() {
         {/* Backend Offline Warning */}
         {backendStatus === 'offline' && (
           <div style={{
-            padding: '1.25rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca',
-            borderRadius: '10px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+            padding: '1.25rem', backgroundColor: 'var(--danger-bg)', border: '1px solid var(--danger-border)',
+            borderRadius: 'var(--radius-lg)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
           }}>
             <span style={{ fontSize: '20px' }}>⚠️</span>
             <div>
-              <div style={{ fontWeight: '600', color: '#dc2626', fontSize: '14px' }}>Backend API is offline</div>
+              <div style={{ fontWeight: '600', color: 'var(--danger)', fontSize: '14px' }}>Backend API is offline</div>
               <div style={{ color: '#7f1d1d', fontSize: '13px', marginTop: '2px' }}>
-                Start the backend: <code style={{ backgroundColor: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>cd cricsearch-backend && npm start</code>
+                Start the backend: <code style={{ backgroundColor: 'var(--data-red-light)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }}>cd cricsearch-backend && npm start</code>
               </div>
             </div>
           </div>
@@ -113,28 +116,25 @@ export default function CricSearchApp() {
         <MultiPlatformSearchBar onSearch={handleSearch} onClear={handleClear} initialQuery={searchQuery} />
 
         {loading && (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
-            <div style={{ fontSize: '40px', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>🏏</div>
-            <div style={{ fontSize: '16px', fontWeight: '500' }}>Searching live cricket databases...</div>
-            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: '#9ca3af' }}>Querying SCA — stats will load automatically after results are found</div>
-            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div style={{ fontSize: '40px', marginBottom: '1rem', display: 'inline-block', animation: 'spin 1s linear infinite' }}>🏏</div>
+            <div style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-primary)' }}>Searching live cricket databases...</div>
+            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: 'var(--text-muted)' }}>Querying SCA — stats will load automatically after results are found</div>
           </div>
         )}
 
         {error && (
           <div style={{
-            padding: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca',
-            borderRadius: '10px', marginTop: '1.5rem', textAlign: 'center',
+            padding: '1.5rem', backgroundColor: 'var(--danger-bg)', border: '1px solid var(--danger-border)',
+            borderRadius: 'var(--radius-lg)', marginTop: '1.5rem', textAlign: 'center',
           }}>
             <div style={{ fontSize: '28px', marginBottom: '0.5rem' }}>❌</div>
-            <div style={{ fontWeight: '600', color: '#dc2626', marginBottom: '0.5rem' }}>Search Error</div>
+            <div style={{ fontWeight: '600', color: 'var(--danger)', marginBottom: '0.5rem' }}>Search Error</div>
             <div style={{ color: '#7f1d1d', fontSize: '14px' }}>{error}</div>
             <button
               onClick={() => handleSearch(searchQuery)}
-              style={{
-                marginTop: '1rem', padding: '0.5rem 1.5rem', backgroundColor: '#dc2626',
-                color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-              }}
+              className="btn btn-primary"
+              style={{ marginTop: '1rem' }}
             >
               Retry Search
             </button>
@@ -146,16 +146,17 @@ export default function CricSearchApp() {
 
       {/* Footer */}
       <div style={{
-        backgroundColor: '#f5f8fc', borderTop: '1px solid #d0dae8',
+        backgroundColor: 'var(--surface-dark)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
         padding: '2rem 1.5rem', marginTop: '3rem', textAlign: 'center',
       }}>
-        <div style={{ fontSize: '12px', color: '#64748b' }}>
+        <div style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)' }}>
           Changi Risers Cricket Search SG &bull; Singapore Cricket Search &bull; Live data from SCA
         </div>
-        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', maxWidth: '700px', margin: '0.75rem auto 0' }}>
+        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: 'rgba(203,213,225,0.7)', fontStyle: 'italic', maxWidth: '700px', margin: '0.75rem auto 0' }}>
           Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
         </div>
-        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: '#94a3b8', maxWidth: '700px', margin: '0.75rem auto 0', lineHeight: '1.7' }}>
+        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: 'rgba(203,213,225,0.7)', maxWidth: '700px', margin: '0.75rem auto 0', lineHeight: '1.7' }}>
           This platform uses AI-driven insights to standardize player stats, reduce bias, and enable fair, transparent decision-making.
           It supports both the skipper and Changi Risers management with reliable, data-backed insights.
           By fostering trust, healthy competition, and a performance mindset, it helps the Risers achieve consistent success.

@@ -34,12 +34,12 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
     <div
       className="search-hero"
       style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #064E3B 100%)',
         padding: '3.5rem 1.5rem',
         textAlign: 'center',
         marginBottom: '2rem',
-        borderRadius: '16px',
-        boxShadow: '0 10px 28px rgba(0, 102, 204, 0.16)'
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--shadow-hero)',
       }}
     >
       <div style={{ maxWidth: '700px', margin: '0 auto' }}>
@@ -49,7 +49,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
             fontSize: '28px',
             fontWeight: 'bold',
             marginBottom: '0.75rem',
-            color: '#ffffff',
+            color: 'var(--text-on-dark)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -64,9 +64,9 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
 
         <div style={{
           fontSize: '15px',
-          color: '#cbd5e1',
+          color: 'var(--text-on-dark-muted)',
           marginBottom: '2.5rem',
-          lineHeight: '1.6'
+          lineHeight: '1.6',
         }}>
           Search cricket player stats across Singapore platforms — aggregated in one place
         </div>
@@ -82,55 +82,12 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="search-input"
-            style={{
-              flex: 1,
-              padding: '1rem 1.25rem',
-              borderRadius: '8px',
-              border: '2px solid #0066cc',
-              fontSize: '15px',
-              backgroundColor: '#ffffff',
-              color: '#1e293b',
-              outline: 'none',
-              fontWeight: '500',
-              transition: 'all 0.2s',
-              minWidth: 0,
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#003d99';
-              e.target.style.boxShadow = '0 0 0 4px rgba(0, 102, 204, 0.15)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#0066cc';
-              e.target.style.boxShadow = 'none';
-            }}
           />
           <button
             type="submit"
             disabled={!query.trim()}
-            className="search-btn search-btn-submit"
-            style={{
-              padding: '1rem 2rem',
-              backgroundColor: '#0066cc',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: query.trim() ? 'pointer' : 'not-allowed',
-              fontSize: '15px',
-              fontWeight: '600',
-              opacity: query.trim() ? 1 : 0.6,
-              transition: 'all 0.2s',
-              whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={(e) => {
-              if (query.trim()) {
-                e.target.style.backgroundColor = '#003d99';
-                e.target.style.boxShadow = '0 4px 12px rgba(0, 102, 204, 0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#0066cc';
-              e.target.style.boxShadow = 'none';
-            }}
+            aria-label="Search players"
+            className="btn btn-primary search-btn search-btn-submit"
           >
             Search
           </button>
@@ -139,27 +96,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
             <button
               type="button"
               onClick={handleClear}
-              className="search-btn search-btn-clear"
-              style={{
-                padding: '1rem 1.5rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                color: '#cbd5e1',
-                border: '1.5px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '15px',
-                fontWeight: '600',
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-              }}
+              className="btn btn-ghost-light search-btn search-btn-clear"
             >
               Clear
             </button>
@@ -172,7 +109,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
             gap: '1rem',
-            marginTop: '2.5rem'
+            marginTop: '2.5rem',
           }}
         >
           <PlatformBadge code="SCA" label="SCA" />
@@ -190,27 +127,27 @@ function PlatformBadge({ code, label }) {
     <div
       style={{
         padding: '1rem',
-        backgroundColor: 'rgba(0, 102, 204, 0.08)',
-        border: '1.5px solid rgba(0, 102, 204, 0.2)',
-        borderRadius: '10px',
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        border: '1.5px solid rgba(255,255,255,0.15)',
+        borderRadius: 'var(--radius-md)',
         textAlign: 'center',
-        color: '#ffffff',
-        transition: 'all 0.3s',
-        cursor: 'default'
+        color: 'var(--text-on-dark)',
+        transition: 'background-color 0.2s, border-color 0.2s',
+        cursor: 'default',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(0, 102, 204, 0.15)';
-        e.currentTarget.style.borderColor = '#0066cc';
+        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.13)';
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.30)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(0, 102, 204, 0.08)';
-        e.currentTarget.style.borderColor = 'rgba(0, 102, 204, 0.2)';
+        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.07)';
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
       }}
     >
       <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '0.35rem', opacity: 0.95 }}>
         {code}
       </div>
-      <div style={{ fontSize: '11px', opacity: 0.8, fontWeight: '500' }}>
+      <div style={{ fontSize: '11px', opacity: 0.75, fontWeight: '500' }}>
         {label}
       </div>
     </div>
