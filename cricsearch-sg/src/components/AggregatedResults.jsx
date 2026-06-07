@@ -3,6 +3,7 @@ import { fetchAnyPlayerStats } from '../services/apiService';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
+import { generatePlayerInsights } from '../utils/playerInsights';
 
 // ── Stats format normalizer ───────────────────────────────────────────────────
 // SCA returns batting/bowling as plain objects.
@@ -673,6 +674,13 @@ export function AggregatedResults({ searchResults }) {
         scaStatsMap={scaStatsMap}
         allLoaded={allLoaded}
       />
+
+      {allLoaded && (
+        <PlayerInsightsSection
+          results={results}
+          scaStatsMap={scaStatsMap}
+        />
+      )}
     </div>
   );
 }
@@ -1749,6 +1757,224 @@ function SCACorpSeasonDetail({ season }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Player Insights Section ───────────────────────────────────────────────────
+
+function ScoreCard({ label, score, color, show }) {
+  if (!show) return null;
+  return (
+    <div style={{ padding: '0.6rem', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.35rem' }}>
+        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>{label}</span>
+        <span style={{ fontSize: '20px', fontWeight: '800', color }}>{score}</span>
+      </div>
+      <div style={{ backgroundColor: '#f1f5f9', borderRadius: '4px', height: '5px', overflow: 'hidden' }}>
+        <div style={{ width: `${score}%`, backgroundColor: color, height: '100%', borderRadius: '4px' }} />
+      </div>
+    </div>
+  );
+}
+
+function InsightChip({ icon, label, value, color }) {
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+      padding: '0.3rem 0.7rem', borderRadius: '20px',
+      backgroundColor: color + '18', border: `1px solid ${color}35`,
+    }}>
+      <span style={{ fontSize: '12px' }}>{icon}</span>
+      <span style={{ fontSize: '10px', color: '#64748b' }}>{label}:</span>
+      <span style={{ fontSize: '12px', fontWeight: '700', color }}>{value}</span>
+    </div>
+  );
+}
+
+function InsightBlock({ title, accentColor, children }) {
+  return (
+    <div style={{ borderLeft: `3px solid ${accentColor}`, paddingLeft: '0.8rem', marginBottom: '1rem' }}>
+      <div style={{ fontSize: '10px', fontWeight: '700', color: accentColor, marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function MiniStat({ label, value }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '0.35rem 0.5rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid #e9eef5' }}>
+      <div style={{ fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+      <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginTop: '1px' }}>{value ?? '—'}</div>
+    </div>
+  );
+}
+
+function InsightsPanel({ insights }) {
+  const { battingProfile, bowlingProfile, suggestedRole, strengths, improvements,
+          battingScore, bowlingScore, overallScore, confidence, leaguesContributed, limitedSample } = insights;
+  const fmt1 = v => v != null && !isNaN(v) ? Number(v).toFixed(1) : '—';
+  const fmt2 = v => v != null && !isNaN(v) ? Number(v).toFixed(2) : '—';
+
+  return (
+    <div style={{
+      marginTop: '0.75rem', backgroundColor: '#f8fafc',
+      border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem',
+    }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.1rem', alignItems: 'center' }}>
+        <InsightChip icon="🎯" label="Suggested Role" value={suggestedRole} color="#0066cc" />
+        <InsightChip icon="📊" label="Confidence" value={confidence.label} color={confidence.color} />
+        {leaguesContributed.length > 0 && (
+          <InsightChip icon="🏏" label="Leagues" value={leaguesContributed.join(', ')} color="#b45309" />
+        )}
+      </div>
+
+      {limitedSample && (
+        <div style={{
+          fontSize: '11px', color: '#92400e', backgroundColor: '#fef9ec',
+          padding: '0.45rem 0.75rem', borderRadius: '6px', marginBottom: '1rem',
+        }}>
+          ⚠ Limited sample — insights based on a small dataset. Interpret with caution.
+        </div>
+      )}
+
+      <InsightBlock title="Impact Scores" accentColor="#0066cc">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.6rem' }}>
+          <ScoreCard label="Batting Score" score={battingScore} color="#16a34a" show={battingScore > 0} />
+          <ScoreCard label="Bowling Score" score={bowlingScore} color="#7c3aed" show={bowlingScore > 0} />
+          <ScoreCard label="Overall Score" score={overallScore} color="#0066cc" show={overallScore > 0} />
+        </div>
+      </InsightBlock>
+
+      {battingProfile && (
+        <InsightBlock title="Batting Profile" accentColor="#16a34a">
+          <div style={{ marginBottom: '0.6rem' }}>
+            <span style={{
+              backgroundColor: '#dcfce7', color: '#15803d',
+              padding: '0.2rem 0.6rem', borderRadius: '12px',
+              fontSize: '12px', fontWeight: '700',
+            }}>{battingProfile.style}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(75px, 1fr))', gap: '0.4rem' }}>
+            <MiniStat label="Avg" value={fmt1(battingProfile.average)} />
+            <MiniStat label="SR" value={fmt1(battingProfile.strikeRate)} />
+            <MiniStat label="50s" value={battingProfile.fifties} />
+            <MiniStat label="100s" value={battingProfile.hundreds} />
+            {battingProfile.highestScore && <MiniStat label="HS" value={battingProfile.highestScore} />}
+          </div>
+        </InsightBlock>
+      )}
+
+      {bowlingProfile && (
+        <InsightBlock title="Bowling Profile" accentColor="#7c3aed">
+          <div style={{ marginBottom: '0.6rem' }}>
+            <span style={{
+              backgroundColor: '#ede9fe', color: '#6d28d9',
+              padding: '0.2rem 0.6rem', borderRadius: '12px',
+              fontSize: '12px', fontWeight: '700',
+            }}>{bowlingProfile.style}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(75px, 1fr))', gap: '0.4rem' }}>
+            <MiniStat label="Wkts" value={bowlingProfile.wickets} />
+            <MiniStat label="Econ" value={fmt2(bowlingProfile.economy)} />
+            <MiniStat label="Avg" value={fmt1(bowlingProfile.average)} />
+            <MiniStat label="SR" value={fmt1(bowlingProfile.strikeRate)} />
+            {bowlingProfile.bestBowling && <MiniStat label="Best" value={bowlingProfile.bestBowling} />}
+          </div>
+        </InsightBlock>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <InsightBlock title="Strengths" accentColor="#16a34a">
+          {strengths.map((s, i) => (
+            <div key={i} style={{ fontSize: '12px', color: '#374151', marginBottom: '0.3rem', display: 'flex', gap: '0.4rem' }}>
+              <span style={{ color: '#16a34a', fontWeight: '700' }}>✓</span>
+              <span>{s}</span>
+            </div>
+          ))}
+        </InsightBlock>
+        <InsightBlock title="Areas to Improve" accentColor="#f59e0b">
+          {improvements.map((imp, i) => (
+            <div key={i} style={{ fontSize: '12px', color: '#374151', marginBottom: '0.3rem', display: 'flex', gap: '0.4rem' }}>
+              <span style={{ color: '#f59e0b', fontWeight: '700' }}>↑</span>
+              <span>{imp}</span>
+            </div>
+          ))}
+        </InsightBlock>
+      </div>
+
+      <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #e9eef5', fontSize: '10px', color: '#94a3b8' }}>
+        Calculated from aggregated data across: {leaguesContributed.join(' · ')}
+      </div>
+    </div>
+  );
+}
+
+function PlayerInsightsSection({ results, scaStatsMap }) {
+  const [open, setOpen] = useState(false);
+  const [insights, setInsights] = useState(null);
+
+  const allPlayers = Object.values(results).flatMap(p => p.players || []);
+  const normalized = allPlayers.map(p => normalizeForAgg(p, scaStatsMap));
+  const agg        = aggregateAll(normalized);
+
+  if (!agg.hasBat && !agg.hasBowl) return null;
+
+  const leaguesContributed = Object.entries(results)
+    .filter(([, p]) => !p.noResults && (p.players?.length ?? 0) > 0)
+    .map(([k]) => k);
+
+  const dismissals = agg.batting.inns - agg.batting.notOuts;
+  const battingForInsights = agg.hasBat ? {
+    matches:    agg.batting.mat,
+    innings:    agg.batting.inns,
+    notOuts:    agg.batting.notOuts,
+    runs:       agg.batting.runs,
+    balls:      agg.batting.balls,
+    average:    dismissals > 0 ? agg.batting.runs / dismissals : 0,
+    strikeRate: agg.batting.balls > 0 ? (agg.batting.runs / agg.batting.balls) * 100 : 0,
+    fifties: 0, hundreds: 0, sixes: 0, ducks: 0, highestScore: null,
+  } : null;
+
+  const oversNum  = parseFloat(agg.bowling.overs) || 0;
+  const econNum   = agg.bowling.econ !== '—' ? parseFloat(agg.bowling.econ) : null;
+  const bowlSRNum = agg.bowling.sr   !== '—' ? parseFloat(agg.bowling.sr)   : null;
+  const bowlingForInsights = agg.hasBowl ? {
+    innings:    Math.max(1, agg.bowling.wickets),
+    overs:      oversNum,
+    runs:       agg.bowling.runs,
+    wickets:    agg.bowling.wickets,
+    economy:    econNum,
+    average:    agg.bowling.wickets > 0 ? agg.bowling.runs / agg.bowling.wickets : null,
+    strikeRate: bowlSRNum,
+    bestBowling: null,
+  } : null;
+
+  function handleClick() {
+    if (!open) {
+      setInsights(generatePlayerInsights(battingForInsights, bowlingForInsights, leaguesContributed));
+    }
+    setOpen(v => !v);
+  }
+
+  return (
+    <div style={{ marginTop: '1rem' }}>
+      <button
+        onClick={handleClick}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          padding: '0.7rem 1.25rem', borderRadius: '8px',
+          backgroundColor: open ? '#e8f1ff' : '#fff',
+          border: `1px solid ${open ? '#0066cc' : '#d0dae8'}`,
+          color: '#0066cc', fontSize: '13px', fontWeight: '600',
+          cursor: 'pointer',
+        }}
+      >
+        <span style={{ fontSize: '15px' }}>✦</span>
+        {open ? 'Hide Player Insights' : 'View Player Insights'}
+        <span style={{ marginLeft: '0.5rem', fontSize: '11px', opacity: 0.7 }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && insights && <InsightsPanel insights={insights} />}
     </div>
   );
 }
