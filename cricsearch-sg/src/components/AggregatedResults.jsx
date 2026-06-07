@@ -166,23 +166,18 @@ function playerKey(p) {
 
 // ── Yearly performance helpers ────────────────────────────────────────────────
 
-const CHART_COLORS = ['#0066cc', '#dc2626', '#7c3aed', '#16a34a', '#b45309', '#0891b2'];
-
 function calculateYearlyPlayerPerformance(players) {
-  // keyed by playerName → year → { runs, wickets }
-  const byPlayer = {};
+  // All included players are treated as the same person — sum by year.
+  const byYear = {};
+
+  const add = (yr, runs, wkts) => {
+    const y = String(yr);
+    if (!byYear[y]) byYear[y] = { runs: 0, wickets: 0 };
+    byYear[y].runs    += Number(runs) || 0;
+    byYear[y].wickets += Number(wkts) || 0;
+  };
 
   for (const player of players) {
-    const pname = player.name;
-    if (!byPlayer[pname]) byPlayer[pname] = {};
-
-    const add = (yr, runs, wkts) => {
-      const y = String(yr);
-      if (!byPlayer[pname][y]) byPlayer[pname][y] = { runs: 0, wickets: 0 };
-      byPlayer[pname][y].runs    += Number(runs)   || 0;
-      byPlayer[pname][y].wickets += Number(wkts)   || 0;
-    };
-
     const src = player.source;
 
     if (src === 'sgia-static') {
@@ -196,45 +191,31 @@ function calculateYearlyPlayerPerformance(players) {
         if (season.year) add(season.year, season.batting?.runs, season.bowling?.wkts);
       }
     } else if (src === 'ypl-static') {
-      // YPL is career aggregate — attribute to first season year
       const yr = player.seasons?.[0];
       if (yr) add(yr, player.inlineStats?.batting?.runs, player.inlineStats?.bowling?.wickets);
     }
     // sca (live) excluded — career aggregate only
   }
 
-  const playerNames = Object.keys(byPlayer);
-  if (playerNames.length === 0) return null;
-
-  const allYears = [...new Set(
-    playerNames.flatMap(n => Object.keys(byPlayer[n]))
-  )].sort();
-
+  const allYears = Object.keys(byYear).sort();
   if (allYears.length === 0) return null;
 
-  // Build flat chart data: [{ year, [playerName]: runs }, ...]
-  const runsData = allYears.map(yr => {
-    const row = { year: yr };
-    for (const n of playerNames) row[n] = byPlayer[n][yr]?.runs ?? 0;
-    return row;
-  });
+  const chartData = allYears.map(yr => ({
+    year: yr,
+    Runs:    byYear[yr].runs,
+    Wickets: byYear[yr].wickets,
+  }));
 
-  const wicketsData = allYears.map(yr => {
-    const row = { year: yr };
-    for (const n of playerNames) row[n] = byPlayer[n][yr]?.wickets ?? 0;
-    return row;
-  });
-
-  return { playerNames, runsData, wicketsData };
+  return { chartData };
 }
 
 function YearlyPerformanceSection({ players }) {
   const data = calculateYearlyPlayerPerformance(players);
   if (!data) return null;
 
-  const { playerNames, runsData, wicketsData } = data;
-  const hasRuns    = runsData.some(row    => playerNames.some(n => row[n] > 0));
-  const hasWickets = wicketsData.some(row => playerNames.some(n => row[n] > 0));
+  const { chartData } = data;
+  const hasRuns    = chartData.some(r => r.Runs > 0);
+  const hasWickets = chartData.some(r => r.Wickets > 0);
 
   if (!hasRuns && !hasWickets) return null;
 
@@ -247,11 +228,11 @@ function YearlyPerformanceSection({ players }) {
       borderRadius: '12px',
       boxShadow: '0 2px 8px rgba(6,28,84,0.07)',
     }}>
-      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         📊 Yearly Performance Trend
       </div>
       <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '1rem' }}>
-        SG IA, BPL, SCA Corporate, YPL · SCA live excluded (career aggregate only)
+        All included players consolidated · SG IA, BPL, SCA Corporate, YPL · SCA live excluded (career aggregate only)
       </div>
 
       <div style={{
@@ -265,15 +246,12 @@ function YearlyPerformanceSection({ players }) {
               🏏 Runs Scored per Year
             </div>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={runsData} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
+              <BarChart data={chartData} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="year" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip contentStyle={{ fontSize: 12 }} />
-                {playerNames.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
-                {playerNames.map((n, i) => (
-                  <Bar key={n} dataKey={n} name={n} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[3, 3, 0, 0]} />
-                ))}
+                <Bar dataKey="Runs" fill="#0066cc" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -285,15 +263,12 @@ function YearlyPerformanceSection({ players }) {
               ⚡ Wickets Taken per Year
             </div>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={wicketsData} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
+              <BarChart data={chartData} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="year" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip contentStyle={{ fontSize: 12 }} />
-                {playerNames.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
-                {playerNames.map((n, i) => (
-                  <Bar key={n} dataKey={n} name={n} fill={CHART_COLORS[(i + 2) % CHART_COLORS.length]} radius={[3, 3, 0, 0]} />
-                ))}
+                <Bar dataKey="Wickets" fill="#7c3aed" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
