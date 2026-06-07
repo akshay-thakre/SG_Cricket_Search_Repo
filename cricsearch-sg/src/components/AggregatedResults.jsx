@@ -167,13 +167,19 @@ function playerKey(p) {
 // ── Yearly performance helpers ────────────────────────────────────────────────
 
 const LEAGUE_META = [
-  { key: 'sgia-static',   label: 'SG IA',    runsColor: '#dc2626', wicketsColor: '#ef4444' },
-  { key: 'bpl-static',    label: 'BPL',       runsColor: '#7c3aed', wicketsColor: '#a855f7' },
-  { key: 'sca-corporate', label: 'SCA Corp',  runsColor: '#1e40af', wicketsColor: '#3b82f6' },
-  { key: 'ypl-static',    label: 'YPL',       runsColor: '#b45309', wicketsColor: '#f59e0b' },
+  { key: 'sca',          label: 'SCA Live',  runsColor: '#1e40af', wicketsColor: '#3b82f6' },
+  { key: 'sgia-static',  label: 'SG IA',     runsColor: '#dc2626', wicketsColor: '#ef4444' },
+  { key: 'bpl-static',   label: 'BPL',       runsColor: '#7c3aed', wicketsColor: '#a855f7' },
+  { key: 'sca-corporate',label: 'SCA Corp',  runsColor: '#0e7490', wicketsColor: '#06b6d4' },
+  { key: 'ypl-static',   label: 'YPL',       runsColor: '#b45309', wicketsColor: '#f59e0b' },
 ];
 
-function calculateYearlyPlayerPerformance(players) {
+function extractYearFromName(name) {
+  const m = (name || '').match(/\b(20\d{2})\b/);
+  return m ? m[1] : null;
+}
+
+function calculateYearlyPlayerPerformance(players, scaStatsMap) {
   // byYear[year][sourceKey] = { runs, wickets }
   const byYear = {};
 
@@ -188,7 +194,15 @@ function calculateYearlyPlayerPerformance(players) {
   for (const player of players) {
     const src = player.source;
 
-    if (src === 'sgia-static') {
+    if (src === 'sca') {
+      const stats = scaStatsMap?.get(player.id);
+      for (const c of stats?.competitions || []) {
+        const yr = extractYearFromName(c.competition);
+        if (!yr) continue;
+        if (c.type === 'batting')  add(yr, src, c.runs, 0);
+        if (c.type === 'bowling')  add(yr, src, 0, c.wickets);
+      }
+    } else if (src === 'sgia-static') {
       for (const entry of player.entries || []) {
         if (entry.year) add(entry.year, src, entry.batting?.runs, entry.bowling?.wickets);
       }
@@ -202,7 +216,6 @@ function calculateYearlyPlayerPerformance(players) {
       const yr = player.seasons?.[0];
       if (yr) add(yr, src, player.inlineStats?.batting?.runs, player.inlineStats?.bowling?.wickets);
     }
-    // sca (live) excluded — career aggregate only
   }
 
   const allYears = Object.keys(byYear).sort();
@@ -227,8 +240,8 @@ function calculateYearlyPlayerPerformance(players) {
   return { runsData, wicketsData, activeRunsLeagues, activeWicketsLeagues };
 }
 
-function YearlyPerformanceSection({ players }) {
-  const data = calculateYearlyPlayerPerformance(players);
+function YearlyPerformanceSection({ players, scaStatsMap }) {
+  const data = calculateYearlyPlayerPerformance(players, scaStatsMap);
   if (!data) return null;
 
   const { runsData, wicketsData, activeRunsLeagues, activeWicketsLeagues } = data;
@@ -408,7 +421,7 @@ function CrossLeaguePanel({ query, results, scaStatsMap, allLoaded }) {
               {showGraph ? 'Hide Yearly Performance Graph' : 'View Yearly Performance Graph'}
             </button>
             {showGraph && (
-              <YearlyPerformanceSection players={includedPlayers} />
+              <YearlyPerformanceSection players={includedPlayers} scaStatsMap={scaStatsMap} />
             )}
           </div>
 
