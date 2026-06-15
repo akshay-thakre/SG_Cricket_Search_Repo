@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { searchAcrossPlatforms, checkHealth } from './services/apiService';
 import { AggregatedResults } from './components/AggregatedResults';
 import { MultiPlatformSearchBar } from './components/MultiPlatformSearchBar';
+import { RisersLegacy } from './components/RisersLegacy';
 
 export default function CricSearchApp() {
   const [searchResults, setSearchResults] = useState(null);
@@ -9,6 +10,7 @@ export default function CricSearchApp() {
   const [error, setError]               = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking');
   const [searchQuery, setSearchQuery]   = useState('');
+  const [activePage, setActivePage]     = useState('search');
   const abortControllerRef = useRef(null);
 
   useEffect(() => {
@@ -94,7 +96,38 @@ export default function CricSearchApp() {
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div style={{ backgroundColor: '#fff', borderBottom: '2px solid #e2e8f0' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex' }}>
+          {[
+            { id: 'search', label: '🔍 Player Search' },
+            { id: 'legacy', label: '🏆 Risers Legacy & Legends' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActivePage(tab.id)}
+              style={{
+                padding: '0.8rem 1.25rem',
+                border: 'none',
+                borderBottom: `2px solid ${activePage === tab.id ? '#0066cc' : 'transparent'}`,
+                marginBottom: '-2px',
+                backgroundColor: 'transparent',
+                color: activePage === tab.id ? '#0066cc' : '#64748b',
+                fontWeight: activePage === tab.id ? '700' : '500',
+                fontSize: '13px', cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activePage === 'legacy' && <RisersLegacy />}
+
       {/* Main Content */}
+      {activePage === 'search' && (
       <div className="app-main-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1.5rem 2rem' }}>
 
         {/* Backend Offline Warning */}
@@ -143,6 +176,7 @@ export default function CricSearchApp() {
 
         {searchResults && !loading && <AggregatedResults searchResults={searchResults} />}
       </div>
+      )}
 
       {/* Footer */}
       <div style={{
