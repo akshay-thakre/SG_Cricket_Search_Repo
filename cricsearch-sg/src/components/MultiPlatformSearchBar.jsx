@@ -34,7 +34,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
     <div
       className="search-hero"
       style={{
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #064E3B 100%)',
+        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #1E3A5F 100%)',
         padding: '3.5rem 1.5rem',
         textAlign: 'center',
         marginBottom: '2rem',
@@ -59,7 +59,7 @@ export function MultiPlatformSearchBar({ onSearch, onClear, initialQuery = '' })
           }}
         >
           <span style={{ fontSize: '40px', flexShrink: 0 }}>🏏</span>
-          <span>Changi Risers Cricket Search SG</span>
+          <span>Changi Risers Cricket | Club &amp; Stats</span>
         </div>
 
         <div style={{
