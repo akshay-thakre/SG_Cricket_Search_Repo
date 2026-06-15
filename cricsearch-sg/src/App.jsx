@@ -75,9 +75,9 @@ export default function CricSearchApp() {
             <div>
               <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--text-on-dark)', lineHeight: '1.3', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ color: 'var(--primary)', fontSize: '22px' }}>🏏</span>
-                <span>Changi Risers Cricket Search SG</span>
+                <span>Changi Risers Cricket | Club &amp; Stats</span>
               </h1>
-              <div style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)', marginTop: '0.2rem', paddingLeft: '30px' }}>
                 Singapore Cricket Player Search — Live Data
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function CricSearchApp() {
         padding: '2rem 1.5rem', marginTop: '3rem', textAlign: 'center',
       }}>
         <div style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)' }}>
-          Changi Risers Cricket Search SG &bull; Singapore Cricket Search &bull; Live data from SCA
+          Changi Risers Cricket | Club &amp; Stats &bull; Singapore Cricket Search &bull; Live data from SCA
         </div>
         <div style={{ marginTop: '0.75rem', fontSize: '11px', color: 'rgba(203,213,225,0.7)', fontStyle: 'italic', maxWidth: '700px', margin: '0.75rem auto 0' }}>
           Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
