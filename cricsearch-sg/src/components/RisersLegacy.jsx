@@ -78,10 +78,10 @@ function HeroSection() {
           Changi Risers Cricket
         </div>
         <h1 style={{ fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: '900', color: '#f1f5f9', margin: '0 0 1.25rem 0', lineHeight: '1.1', letterSpacing: '-0.02em' }}>
-          Risers Legacy<br />&amp; Legends
+          Risers Legacy
         </h1>
         <div style={{ fontSize: 'clamp(15px, 2.5vw, 19px)', color: '#f59e0b', fontWeight: '700', fontStyle: 'italic', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-          "Built by Risers. Remembered as Legends."
+          "Built by Players. Remembered as Riser."
         </div>
         <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '580px', margin: '0 auto 2.5rem', lineHeight: '1.85' }}>
           Honouring the people, memories, milestones, and numbers that shaped Changi Risers Cricket — from the early days to the future ahead.
@@ -263,7 +263,7 @@ function PastPresentFuture() {
           Past, Present &amp; Future
         </h2>
         <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '1.25rem' }}>
-          Risers Legacy &amp; Legends is intended to evolve over time — with player stories, photos, milestones, match memories, and data-backed insights.
+          Risers Legacy is intended to evolve over time — with player stories, photos, milestones, match memories, and data-backed insights.
         </p>
         <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '3rem' }}>
           The goal is to preserve the club's journey, respect those who built it, celebrate those who carry it today, and inspire those who will wear the colours tomorrow.
