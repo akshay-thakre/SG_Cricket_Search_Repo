@@ -420,7 +420,6 @@ app.post('/api/push-github', (req, res) => {
     run('git pull origin main');
     logs.push('  ✓ pull done');
     run(`git add "${compConfig.targetRepoPath}"`);
-    run(`git add "${compConfig.backupDir}/"`);
     run(`git commit -m "Update ${competition} stats JSON - ${today}"`);
     logs.push('  ✓ commit created');
     run('git push origin main');
