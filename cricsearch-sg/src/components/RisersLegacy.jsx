@@ -179,7 +179,7 @@ const LEGACY_CATEGORIES = [
 const MEMORY_TILES = [
   { title: 'Team Photo',            icon: '👥', caption: 'A squad memory to be added here.',                                                                         photo: null },
   { title: 'Trophy Moment',         icon: '🏆', caption: 'Risers in whites — a day to remember on the field.',                                                       photo: '/images/trophy-moment.jpeg' },
-  { title: 'Farewell Memory',       icon: '✈️', caption: 'A farewell story to be added here.',                                                                       photo: null },
+  { title: 'Farewell Memory',       icon: '✈️', caption: 'Saying goodbye is never easy — but a Riser always remains a Riser.',                                      photo: '/images/farewell-moment.png' },
   { title: 'Match-Day Moment',      icon: '🏏', caption: 'One of the best fights by Risers to defend against power hitters.',                                        photo: '/images/match-day-moment.jpeg' },
   { title: 'Dressing-Room Story',   icon: '🧢', caption: 'A dressing-room memory to be added here.',                                                                 photo: null },
   { title: 'Overseas Riser Memory', icon: '🌏', caption: 'A memory from an overseas Riser to be added here.',                                                        photo: null },
