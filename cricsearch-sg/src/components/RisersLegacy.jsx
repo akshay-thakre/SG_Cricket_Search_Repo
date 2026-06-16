@@ -1,6 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-// ── Data — update these arrays to add real content later ──────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+// Generate n placeholder person entries — replace with real data when ready
+function mkPeople(n = 3) {
+  return Array.from({ length: n }, () => ({
+    name:    'Name to be added',
+    role:    'Contribution details coming soon',
+    tribute: 'A tribute story will be added here to honour this person\'s contribution to Changi Risers.',
+    photo:   null,
+  }));
+}
+
+// ── Data — update these arrays/objects to add real content later ──────────────
 
 const TIMELINE_ITEMS = [
   { era: 'The Early Days',         icon: '🌱', color: '#16a34a', description: 'Around 2014, a shared passion for cricket in Singapore brought together a group of working colleagues who were eager to continue playing the sport they loved. With limited awareness of cricket facilities in a new country, the group started with tennis-ball cricket — and from that simple beginning, the team known as Changi Risers was born.' },
@@ -11,15 +23,104 @@ const TIMELINE_ITEMS = [
   { era: 'The Future',             icon: '🚀', color: '#dc2626', description: 'The future may never be certain, but the purpose of Changi Risers remains clear — to build a team of like-minded individuals who value cricket, sportsmanship, friendship, and togetherness. As the club moves ahead, the goal is to grow as a family while staying competitive, committed, and proud on the cricket field.' },
 ];
 
-const LEGEND_CARDS = [
-  { title: 'Founding Contributor',    contributionType: 'Club Foundation',       icon: '🏗️', accentColor: '#0066cc', tribute: 'A tribute story will be added here to honour the role in establishing the Changi Risers identity and spirit from the very beginning.' },
-  { title: 'Former Captain',          contributionType: 'Leadership & Team Culture', icon: '🎯', accentColor: '#7c3aed', tribute: 'A tribute story will be added here to honour leadership, commitment, and contribution to the Risers journey across seasons.' },
-  { title: 'Match Winner',            contributionType: 'Clutch Performances',   icon: '🏆', accentColor: '#d97706', tribute: 'A tribute story will be added here to honour the match-defining moments, innings, and spells that won games for the Risers.' },
-  { title: 'Team Builder',            contributionType: 'Culture & Bonding',     icon: '🤝', accentColor: '#16a34a', tribute: 'A tribute story will be added here to honour the effort that went into building team culture, trust, and lasting friendships.' },
-  { title: 'Overseas Riser',          contributionType: 'Global Riser Community',icon: '✈️', accentColor: '#0891b2', tribute: 'A tribute story will be added here for a Riser who moved overseas but remains part of the club spirit and legacy forever.' },
-  { title: 'Mentor / Senior Player',  contributionType: 'Guidance & Experience', icon: '🧠', accentColor: '#6d28d9', tribute: 'A tribute story will be added here to honour the guidance, experience, and mentorship that shaped younger Risers.' },
-  { title: 'Silent Contributor',      contributionType: 'Off-Field Dedication',  icon: '💪', accentColor: '#475569', tribute: 'A tribute story will be added here for someone who contributed behind the scenes — organising, supporting, and making things happen.' },
-  { title: 'Current Core Player',     contributionType: 'Present-Day Riser',     icon: '⭐', accentColor: '#dc2626', tribute: 'A tribute story will be added here to celebrate an active contributor carrying the Changi Risers identity forward today.' },
+// Single source of truth for all Legacy & Legends categories
+const LEGACY_CATEGORIES = [
+  {
+    id:               'founding-contributors',
+    cardTitle:        'Founding Contributor',
+    title:            'Founding Contributors',
+    contributionType: 'Club Foundation',
+    icon:             '🏗️',
+    accentColor:      '#0066cc',
+    ctaLabel:         'View Founding Contributors',
+    cardTribute:      'A tribute story will be added here to honour the role in establishing the Changi Risers identity and spirit from the very beginning.',
+    detailDescription:'Honouring the early contributors who helped establish the Changi Risers identity, spirit, and foundation.',
+    people:           mkPeople(3),
+  },
+  {
+    id:               'former-captains',
+    cardTitle:        'Former Captain',
+    title:            'Former Captains',
+    contributionType: 'Leadership & Team Culture',
+    icon:             '🎯',
+    accentColor:      '#7c3aed',
+    ctaLabel:         'View Former Captains',
+    cardTribute:      'A tribute story will be added here to honour leadership, commitment, and contribution to the Risers journey across seasons.',
+    detailDescription:'Recognising the leaders who guided the team, shaped culture, and carried responsibility across seasons.',
+    people:           mkPeople(3),
+  },
+  {
+    id:               'match-winners',
+    cardTitle:        'Match Winner',
+    title:            'Match Winners',
+    contributionType: 'Clutch Performances',
+    icon:             '🏆',
+    accentColor:      '#d97706',
+    ctaLabel:         'View Match Winners',
+    cardTribute:      'A tribute story will be added here to honour the match-defining moments, innings, and spells that won games for the Risers.',
+    detailDescription:'Celebrating the players who created defining moments with bat, ball, fielding, and pressure performances.',
+    people:           mkPeople(3),
+  },
+  {
+    id:               'team-builders',
+    cardTitle:        'Team Builder',
+    title:            'Team Builders',
+    contributionType: 'Culture & Bonding',
+    icon:             '🤝',
+    accentColor:      '#16a34a',
+    ctaLabel:         'View Team Builders',
+    cardTribute:      'A tribute story will be added here to honour the effort that went into building team culture, trust, and lasting friendships.',
+    detailDescription:'Respecting those who strengthened bonding, culture, trust, and togetherness within the Risers family.',
+    people:           mkPeople(3),
+  },
+  {
+    id:               'overseas-risers',
+    cardTitle:        'Overseas Riser',
+    title:            'Overseas Risers',
+    contributionType: 'Global Riser Community',
+    icon:             '✈️',
+    accentColor:      '#0891b2',
+    ctaLabel:         'View Overseas Risers',
+    cardTribute:      'A tribute story will be added here for a Riser who moved overseas but remains part of the club spirit and legacy forever.',
+    detailDescription:'Remembering Risers who moved abroad but remain part of the club\'s journey, memories, and legacy.',
+    people:           mkPeople(3),
+  },
+  {
+    id:               'mentor-senior',
+    cardTitle:        'Mentor / Senior Player',
+    title:            'Mentor / Senior Risers',
+    contributionType: 'Guidance & Experience',
+    icon:             '🧠',
+    accentColor:      '#6d28d9',
+    ctaLabel:         'View Mentor / Senior Risers',
+    cardTribute:      'A tribute story will be added here to honour the guidance, experience, and mentorship that shaped younger Risers.',
+    detailDescription:'Honouring senior players and mentors whose guidance, experience, and support helped shape younger Risers.',
+    people:           mkPeople(3),
+  },
+  {
+    id:               'silent-contributors',
+    cardTitle:        'Silent Contributor',
+    title:            'Silent Contributors',
+    contributionType: 'Off-Field Dedication',
+    icon:             '💪',
+    accentColor:      '#475569',
+    ctaLabel:         'View Silent Contributors',
+    cardTribute:      'A tribute story will be added here for someone who contributed behind the scenes — organising, supporting, and making things happen.',
+    detailDescription:'Recognising those who contributed behind the scenes — organising, supporting, helping, and making things happen.',
+    people:           mkPeople(3),
+  },
+  {
+    id:               'current-core-players',
+    cardTitle:        'Current Core Player',
+    title:            'Current Core Players',
+    contributionType: 'Present-Day Riser',
+    icon:             '⭐',
+    accentColor:      '#dc2626',
+    ctaLabel:         'View Current Core Players',
+    cardTribute:      'A tribute story will be added here to celebrate an active contributor carrying the Changi Risers identity forward today.',
+    detailDescription:'Celebrating the present-day Risers who continue to carry the club identity forward on and off the field.',
+    people:           mkPeople(3),
+  },
 ];
 
 const MEMORY_TILES = [
@@ -57,6 +158,111 @@ function SectionHeading({ eyebrow, title, body, light = false }) {
           {body}
         </p>
       )}
+    </div>
+  );
+}
+
+// ── Category Detail View ───────────────────────────────────────────────────────
+
+function CategoryDetailView({ category, onBack }) {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  return (
+    <div style={{ backgroundColor: '#0f172a', minHeight: '80vh', color: '#fff' }}>
+
+      {/* Back bar */}
+      <div style={{ backgroundColor: '#0a1120', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0.9rem 1.5rem' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '7px', padding: '0.45rem 1rem',
+              color: '#94a3b8', fontSize: '13px', fontWeight: '600',
+              cursor: 'pointer',
+            }}
+          >
+            ← Back to Risers Legacy
+          </button>
+        </div>
+      </div>
+
+      {/* Category hero */}
+      <div style={{ padding: 'clamp(2.5rem, 6vw, 4rem) 1.5rem', borderBottom: `1px solid ${category.accentColor}20`, textAlign: 'center' }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+          <div style={{ fontSize: '52px', marginBottom: '1.1rem' }}>{category.icon}</div>
+          <div style={{ fontSize: '10px', fontWeight: '800', color: category.accentColor, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '0.6rem' }}>
+            {category.contributionType}
+          </div>
+          <h1 style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: '900', color: '#f1f5f9', margin: '0 0 1rem 0', lineHeight: '1.15' }}>
+            {category.title}
+          </h1>
+          <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '540px', margin: '0 auto', lineHeight: '1.85' }}>
+            {category.detailDescription}
+          </p>
+          <div style={{ marginTop: '1.75rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ width: '32px', height: '2px', backgroundColor: category.accentColor, borderRadius: '1px' }} />
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: category.accentColor }} />
+            <div style={{ width: '32px', height: '2px', backgroundColor: category.accentColor, borderRadius: '1px' }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Person cards grid */}
+      <div style={{ padding: 'clamp(2rem, 5vw, 3.5rem) 1.5rem' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            {category.people.map((person, i) => (
+              <div key={i} style={{
+                backgroundColor: '#1e293b', borderRadius: '14px',
+                border: `1px solid ${category.accentColor}28`,
+                overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                boxShadow: `0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px ${category.accentColor}10`,
+              }}>
+                {/* Photo placeholder */}
+                <div style={{ height: '150px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${category.accentColor}18` }}>
+                  <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: category.accentColor + '15', border: `2px dashed ${category.accentColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>
+                    👤
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Photo coming soon</div>
+                </div>
+                {/* Content */}
+                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontWeight: '700', fontSize: '16px', color: '#f1f5f9', marginBottom: '0.3rem' }}>{person.name}</div>
+                  <div style={{ fontSize: '10px', color: category.accentColor, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.65rem' }}>{person.role}</div>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.75', margin: '0 0 1rem 0', flex: 1 }}>{person.tribute}</p>
+                  <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Story coming soon</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', color: '#334155', fontStyle: 'italic' }}>
+              Real names, photos, and tribute stories will be updated here. This list is not exhaustive — more names will be added over time.
+            </p>
+          </div>
+
+          {/* Bottom back button */}
+          <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+            <button
+              onClick={onBack}
+              style={{
+                backgroundColor: category.accentColor, color: '#fff', border: 'none',
+                borderRadius: '8px', padding: '0.8rem 2rem',
+                fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+                boxShadow: `0 4px 14px ${category.accentColor}40`,
+              }}
+            >
+              ← Back to Risers Legacy
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -148,7 +354,7 @@ function JourneySoFar() {
   );
 }
 
-function LegendsWall() {
+function LegendsWall({ onSelectCategory }) {
   return (
     <Section bg="#0f172a">
       <SectionHeading
@@ -158,21 +364,32 @@ function LegendsWall() {
         light
       />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(235px, 1fr))', gap: '1.25rem' }}>
-        {LEGEND_CARDS.map((card, i) => (
-          <div key={i} style={{ backgroundColor: '#1e293b', borderRadius: '14px', border: `1px solid ${card.accentColor}30`, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
-            <div style={{ height: '140px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${card.accentColor}20` }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: card.accentColor + '18', border: `2px dashed ${card.accentColor}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>
-                {card.icon}
+        {LEGACY_CATEGORIES.map((cat) => (
+          <div key={cat.id} style={{ backgroundColor: '#1e293b', borderRadius: '14px', border: `1px solid ${cat.accentColor}30`, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
+            <div style={{ height: '140px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${cat.accentColor}20` }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: cat.accentColor + '18', border: `2px dashed ${cat.accentColor}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>
+                {cat.icon}
               </div>
               <div style={{ fontSize: '10px', color: '#475569', fontStyle: 'italic' }}>Photo coming soon</div>
             </div>
             <div style={{ padding: '1.1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '9px', fontWeight: '800', color: card.accentColor, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>{card.contributionType}</div>
-              <div style={{ fontWeight: '700', fontSize: '15px', color: '#f1f5f9', marginBottom: '0.6rem' }}>{card.title}</div>
-              <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.7', margin: '0 0 1rem 0', flex: 1 }}>{card.tribute}</p>
-              <div style={{ fontSize: '10px', color: card.accentColor, border: `1px solid ${card.accentColor}45`, borderRadius: '5px', padding: '0.3rem 0.7rem', fontWeight: '700', alignSelf: 'flex-start', letterSpacing: '0.03em' }}>
-                View Stats / Story Coming Soon
-              </div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: cat.accentColor, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>{cat.contributionType}</div>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#f1f5f9', marginBottom: '0.6rem' }}>{cat.cardTitle}</div>
+              <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.7', margin: '0 0 1rem 0', flex: 1 }}>{cat.cardTribute}</p>
+              <button
+                onClick={() => onSelectCategory(cat.id)}
+                style={{
+                  fontSize: '11px', color: cat.accentColor,
+                  border: `1px solid ${cat.accentColor}45`,
+                  borderRadius: '5px', padding: '0.4rem 0.8rem',
+                  fontWeight: '700', cursor: 'pointer',
+                  backgroundColor: cat.accentColor + '12',
+                  alignSelf: 'flex-start', letterSpacing: '0.02em',
+                  transition: 'background-color 0.15s',
+                }}
+              >
+                {cat.ctaLabel}
+              </button>
             </div>
           </div>
         ))}
@@ -289,13 +506,30 @@ function PastPresentFuture() {
   );
 }
 
+// ── Root export ────────────────────────────────────────────────────────────────
+
 export function RisersLegacy() {
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
+  const selectedCategory = selectedCategoryId
+    ? LEGACY_CATEGORIES.find(c => c.id === selectedCategoryId)
+    : null;
+
+  if (selectedCategory) {
+    return (
+      <CategoryDetailView
+        category={selectedCategory}
+        onBack={() => setSelectedCategoryId(null)}
+      />
+    );
+  }
+
   return (
     <div>
       <HeroSection />
       <WhyThisExists />
       <JourneySoFar />
-      <LegendsWall />
+      <LegendsWall onSelectCategory={setSelectedCategoryId} />
       <MemoriesSection />
       <StatsWithRespect />
       <PastPresentFuture />
