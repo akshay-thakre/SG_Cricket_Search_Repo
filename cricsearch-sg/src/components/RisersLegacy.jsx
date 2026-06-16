@@ -69,6 +69,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Gururaj Banakar',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Akhil Kukreja',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Harsha Sarma',          role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Arvind Bajaj',           role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
   {
@@ -140,6 +141,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Samveg Jain',          role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Vikram Singh Salaria', role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Pramod Gururaj',       role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vipin Jha',            role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'List to be added', role: '', tribute: '', photo: null, isPlaceholder: true },
     ],
   },
