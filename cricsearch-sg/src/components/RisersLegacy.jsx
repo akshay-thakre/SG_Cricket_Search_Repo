@@ -35,7 +35,13 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Founding Contributors',
     cardTribute:      'A tribute story will be added here to honour the role in establishing the Changi Risers identity and spirit from the very beginning.',
     detailDescription:'Honouring the early contributors who helped establish the Changi Risers identity, spirit, and foundation.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Shailesh Thakur',       role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Gajendra Agarwal',      role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Ahsan Nabi Dar',        role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Abhijeet Joshi',        role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+    ],
   },
   {
     id:               'former-captains',
@@ -47,7 +53,12 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Former Captains',
     cardTribute:      'A tribute story will be added here to honour leadership, commitment, and contribution to the Risers journey across seasons.',
     detailDescription:'Recognising the leaders who guided the team, shaped culture, and carried responsibility across seasons.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Gajendra Agarwal',      role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kapil Arora',           role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',         role: 'Former & Current Captain', tribute: 'A tribute story will be added here.', photo: null },
+    ],
   },
   {
     id:               'match-winners',
@@ -59,7 +70,18 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Match Winners',
     cardTribute:      'A tribute story will be added here to honour the match-defining moments, innings, and spells that won games for the Risers.',
     detailDescription:'Celebrating the players who created defining moments with bat, ball, fielding, and pressure performances.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Vikram Singh Salaria',  role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Pradipta Mishra',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kapil Arora',           role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Ahsan Nabi Dar',        role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Santhosh Dommety',      role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Gururaj Banakar',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Akhil Kukreja',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Harsha Sarma',          role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+    ],
   },
   {
     id:               'team-builders',
@@ -71,7 +93,14 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Team Builders',
     cardTribute:      'A tribute story will be added here to honour the effort that went into building team culture, trust, and lasting friendships.',
     detailDescription:'Respecting those who strengthened bonding, culture, trust, and togetherness within the Risers family.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Gaurav Khandelwal',     role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Amol Babu',             role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',         role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kapil Arora',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vivek Singh',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+    ],
   },
   {
     id:               'overseas-risers',
@@ -83,7 +112,15 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Overseas Risers',
     cardTribute:      'A tribute story will be added here for a Riser who moved overseas but remains part of the club spirit and legacy forever.',
     detailDescription:'Remembering Risers who moved abroad but remain part of the club\'s journey, memories, and legacy.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Santosh Dommety',       role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Gaurav Khandelwal',     role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vivek Bhat',            role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Akhil Kukreja',         role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Zubin Patel',           role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Harsha Sharma',         role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+    ],
   },
   {
     id:               'mentor-senior',
@@ -95,7 +132,10 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Mentor / Senior Risers',
     cardTribute:      'A tribute story will be added here to honour the guidance, experience, and mentorship that shaped younger Risers.',
     detailDescription:'Honouring senior players and mentors whose guidance, experience, and support helped shape younger Risers.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Chacha', role: 'Mentor / Senior Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vivek',  role: 'Mentor / Senior Riser', tribute: 'A tribute story will be added here.', photo: null },
+    ],
   },
   {
     id:               'silent-contributors',
@@ -107,7 +147,13 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Silent Contributors',
     cardTribute:      'A tribute story will be added here for someone who contributed behind the scenes — organising, supporting, and making things happen.',
     detailDescription:'Recognising those who contributed behind the scenes — organising, supporting, helping, and making things happen.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Amol Babu',            role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Samveg Jain',          role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vikram Singh Salaria', role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Pramod Gururaj',       role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'List to be added', role: '', tribute: '', photo: null, isPlaceholder: true },
+    ],
   },
   {
     id:               'current-core-players',
@@ -119,7 +165,14 @@ const LEGACY_CATEGORIES = [
     ctaLabel:         'View Current Core Players',
     cardTribute:      'A tribute story will be added here to celebrate an active contributor carrying the Changi Risers identity forward today.',
     detailDescription:'Celebrating the present-day Risers who continue to carry the club identity forward on and off the field.',
-    people:           mkPeople(3),
+    people: [
+      { name: 'Kintul Mistry',        role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vikram Singh Salaria', role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Pradipta Mishra',      role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Gajendra Agrawal',     role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vivek Singh',          role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Akshay Thakre',        role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+    ],
   },
 ];
 
@@ -216,29 +269,47 @@ function CategoryDetailView({ category, onBack }) {
       <div style={{ padding: 'clamp(2rem, 5vw, 3.5rem) 1.5rem' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
-            {category.people.map((person, i) => (
-              <div key={i} style={{
-                backgroundColor: '#1e293b', borderRadius: '14px',
-                border: `1px solid ${category.accentColor}28`,
-                overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                boxShadow: `0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px ${category.accentColor}10`,
-              }}>
-                {/* Photo placeholder */}
-                <div style={{ height: '150px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${category.accentColor}18` }}>
-                  <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: category.accentColor + '15', border: `2px dashed ${category.accentColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>
-                    👤
+            {category.people.map((person, i) => {
+              if (person.isPlaceholder) {
+                return (
+                  <div key={i} style={{
+                    backgroundColor: 'transparent', borderRadius: '14px',
+                    border: `1px dashed ${category.accentColor}25`,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    justifyContent: 'center', padding: '2rem 1.25rem', gap: '0.6rem',
+                    minHeight: '180px',
+                  }}>
+                    <div style={{ fontSize: '22px', opacity: 0.3 }}>＋</div>
+                    <div style={{ fontSize: '12px', color: '#334155', fontStyle: 'italic', textAlign: 'center', lineHeight: '1.6' }}>
+                      More names will be added here over time.
+                    </div>
                   </div>
-                  <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Photo coming soon</div>
+                );
+              }
+              return (
+                <div key={i} style={{
+                  backgroundColor: '#1e293b', borderRadius: '14px',
+                  border: `1px solid ${category.accentColor}28`,
+                  overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                  boxShadow: `0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px ${category.accentColor}10`,
+                }}>
+                  {/* Photo placeholder */}
+                  <div style={{ height: '150px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${category.accentColor}18` }}>
+                    <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: category.accentColor + '15', border: `2px dashed ${category.accentColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>
+                      👤
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Photo coming soon</div>
+                  </div>
+                  {/* Content */}
+                  <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', color: '#f1f5f9', marginBottom: '0.3rem' }}>{person.name}</div>
+                    <div style={{ fontSize: '10px', color: category.accentColor, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.65rem' }}>{person.role}</div>
+                    <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.75', margin: '0 0 1rem 0', flex: 1 }}>{person.tribute}</p>
+                    <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Story coming soon</div>
+                  </div>
                 </div>
-                {/* Content */}
-                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontWeight: '700', fontSize: '16px', color: '#f1f5f9', marginBottom: '0.3rem' }}>{person.name}</div>
-                  <div style={{ fontSize: '10px', color: category.accentColor, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.65rem' }}>{person.role}</div>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.75', margin: '0 0 1rem 0', flex: 1 }}>{person.tribute}</p>
-                  <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Story coming soon</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
