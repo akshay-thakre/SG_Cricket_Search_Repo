@@ -262,7 +262,7 @@ function CategoryDetailView({ category, onBack }) {
               cursor: 'pointer',
             }}
           >
-            ← Back to Risers Legacy
+            ← Back to The Riser Wall
           </button>
         </div>
       </div>
@@ -352,7 +352,7 @@ function CategoryDetailView({ category, onBack }) {
                 boxShadow: `0 4px 14px ${category.accentColor}40`,
               }}
             >
-              ← Back to Risers Legacy
+              ← Back to The Riser Wall
             </button>
           </div>
         </div>
@@ -452,9 +452,9 @@ function LegendsWall({ onSelectCategory }) {
   return (
     <Section bg="#0f172a">
       <SectionHeading
-        eyebrow="The Legends Wall"
-        title="Legacy &amp; Legends"
-        body="Legends are not only top performers. Anyone who meaningfully contributed to Changi Risers — on or off the field — belongs here."
+        eyebrow="The Riser Wall"
+        title="The Riser Wall"
+        body="Risers are remembered not only for performances, but for contribution, leadership, loyalty, culture, and the moments they created on and off the field."
         light
       />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(235px, 1fr))', gap: '1.25rem' }}>
@@ -761,17 +761,23 @@ function PastPresentFuture() {
 
 // ── Root export ────────────────────────────────────────────────────────────────
 
+const LEGACY_TABS = [
+  { id: 'legacy',   label: 'Risers Legacy' },
+  { id: 'journey',  label: 'The Riser Journey' },
+  { id: 'wall',     label: 'The Riser Wall' },
+  { id: 'memories', label: 'Memories' },
+];
+
 export function RisersLegacy() {
+  const [activeTab, setActiveTab]               = useState('legacy');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-  const selectedCategory = selectedCategoryId
-    ? LEGACY_CATEGORIES.find(c => c.id === selectedCategoryId)
-    : null;
-
-  if (selectedCategory) {
+  // Category detail view replaces the whole page (back returns to 'wall' tab)
+  if (selectedCategoryId) {
+    const category = LEGACY_CATEGORIES.find(c => c.id === selectedCategoryId);
     return (
       <CategoryDetailView
-        category={selectedCategory}
+        category={category}
         onBack={() => setSelectedCategoryId(null)}
       />
     );
@@ -779,13 +785,42 @@ export function RisersLegacy() {
 
   return (
     <div>
-      <HeroSection />
-      <WhyThisExists />
-      <JourneySoFar />
-      <LegendsWall onSelectCategory={setSelectedCategoryId} />
-      <MemoriesSection />
-      <StatsWithRespect />
-      <PastPresentFuture />
+      {/* Internal tab navigation */}
+      <div style={{ backgroundColor: '#fff', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
+          {LEGACY_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: '0.85rem 1.25rem',
+                border: 'none',
+                borderBottom: `2px solid ${activeTab === tab.id ? '#0066cc' : 'transparent'}`,
+                marginBottom: '-2px',
+                backgroundColor: 'transparent',
+                color: activeTab === tab.id ? '#0066cc' : '#64748b',
+                fontWeight: activeTab === tab.id ? '700' : '500',
+                fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      {activeTab === 'legacy' && (
+        <div>
+          <HeroSection />
+          <WhyThisExists />
+          <StatsWithRespect />
+          <PastPresentFuture />
+        </div>
+      )}
+      {activeTab === 'journey' && <JourneySoFar />}
+      {activeTab === 'wall'    && <LegendsWall onSelectCategory={(id) => { setSelectedCategoryId(id); setActiveTab('wall'); }} />}
+      {activeTab === 'memories' && <MemoriesSection />}
     </div>
   );
 }
