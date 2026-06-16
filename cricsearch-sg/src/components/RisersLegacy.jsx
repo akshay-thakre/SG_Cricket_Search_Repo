@@ -177,12 +177,12 @@ const LEGACY_CATEGORIES = [
 ];
 
 const MEMORY_TILES = [
-  { title: 'Team Photo',            icon: '👥', caption: 'A squad memory to be added here.' },
-  { title: 'Trophy Moment',         icon: '🏆', caption: 'A winning moment to be added here.' },
-  { title: 'Farewell Memory',       icon: '✈️', caption: 'A farewell story to be added here.' },
-  { title: 'Match-Day Moment',      icon: '🏏', caption: 'A match-day snapshot to be added here.' },
-  { title: 'Dressing-Room Story',   icon: '🧢', caption: 'A dressing-room memory to be added here.' },
-  { title: 'Overseas Riser Memory', icon: '🌏', caption: 'A memory from an overseas Riser to be added here.' },
+  { title: 'Trophy Moment',         icon: '🏆', caption: 'Lifting the trophy — a moment that defines what Risers play for.',                                         photo: '/images/trophy-moment-2.jpeg' },
+  { title: 'Team Photo',            icon: '👥', caption: 'Risers in whites — a day to remember on the field.',                                                       photo: '/images/trophy-moment.jpeg' },
+  { title: 'Farewell Memory',       icon: '✈️', caption: 'Saying goodbye is never easy — but a Suresha always remains a Riser.',                                    photo: '/images/farewell-moment.png' },
+  { title: 'Match-Day Moment',      icon: '🏏', caption: 'One of the best fights by Risers to defend against power hitters.',                                        photo: '/images/match-day-moment.jpeg' },
+  { title: 'Dressing-Room Story',   icon: '🧢', caption: 'A dressing-room memory to be added here.',                                                                 photo: null },
+  { title: 'Overseas Riser Memory', icon: '🌏', caption: 'A memory from an overseas Riser to be added here.',                                                        photo: '/images/overseas-riser-1.jpeg' },
 ];
 
 // ── Layout helpers ─────────────────────────────────────────────────────────────
@@ -486,10 +486,18 @@ function MemoriesSection() {
         {MEMORY_TILES.map((tile, i) => (
           <div key={i} style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', boxShadow: '0 2px 8px rgba(6,28,84,0.05)' }}>
             <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6' }}>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                <span style={{ fontSize: '30px', opacity: 0.45 }}>{tile.icon}</span>
-                <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
-              </div>
+              {tile.photo ? (
+                <img
+                  src={tile.photo}
+                  alt={tile.title}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                  <span style={{ fontSize: '30px', opacity: 0.45 }}>{tile.icon}</span>
+                  <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
+                </div>
+              )}
             </div>
             <div style={{ padding: '0.8rem 0.9rem' }}>
               <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', marginBottom: '0.2rem' }}>{tile.title}</div>
