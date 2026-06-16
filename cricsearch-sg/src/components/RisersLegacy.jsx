@@ -3,7 +3,7 @@ import React from 'react';
 // ── Data — update these arrays to add real content later ──────────────────────
 
 const TIMELINE_ITEMS = [
-  { era: 'The Early Days',         icon: '🌱', color: '#16a34a', description: 'Where the club spirit began and the foundation of Changi Risers started taking shape.' },
+  { era: 'The Early Days',         icon: '🌱', color: '#16a34a', description: 'Around 2014, a shared passion for cricket in Singapore brought together a group of working colleagues who were eager to continue playing the sport they loved. With limited awareness of cricket facilities in a new country, the group started with tennis-ball cricket — and from that simple beginning, the team known as Changi Risers was born.' },
   { era: 'Building the Core',      icon: '🏗️', color: '#0066cc', description: 'Players, organisers, captains, and supporters came together to create a strong team culture.' },
   { era: 'Growing Across Leagues', icon: '🏟️', color: '#7c3aed', description: 'Risers represented the club across Singapore cricket competitions, carrying the club identity into every match.' },
   { era: 'Memorable Seasons',      icon: '🏆', color: '#d97706', description: 'Campaigns, wins, rivalries, partnerships, spells, and dressing-room memories became part of the club story.' },
