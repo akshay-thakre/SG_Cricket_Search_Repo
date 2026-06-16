@@ -197,8 +197,9 @@ const MEMORY_ITEMS = [
   },
   {
     id: 'dressing-room-story', title: 'Dressing-Room Story',
-    icon: '🧢',                status: 'comingSoon',
-    image: null, alt: '',
+    icon: '🧢',                status: 'available',
+    image: '/images/dressing-room-1.jpeg',
+    alt:  'Changi Risers dressing room moment',
     caption: 'A dressing-room memory to be added here.',
   },
   {
