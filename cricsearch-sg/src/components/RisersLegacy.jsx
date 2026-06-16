@@ -1,16 +1,4 @@
-import React, { useState, useEffect } from 'react';
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-// Generate n placeholder person entries — replace with real data when ready
-function mkPeople(n = 3) {
-  return Array.from({ length: n }, () => ({
-    name:    'Name to be added',
-    role:    'Contribution details coming soon',
-    tribute: 'A tribute story will be added here to honour this person\'s contribution to Changi Risers.',
-    photo:   null,
-  }));
-}
+import React, { useState, useEffect, useRef } from 'react';
 
 // ── Data — update these arrays/objects to add real content later ──────────────
 
@@ -176,13 +164,48 @@ const LEGACY_CATEGORIES = [
   },
 ];
 
-const MEMORY_TILES = [
-  { title: 'Trophy Moment',         icon: '🏆', caption: 'Lifting the trophy — a moment that defines what Risers play for.',                                         photo: '/images/trophy-moment-2.jpeg' },
-  { title: 'Team Photo',            icon: '👥', caption: 'Risers in whites — a day to remember on the field.',                                                       photo: '/images/trophy-moment.jpeg' },
-  { title: 'Farewell Memory',       icon: '✈️', caption: 'Saying goodbye is never easy — but a Suresha always remains a Riser.',                                    photo: '/images/farewell-moment.png' },
-  { title: 'Match-Day Moment',      icon: '🏏', caption: 'One of the best fights by Risers to defend against power hitters.',                                        photo: '/images/match-day-moment.jpeg' },
-  { title: 'Dressing-Room Story',   icon: '🧢', caption: 'A dressing-room memory to be added here.',                                                                 photo: null },
-  { title: 'Overseas Riser Memory', icon: '🌏', caption: 'A memory from an overseas Riser to be added here.',                                                        photo: '/images/overseas-riser-1.jpeg' },
+const MEMORY_ITEMS = [
+  {
+    id: 'trophy-moment',      title: 'Trophy Moment',
+    icon: '🏆',               status: 'available',
+    image: '/images/trophy-moment-2.jpeg',
+    alt:  'Changi Risers team celebrating with a trophy',
+    caption: 'Lifting the trophy — a moment that defines what Risers play for.',
+  },
+  {
+    id: 'team-photo',         title: 'Team Photo',
+    icon: '👥',               status: 'available',
+    image: '/images/trophy-moment.jpeg',
+    alt:  'Changi Risers squad in white cricket kit',
+    caption: 'Risers in whites — a day to remember on the field.',
+  },
+  {
+    id: 'farewell-memory',    title: 'Farewell Memory',
+    icon: '✈️',               status: 'available',
+    image: '/images/farewell-moment.png',
+    alt:  'Farewell moment with Changi Risers',
+    caption: 'Saying goodbye is never easy — but a Suresha always remains a Riser.',
+  },
+  {
+    id: 'match-day-moment',   title: 'Match-Day Moment',
+    icon: '🏏',               status: 'available',
+    image: '/images/match-day-moment.jpeg',
+    alt:  'Changi Risers in navy and gold jerseys after a match',
+    caption: 'One of the best fights by Risers to defend against power hitters.',
+  },
+  {
+    id: 'dressing-room-story', title: 'Dressing-Room Story',
+    icon: '🧢',                status: 'comingSoon',
+    image: null, alt: '',
+    caption: 'A dressing-room memory to be added here.',
+  },
+  {
+    id: 'overseas-riser-memory', title: 'Overseas Riser Memory',
+    icon: '🌏',                  status: 'available',
+    image: '/images/overseas-riser-1.jpeg',
+    alt:  'Overseas Riser memory',
+    caption: 'A memory from an overseas Riser to be added here.',
+  },
 ];
 
 // ── Layout helpers ─────────────────────────────────────────────────────────────
@@ -239,7 +262,7 @@ function CategoryDetailView({ category, onBack }) {
               cursor: 'pointer',
             }}
           >
-            ← Back to Risers Legacy
+            ← Back to The Riser Wall
           </button>
         </div>
       </div>
@@ -329,7 +352,7 @@ function CategoryDetailView({ category, onBack }) {
                 boxShadow: `0 4px 14px ${category.accentColor}40`,
               }}
             >
-              ← Back to Risers Legacy
+              ← Back to The Riser Wall
             </button>
           </div>
         </div>
@@ -429,9 +452,9 @@ function LegendsWall({ onSelectCategory }) {
   return (
     <Section bg="#0f172a">
       <SectionHeading
-        eyebrow="The Legends Wall"
-        title="Legacy &amp; Legends"
-        body="Legends are not only top performers. Anyone who meaningfully contributed to Changi Risers — on or off the field — belongs here."
+        eyebrow="The Riser Wall"
+        title="The Riser Wall"
+        body="Risers are remembered not only for performances, but for contribution, leadership, loyalty, culture, and the moments they created on and off the field."
         light
       />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(235px, 1fr))', gap: '1.25rem' }}>
@@ -474,37 +497,188 @@ function LegendsWall({ onSelectCategory }) {
   );
 }
 
+// ── Lightbox modal ─────────────────────────────────────────────────────────────
+
+function LightboxModal({ photos, startIndex, onClose }) {
+  const [idx, setIdx] = useState(startIndex);
+  const closeRef = useRef(null);
+  const photo   = photos[idx];
+  const hasPrev = idx > 0;
+  const hasNext = idx < photos.length - 1;
+
+  useEffect(() => { closeRef.current?.focus(); }, []);
+
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => {
+      if (e.key === 'Escape')     { onClose(); }
+      if (e.key === 'ArrowLeft')  { setIdx(i => Math.max(0, i - 1)); }
+      if (e.key === 'ArrowRight') { setIdx(i => Math.min(photos.length - 1, i + 1)); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [photos.length, onClose]);
+
+  const navBtn = (disabled) => ({
+    background: disabled ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.1)',
+    border: '1px solid rgba(255,255,255,0.14)',
+    borderRadius: '50%',
+    width: '48px', height: '48px', minWidth: '48px',
+    color: disabled ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+    fontSize: '28px', fontWeight: '300', lineHeight: 1,
+    cursor: disabled ? 'default' : 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
+  });
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Viewing: ${photo.title}`}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        backgroundColor: 'rgba(4,10,24,0.96)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '1rem', boxSizing: 'border-box',
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          maxWidth: '920px', width: '100%',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', gap: '0.9rem',
+          maxHeight: 'calc(100vh - 2rem)',
+        }}
+      >
+        {/* Top bar: counter + close */}
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: '#475569', fontWeight: '600', letterSpacing: '0.06em' }}>
+            {photos.length > 1 ? `${idx + 1} / ${photos.length}` : ''}
+          </span>
+          <button
+            ref={closeRef}
+            onClick={onClose}
+            aria-label="Close photo viewer"
+            style={{
+              background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.16)',
+              borderRadius: '50%', width: '44px', height: '44px',
+              color: '#e2e8f0', fontSize: '22px',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Prev arrow + image + next arrow */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+          {photos.length > 1 && (
+            <button onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={!hasPrev} aria-label="Previous photo" style={navBtn(!hasPrev)}>‹</button>
+          )}
+          <div style={{
+            flex: 1, borderRadius: '14px', overflow: 'hidden',
+            boxShadow: '0 4px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)',
+            backgroundColor: '#0f172a',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <img
+              src={photo.image}
+              alt={photo.alt || photo.title}
+              style={{ display: 'block', width: '100%', maxHeight: 'calc(100vh - 230px)', objectFit: 'contain' }}
+            />
+          </div>
+          {photos.length > 1 && (
+            <button onClick={() => setIdx(i => Math.min(photos.length - 1, i + 1))} disabled={!hasNext} aria-label="Next photo" style={navBtn(!hasNext)}>›</button>
+          )}
+        </div>
+
+        {/* Title + caption */}
+        <div style={{ textAlign: 'center', padding: '0 0.5rem', maxWidth: '640px' }}>
+          <div style={{ fontWeight: '700', color: '#f1f5f9', fontSize: '15px', marginBottom: '0.3rem' }}>{photo.title}</div>
+          <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: '1.7', margin: 0 }}>{photo.caption}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Memories section ───────────────────────────────────────────────────────────
+
 function MemoriesSection() {
+  const [lightboxIdx, setLightboxIdx] = useState(null);
+  const realPhotos = MEMORY_ITEMS.filter(m => m.status === 'available');
+
+  const openLightbox = (item) => {
+    const i = realPhotos.findIndex(p => p.id === item.id);
+    if (i !== -1) setLightboxIdx(i);
+  };
+
   return (
     <Section bg="#fff">
+      {lightboxIdx !== null && (
+        <LightboxModal
+          photos={realPhotos}
+          startIndex={lightboxIdx}
+          onClose={() => setLightboxIdx(null)}
+        />
+      )}
       <SectionHeading
         eyebrow="Club Memories"
         title="Memories Down the Lane"
-        body="A future gallery of team photos, match moments, farewells, and shared memories that define the Changi Risers journey."
+        body="A gallery of team photos, match moments, farewells, and shared memories that define the Changi Risers journey. Tap any photo to view it."
       />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.1rem' }}>
-        {MEMORY_TILES.map((tile, i) => (
-          <div key={i} style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', boxShadow: '0 2px 8px rgba(6,28,84,0.05)' }}>
-            <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6' }}>
-              {tile.photo ? (
-                <img
-                  src={tile.photo}
-                  alt={tile.title}
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
+        {MEMORY_ITEMS.map((item) => {
+          const isAvailable = item.status === 'available';
+          return (
+            <div
+              key={item.id}
+              style={{
+                borderRadius: '12px', overflow: 'hidden',
+                border: `1px solid ${isAvailable ? '#d0dae8' : '#e2e8f0'}`,
+                backgroundColor: '#f8fafc',
+                boxShadow: isAvailable ? '0 2px 10px rgba(6,28,84,0.1)' : '0 2px 8px rgba(6,28,84,0.04)',
+              }}
+            >
+              {isAvailable ? (
+                <button
+                  onClick={() => openLightbox(item)}
+                  aria-label={`View ${item.title}`}
+                  style={{ display: 'block', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6', overflow: 'hidden' }}>
+                    <img
+                      src={item.image}
+                      alt={item.alt || item.title}
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    <div style={{ position: 'absolute', bottom: '0.45rem', right: '0.5rem', backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
+                      View ↗
+                    </div>
+                  </div>
+                </button>
               ) : (
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                  <span style={{ fontSize: '30px', opacity: 0.45 }}>{tile.icon}</span>
-                  <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
+                <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6' }}>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '30px', opacity: 0.4 }}>{item.icon}</span>
+                    <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
+                  </div>
                 </div>
               )}
+              <div style={{ padding: '0.8rem 0.9rem' }}>
+                <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', marginBottom: '0.2rem' }}>{item.title}</div>
+                <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: '1.5' }}>{item.caption}</div>
+              </div>
             </div>
-            <div style={{ padding: '0.8rem 0.9rem' }}>
-              <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', marginBottom: '0.2rem' }}>{tile.title}</div>
-              <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: '1.5' }}>{tile.caption}</div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div style={{ marginTop: '1.75rem', padding: '1.1rem 1.5rem', backgroundColor: '#f0f7ff', borderRadius: '10px', border: '1px dashed #93c5fd', textAlign: 'center' }}>
         <p style={{ margin: 0, fontSize: '13px', color: '#0066cc', fontWeight: '600' }}>
@@ -587,17 +761,23 @@ function PastPresentFuture() {
 
 // ── Root export ────────────────────────────────────────────────────────────────
 
+const LEGACY_TABS = [
+  { id: 'legacy',   label: 'Risers Legacy' },
+  { id: 'journey',  label: 'The Riser Journey' },
+  { id: 'wall',     label: 'The Riser Wall' },
+  { id: 'memories', label: 'Memories' },
+];
+
 export function RisersLegacy() {
+  const [activeTab, setActiveTab]               = useState('legacy');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-  const selectedCategory = selectedCategoryId
-    ? LEGACY_CATEGORIES.find(c => c.id === selectedCategoryId)
-    : null;
-
-  if (selectedCategory) {
+  // Category detail view replaces the whole page (back returns to 'wall' tab)
+  if (selectedCategoryId) {
+    const category = LEGACY_CATEGORIES.find(c => c.id === selectedCategoryId);
     return (
       <CategoryDetailView
-        category={selectedCategory}
+        category={category}
         onBack={() => setSelectedCategoryId(null)}
       />
     );
@@ -605,13 +785,42 @@ export function RisersLegacy() {
 
   return (
     <div>
-      <HeroSection />
-      <WhyThisExists />
-      <JourneySoFar />
-      <LegendsWall onSelectCategory={setSelectedCategoryId} />
-      <MemoriesSection />
-      <StatsWithRespect />
-      <PastPresentFuture />
+      {/* Internal tab navigation */}
+      <div style={{ backgroundColor: '#fff', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
+          {LEGACY_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: '0.85rem 1.25rem',
+                border: 'none',
+                borderBottom: `2px solid ${activeTab === tab.id ? '#0066cc' : 'transparent'}`,
+                marginBottom: '-2px',
+                backgroundColor: 'transparent',
+                color: activeTab === tab.id ? '#0066cc' : '#64748b',
+                fontWeight: activeTab === tab.id ? '700' : '500',
+                fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      {activeTab === 'legacy' && (
+        <div>
+          <HeroSection />
+          <WhyThisExists />
+          <StatsWithRespect />
+          <PastPresentFuture />
+        </div>
+      )}
+      {activeTab === 'journey' && <JourneySoFar />}
+      {activeTab === 'wall'    && <LegendsWall onSelectCategory={(id) => { setSelectedCategoryId(id); setActiveTab('wall'); }} />}
+      {activeTab === 'memories' && <MemoriesSection />}
     </div>
   );
 }
