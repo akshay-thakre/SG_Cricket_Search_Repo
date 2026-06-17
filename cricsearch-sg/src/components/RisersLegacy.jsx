@@ -21,22 +21,22 @@ import { cloudinaryUrl } from '../config/cloudinary';
 
 // Lightbox (large) versions — w_900
 const IMAGES = {
-  trophyMoment2:  cloudinaryUrl('home/cricksearch/moments/trophy-moment-2', 'w_900,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('home/cricksearch/moments/trophy-moment',   'w_900,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('home/cricksearch/moments/farewell-moment', 'w_900,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('home/cricksearch/moments/match-day-moment','w_900,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('home/cricksearch/moments/dressing-room-1', 'w_900,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('home/cricksearch/moments/overseas-riser-1','w_900,f_auto,q_auto'),
+  trophyMoment2:  cloudinaryUrl('home/cricksearch/moments/trophy_moment_2',  'w_900,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('home/cricksearch/moments/Trophy_Moment_1',  'w_900,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('home/cricksearch/moments/farewell_moment',  'w_900,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('home/cricksearch/moments/Match_Day_Moment_1','w_900,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('home/cricksearch/moments/dressing_room_1',  'w_900,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('home/cricksearch/moments/overseas_riser_1', 'w_900,f_auto,q_auto'),
 };
 
 // Thumbnail (grid card) versions — w_400
 const THUMBS = {
-  trophyMoment2:  cloudinaryUrl('home/cricksearch/moments/trophy-moment-2', 'w_400,c_fill,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('home/cricksearch/moments/trophy-moment',   'w_400,c_fill,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('home/cricksearch/moments/farewell-moment', 'w_400,c_fill,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('home/cricksearch/moments/match-day-moment','w_400,c_fill,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('home/cricksearch/moments/dressing-room-1', 'w_400,c_fill,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('home/cricksearch/moments/overseas-riser-1','w_400,c_fill,f_auto,q_auto'),
+  trophyMoment2:  cloudinaryUrl('home/cricksearch/moments/trophy_moment_2',  'w_400,c_fill,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('home/cricksearch/moments/Trophy_Moment_1',  'w_400,c_fill,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('home/cricksearch/moments/farewell_moment',  'w_400,c_fill,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('home/cricksearch/moments/Match_Day_Moment_1','w_400,c_fill,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('home/cricksearch/moments/dressing_room_1',  'w_400,c_fill,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('home/cricksearch/moments/overseas_riser_1', 'w_400,c_fill,f_auto,q_auto'),
 };
 
 // ── Data — update these arrays/objects to add real content later ──────────────
