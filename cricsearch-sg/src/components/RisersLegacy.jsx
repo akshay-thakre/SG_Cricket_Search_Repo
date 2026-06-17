@@ -1,4 +1,43 @@
+/*
+ * PHOTO MANAGEMENT
+ * ----------------
+ * All images in this component are served from Cloudinary.
+ * Cloud name is configured in src/config/cloudinary.js
+ *
+ * To add a player photo:
+ *   1. Upload the photo to Cloudinary under cricksearch/players/
+ *   2. Set photo: 'cricksearch/players/filename' in the player object below
+ *   3. The component will automatically display it at 200x200 circular crop
+ *
+ * To add a new gallery moment:
+ *   1. Upload to Cloudinary under cricksearch/moments/
+ *   2. Add an entry to MEMORY_ITEMS with the Cloudinary public ID
+ *   3. Thumbnail uses w_400, lightbox uses w_900 — both auto-formatted
+ */
 import React, { useState, useEffect, useRef } from 'react';
+import { cloudinaryUrl } from '../config/cloudinary';
+
+// ── Cloudinary image URLs ──────────────────────────────────────────────────────
+
+// Lightbox (large) versions — w_900
+const IMAGES = {
+  trophyMoment2:  cloudinaryUrl('cricksearch/moments/trophy-moment-2', 'w_900,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('cricksearch/moments/trophy-moment',   'w_900,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('cricksearch/moments/farewell-moment', 'w_900,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('cricksearch/moments/match-day-moment','w_900,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('cricksearch/moments/dressing-room-1', 'w_900,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('cricksearch/moments/overseas-riser-1','w_900,f_auto,q_auto'),
+};
+
+// Thumbnail (grid card) versions — w_400
+const THUMBS = {
+  trophyMoment2:  cloudinaryUrl('cricksearch/moments/trophy-moment-2', 'w_400,c_fill,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('cricksearch/moments/trophy-moment',   'w_400,c_fill,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('cricksearch/moments/farewell-moment', 'w_400,c_fill,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('cricksearch/moments/match-day-moment','w_400,c_fill,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('cricksearch/moments/dressing-room-1', 'w_400,c_fill,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('cricksearch/moments/overseas-riser-1','w_400,c_fill,f_auto,q_auto'),
+};
 
 // ── Data — update these arrays/objects to add real content later ──────────────
 
@@ -69,7 +108,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Gururaj Banakar',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Akhil Kukreja',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Harsha Sarma',          role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Arvind Bajaj',           role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Arvind Bajaj',          role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
   {
@@ -170,42 +209,48 @@ const MEMORY_ITEMS = [
   {
     id: 'trophy-moment',      title: 'Trophy Moment',
     icon: '🏆',               status: 'available',
-    image: '/images/trophy-moment-2.jpeg',
+    image:     IMAGES.trophyMoment2,
+    thumbnail: THUMBS.trophyMoment2,
     alt:  'Changi Risers team celebrating with a trophy',
     caption: 'Lifting the trophy — a moment that defines what Risers play for.',
   },
   {
     id: 'team-photo',         title: 'Team Photo',
     icon: '👥',               status: 'available',
-    image: '/images/trophy-moment.jpeg',
+    image:     IMAGES.trophyMoment,
+    thumbnail: THUMBS.trophyMoment,
     alt:  'Changi Risers squad in white cricket kit',
     caption: 'Risers in whites — a day to remember on the field.',
   },
   {
     id: 'farewell-memory',    title: 'Farewell Memory',
     icon: '✈️',               status: 'available',
-    image: '/images/farewell-moment.png',
+    image:     IMAGES.farewellMoment,
+    thumbnail: THUMBS.farewellMoment,
     alt:  'Farewell moment with Changi Risers',
     caption: 'Saying goodbye is never easy — but a Suresha always remains a Riser.',
   },
   {
     id: 'match-day-moment',   title: 'Match-Day Moment',
     icon: '🏏',               status: 'available',
-    image: '/images/match-day-moment.jpeg',
+    image:     IMAGES.matchDayMoment,
+    thumbnail: THUMBS.matchDayMoment,
     alt:  'Changi Risers in navy and gold jerseys after a match',
     caption: 'One of the best fights by Risers to defend against power hitters.',
   },
   {
     id: 'dressing-room-story', title: 'Dressing-Room Story',
     icon: '🧢',                status: 'available',
-    image: '/images/dressing-room-1.jpeg',
+    image:     IMAGES.dressingRoom,
+    thumbnail: THUMBS.dressingRoom,
     alt:  'Changi Risers dressing room moment',
     caption: 'A dressing-room memory to be added here.',
   },
   {
     id: 'overseas-riser-memory', title: 'Overseas Riser Memory',
     icon: '🌏',                  status: 'available',
-    image: '/images/overseas-riser-1.jpeg',
+    image:     IMAGES.overseasRiser,
+    thumbnail: THUMBS.overseasRiser,
     alt:  'Overseas Riser memory',
     caption: 'A memory from an overseas Riser to be added here.',
   },
@@ -319,12 +364,23 @@ function CategoryDetailView({ category, onBack }) {
                   overflow: 'hidden', display: 'flex', flexDirection: 'column',
                   boxShadow: `0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px ${category.accentColor}10`,
                 }}>
-                  {/* Photo placeholder */}
+                  {/* Photo area — shows Cloudinary image when available, initial avatar when not */}
                   <div style={{ height: '150px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${category.accentColor}18` }}>
-                    <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: category.accentColor + '15', border: `2px dashed ${category.accentColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>
-                      👤
-                    </div>
-                    <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Photo coming soon</div>
+                    {person.photo ? (
+                      <img
+                        src={cloudinaryUrl(person.photo, 'w_200,h_200,c_fill,f_auto,q_auto')}
+                        alt={person.name}
+                        loading="lazy"
+                        style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${category.accentColor}50` }}
+                      />
+                    ) : (
+                      <>
+                        <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: category.accentColor + '15', border: `2px dashed ${category.accentColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', fontWeight: '700', color: category.accentColor }}>
+                          {person.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#334155', fontStyle: 'italic' }}>Photo coming soon</div>
+                      </>
+                    )}
                   </div>
                   {/* Content */}
                   <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -594,6 +650,7 @@ function LightboxModal({ photos, startIndex, onClose }) {
             <img
               src={photo.image}
               alt={photo.alt || photo.title}
+              loading="lazy"
               style={{ display: 'block', width: '100%', maxHeight: 'calc(100vh - 230px)', objectFit: 'contain' }}
             />
           </div>
@@ -658,8 +715,9 @@ function MemoriesSection() {
                 >
                   <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6', overflow: 'hidden' }}>
                     <img
-                      src={item.image}
+                      src={item.thumbnail}
                       alt={item.alt || item.title}
+                      loading="lazy"
                       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                     <div style={{ position: 'absolute', bottom: '0.45rem', right: '0.5rem', backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
@@ -772,7 +830,7 @@ const LEGACY_TABS = [
 ];
 
 export function RisersLegacy() {
-  const [activeTab, setActiveTab]               = useState('legacy');
+  const [activeTab, setActiveTab]                   = useState('legacy');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   // Category detail view replaces the whole page (back returns to 'wall' tab)
@@ -821,8 +879,8 @@ export function RisersLegacy() {
           <PastPresentFuture />
         </div>
       )}
-      {activeTab === 'journey' && <JourneySoFar />}
-      {activeTab === 'wall'    && <LegendsWall onSelectCategory={(id) => { setSelectedCategoryId(id); setActiveTab('wall'); }} />}
+      {activeTab === 'journey'  && <JourneySoFar />}
+      {activeTab === 'wall'     && <LegendsWall onSelectCategory={(id) => { setSelectedCategoryId(id); setActiveTab('wall'); }} />}
       {activeTab === 'memories' && <MemoriesSection />}
     </div>
   );
