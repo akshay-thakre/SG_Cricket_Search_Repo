@@ -5,12 +5,12 @@
  * Cloud name is configured in src/config/cloudinary.js
  *
  * To add a player photo:
- *   1. Upload the photo to Cloudinary under cricksearch/players/
- *   2. Set photo: 'cricksearch/players/filename' in the player object below
+ *   1. Upload the photo to Cloudinary under home/cricksearch/players/
+ *   2. Set photo: 'home/cricksearch/players/filename' in the player object below
  *   3. The component will automatically display it at 200x200 circular crop
  *
  * To add a new gallery moment:
- *   1. Upload to Cloudinary under cricksearch/moments/
+ *   1. Upload to Cloudinary under home/cricksearch/moments/
  *   2. Add an entry to MEMORY_ITEMS with the Cloudinary public ID
  *   3. Thumbnail uses w_400, lightbox uses w_900 — both auto-formatted
  */
@@ -21,22 +21,22 @@ import { cloudinaryUrl } from '../config/cloudinary';
 
 // Lightbox (large) versions — w_900
 const IMAGES = {
-  trophyMoment2:  cloudinaryUrl('cricksearch/moments/trophy-moment-2', 'w_900,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('cricksearch/moments/trophy-moment',   'w_900,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('cricksearch/moments/farewell-moment', 'w_900,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('cricksearch/moments/match-day-moment','w_900,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('cricksearch/moments/dressing-room-1', 'w_900,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('cricksearch/moments/overseas-riser-1','w_900,f_auto,q_auto'),
+  trophyMoment2:  cloudinaryUrl('home/cricksearch/moments/trophy-moment-2', 'w_900,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('home/cricksearch/moments/trophy-moment',   'w_900,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('home/cricksearch/moments/farewell-moment', 'w_900,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('home/cricksearch/moments/match-day-moment','w_900,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('home/cricksearch/moments/dressing-room-1', 'w_900,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('home/cricksearch/moments/overseas-riser-1','w_900,f_auto,q_auto'),
 };
 
 // Thumbnail (grid card) versions — w_400
 const THUMBS = {
-  trophyMoment2:  cloudinaryUrl('cricksearch/moments/trophy-moment-2', 'w_400,c_fill,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('cricksearch/moments/trophy-moment',   'w_400,c_fill,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('cricksearch/moments/farewell-moment', 'w_400,c_fill,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('cricksearch/moments/match-day-moment','w_400,c_fill,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('cricksearch/moments/dressing-room-1', 'w_400,c_fill,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('cricksearch/moments/overseas-riser-1','w_400,c_fill,f_auto,q_auto'),
+  trophyMoment2:  cloudinaryUrl('home/cricksearch/moments/trophy-moment-2', 'w_400,c_fill,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('home/cricksearch/moments/trophy-moment',   'w_400,c_fill,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('home/cricksearch/moments/farewell-moment', 'w_400,c_fill,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('home/cricksearch/moments/match-day-moment','w_400,c_fill,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('home/cricksearch/moments/dressing-room-1', 'w_400,c_fill,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('home/cricksearch/moments/overseas-riser-1','w_400,c_fill,f_auto,q_auto'),
 };
 
 // ── Data — update these arrays/objects to add real content later ──────────────
