@@ -21,22 +21,22 @@ import { cloudinaryUrl } from '../config/cloudinary';
 
 // Lightbox (large) versions — w_900
 const IMAGES = {
-  trophyMoment2:  cloudinaryUrl('cricksearch/moments/trophy_moment_2',  'w_900,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('cricksearch/moments/Trophy_Moment_1',  'w_900,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('cricksearch/moments/farewell_moment',  'w_900,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('cricksearch/moments/Match_Day_Moment_1','w_900,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('cricksearch/moments/dressing_room_1',  'w_900,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('cricksearch/moments/overseas_riser_1', 'w_900,f_auto,q_auto'),
+  trophyMoment2:  cloudinaryUrl('trophy_moment_2',   'w_900,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('Trophy_Moment_1',   'w_900,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('farewell_moment',   'w_900,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('Match_Day_Moment_1','w_900,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('dressing_room_1',   'w_900,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('overseas_riser_1',  'w_900,f_auto,q_auto'),
 };
 
 // Thumbnail (grid card) versions — w_400
 const THUMBS = {
-  trophyMoment2:  cloudinaryUrl('cricksearch/moments/trophy_moment_2',  'w_400,c_fill,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('cricksearch/moments/Trophy_Moment_1',  'w_400,c_fill,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('cricksearch/moments/farewell_moment',  'w_400,c_fill,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('cricksearch/moments/Match_Day_Moment_1','w_400,c_fill,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('cricksearch/moments/dressing_room_1',  'w_400,c_fill,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('cricksearch/moments/overseas_riser_1', 'w_400,c_fill,f_auto,q_auto'),
+  trophyMoment2:  cloudinaryUrl('trophy_moment_2',   'w_400,c_fill,f_auto,q_auto'),
+  trophyMoment:   cloudinaryUrl('Trophy_Moment_1',   'w_400,c_fill,f_auto,q_auto'),
+  farewellMoment: cloudinaryUrl('farewell_moment',   'w_400,c_fill,f_auto,q_auto'),
+  matchDayMoment: cloudinaryUrl('Match_Day_Moment_1','w_400,c_fill,f_auto,q_auto'),
+  dressingRoom:   cloudinaryUrl('dressing_room_1',   'w_400,c_fill,f_auto,q_auto'),
+  overseasRiser:  cloudinaryUrl('overseas_riser_1',  'w_400,c_fill,f_auto,q_auto'),
 };
 
 // ── Data — update these arrays/objects to add real content later ──────────────
