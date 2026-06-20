@@ -238,6 +238,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Rajeev Shetty',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Sunil Rao',             role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Abhijit Kulkarni',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Surya',                 role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
   {
