@@ -291,12 +291,15 @@ const MEMORY_ITEMS = [
     caption: 'Lifting the trophy — a moment that defines what Risers play for.',
   },
   {
-    id: 'team-photo',         title: 'Team Photo',
+    id: 'team-photos',        title: 'Team Photos',
     icon: '👥',               status: 'available',
-    image:     IMAGES.trophyMoment,
-    thumbnail: THUMBS.trophyMoment,
-    alt:  'Changi Risers squad in white cricket kit',
-    caption: 'Risers in whites — a day to remember on the field.',
+    photos: [
+      { image: IMAGES.trophyMoment,  thumbnail: THUMBS.trophyMoment,  alt: 'Changi Risers squad in white cricket kit',  caption: 'Risers in whites — a day to remember on the field.',     title: 'Team Photo' },
+      { image: IMAGES.memoryOld,     thumbnail: THUMBS.memoryOld,     alt: 'Changi Risers team photo',                  caption: 'A Risers team memory from the early days.',              title: 'Team Photo' },
+      { image: IMAGES.memoryOld1,    thumbnail: THUMBS.memoryOld1,    alt: 'Changi Risers team photo',                  caption: 'A Risers team memory from the early days.',              title: 'Team Photo' },
+      { image: IMAGES.memoryOld2,    thumbnail: THUMBS.memoryOld2,    alt: 'Changi Risers team photo',                  caption: 'A Risers team memory from the early days.',              title: 'Team Photo' },
+      { image: IMAGES.memoryOld3,    thumbnail: THUMBS.memoryOld3,    alt: 'Changi Risers team photo',                  caption: 'A Risers team memory from the early days.',              title: 'Team Photo' },
+    ],
   },
   {
     id: 'farewell-memory',    title: 'Farewell Memory',
@@ -337,38 +340,6 @@ const MEMORY_ITEMS = [
     thumbnail: THUMBS.overseasRiser,
     alt:  'Overseas Riser memory',
     caption: 'A memory from an overseas Riser to be added here.',
-  },
-  {
-    id: 'team-photo-old',     title: 'Team Photo',
-    icon: '👥',               status: 'available',
-    image:     IMAGES.memoryOld,
-    thumbnail: THUMBS.memoryOld,
-    alt:  'Changi Risers team photo',
-    caption: 'A Risers team memory from the early days.',
-  },
-  {
-    id: 'team-photo-old-1',   title: 'Team Photo',
-    icon: '👥',               status: 'available',
-    image:     IMAGES.memoryOld1,
-    thumbnail: THUMBS.memoryOld1,
-    alt:  'Changi Risers team photo',
-    caption: 'A Risers team memory from the early days.',
-  },
-  {
-    id: 'team-photo-old-2',   title: 'Team Photo',
-    icon: '👥',               status: 'available',
-    image:     IMAGES.memoryOld2,
-    thumbnail: THUMBS.memoryOld2,
-    alt:  'Changi Risers team photo',
-    caption: 'A Risers team memory from the early days.',
-  },
-  {
-    id: 'team-photo-old-3',   title: 'Team Photo',
-    icon: '👥',               status: 'available',
-    image:     IMAGES.memoryOld3,
-    thumbnail: THUMBS.memoryOld3,
-    alt:  'Changi Risers team photo',
-    caption: 'A Risers team memory from the early days.',
   },
 ];
 
@@ -832,21 +803,23 @@ function LightboxModal({ photos, startIndex, onClose }) {
 // ── Memories section ───────────────────────────────────────────────────────────
 
 function MemoriesSection() {
-  const [lightboxIdx, setLightboxIdx] = useState(null);
-  const realPhotos = MEMORY_ITEMS.filter(m => m.status === 'available');
+  const [lightbox, setLightbox] = useState(null); // { photos, startIndex }
 
   const openLightbox = (item) => {
-    const i = realPhotos.findIndex(p => p.id === item.id);
-    if (i !== -1) setLightboxIdx(i);
+    if (item.photos) {
+      setLightbox({ photos: item.photos, startIndex: 0 });
+    } else {
+      setLightbox({ photos: [{ image: item.image, thumbnail: item.thumbnail, alt: item.alt, caption: item.caption, title: item.title }], startIndex: 0 });
+    }
   };
 
   return (
     <Section bg="#fff">
-      {lightboxIdx !== null && (
+      {lightbox && (
         <LightboxModal
-          photos={realPhotos}
-          startIndex={lightboxIdx}
-          onClose={() => setLightboxIdx(null)}
+          photos={lightbox.photos}
+          startIndex={lightbox.startIndex}
+          onClose={() => setLightbox(null)}
         />
       )}
       <SectionHeading
@@ -857,6 +830,9 @@ function MemoriesSection() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.1rem' }}>
         {MEMORY_ITEMS.map((item) => {
           const isAvailable = item.status === 'available';
+          const thumbnail = item.photos ? item.photos[0].thumbnail : item.thumbnail;
+          const altText   = item.photos ? item.photos[0].alt : (item.alt || item.title);
+          const count     = item.photos ? item.photos.length : null;
           return (
             <div
               key={item.id}
@@ -875,11 +851,16 @@ function MemoriesSection() {
                 >
                   <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6', overflow: 'hidden' }}>
                     <img
-                      src={item.thumbnail}
-                      alt={item.alt || item.title}
+                      src={thumbnail}
+                      alt={altText}
                       loading="lazy"
                       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
+                    {count && count > 1 && (
+                      <div style={{ position: 'absolute', top: '0.45rem', left: '0.5rem', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
+                        {count} photos
+                      </div>
+                    )}
                     <div style={{ position: 'absolute', bottom: '0.45rem', right: '0.5rem', backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
                       View ↗
                     </div>
@@ -895,7 +876,7 @@ function MemoriesSection() {
               )}
               <div style={{ padding: '0.8rem 0.9rem' }}>
                 <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', marginBottom: '0.2rem' }}>{item.title}</div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: '1.5' }}>{item.caption}</div>
+                <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: '1.5' }}>{item.photos ? item.photos[0].caption : item.caption}</div>
               </div>
             </div>
           );
