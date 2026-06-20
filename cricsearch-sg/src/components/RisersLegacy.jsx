@@ -239,6 +239,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Sunil Rao',             role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Abhijit Kulkarni',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Surya',                 role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Dharmesh Rawal',        role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
   {
@@ -302,20 +303,12 @@ const MEMORY_ITEMS = [
     ],
   },
   {
-    id: 'farewell-memory',    title: 'Farewell Memory',
+    id: 'farewell-memories',  title: 'Farewell Memories',
     icon: '✈️',               status: 'available',
-    image:     IMAGES.farewellMoment,
-    thumbnail: THUMBS.farewellMoment,
-    alt:  'Farewell moment with Changi Risers',
-    caption: 'Saying goodbye is never easy — but a Suresha always remains a Riser.',
-  },
-  {
-    id: 'farewell-memory-ab', title: 'Farewell Memory',
-    icon: '✈️',               status: 'available',
-    image:     IMAGES.farewellAB,
-    thumbnail: THUMBS.farewellAB,
-    alt:  'Farewell moment with Changi Risers',
-    caption: 'Another farewell memory — a Riser always remains a Riser.',
+    photos: [
+      { image: IMAGES.farewellMoment, thumbnail: THUMBS.farewellMoment, alt: 'Farewell moment with Changi Risers', caption: 'Saying goodbye is never easy — but a Suresha always remains a Riser.', title: 'Farewell Memory' },
+      { image: IMAGES.farewellAB,     thumbnail: THUMBS.farewellAB,     alt: 'Farewell moment with Changi Risers', caption: 'Another farewell memory — a Riser always remains a Riser.',            title: 'Farewell Memory' },
+    ],
   },
   {
     id: 'match-day-moment',   title: 'Match-Day Moment',
