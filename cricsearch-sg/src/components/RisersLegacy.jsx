@@ -152,18 +152,65 @@ const LEGACY_CATEGORIES = [
     ],
   },
   {
-    id:               'mentor-senior',
-    cardTitle:        'Mentor / Senior Player',
-    title:            'Mentor / Senior Risers',
-    contributionType: 'Guidance & Experience',
-    icon:             '🧠',
-    accentColor:      '#6d28d9',
-    ctaLabel:         'View Mentor / Senior Risers',
-    cardTribute:      'A tribute story will be added here to honour the guidance, experience, and mentorship that shaped younger Risers.',
-    detailDescription:'Honouring senior players and mentors whose guidance, experience, and support helped shape younger Risers.',
+    id:               'complete-squad',
+    cardTitle:        'Complete Squad',
+    title:            'Complete Squad',
+    contributionType: 'Every Riser, Ever',
+    icon:             '🏏',
+    accentColor:      '#0891b2',
+    ctaLabel:         'View Complete Squad',
+    cardTribute:      'Every Riser who has worn the colours, contributed to the journey, or been part of the Changi Risers family.',
+    detailDescription:'Every player who has been part of the Changi Risers journey — past, present, and those who made it all possible.',
     people: [
-      { name: 'Chacha', role: 'Mentor / Senior Riser', tribute: 'A tribute story will be added here.', photo: 'shailesh_fm' },
-      { name: 'Vivek',  role: 'Mentor / Senior Riser', tribute: 'A tribute story will be added here.', photo: 'viveksingh_cc_tfkeyj' },
+      { name: 'Shailesh Thakur',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'shailesh_fm' },
+      { name: 'Gajendra Agarwal',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'Gajendra_fc_o4xaqe' },
+      { name: 'Sheetanshu Srivastava', role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
+      { name: 'Ahsan Nabi Dar',        role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Abhijeet Joshi',        role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kapil Arora',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'Kapil_FC' },
+      { name: 'Kintul Mistry',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
+      { name: 'Vikram Singh Salaria',  role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'vicky_mw1_jtjrmz' },
+      { name: 'Pradipta Mishra',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Santhosh Dommety',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'SanthoshDommety_mw1_qi2jdt' },
+      { name: 'Gururaj Banakar',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'gururajbanakar_mw1_zooyvr' },
+      { name: 'Akhil Kukreja',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Harsha Sarma',          role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Arvind Bajaj',          role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'arvindbajaj_mw1_cnsduv' },
+      { name: 'Vipin Jha',             role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'vipin_mw1_mjpav5' },
+      { name: 'Gaurav Khandelwal',     role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Amol Babu',             role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vivek Singh',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'viveksingh_cc_tfkeyj' },
+      { name: 'Vivek Bhat',            role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'vivekbhat_OR_sitksv' },
+      { name: 'Zubin Patel',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Harsha Sharma',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Samveg Jain',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Pramod Gururaj',        role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Akshay Thakre',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Mithun Ruikar',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Deepak Waghmare',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Pramod Rane',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Bharat Bhatta',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kiran Salke',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kshitij Godbole',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Rishit Mehta',          role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Vineet Kulkarni',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Ramyajit Brahma',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Shrikanth Bhoyar',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Abdul',                 role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Rohan Rangarajan',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Yogesh Kulkarni',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Rob Hrvatin',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Irfan Makadia',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sreejith Vakkyl',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Amit Aneja',            role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Shobit Sharma',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Logan',                 role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Abhinav Gupta',         role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Amit Dubey',            role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Pavan Joshi',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Arvind Pednekar',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Priyanshu Rawat',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sagar Waghunde',        role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
   {
@@ -354,6 +401,17 @@ function CategoryDetailView({ category, onBack }) {
           <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '540px', margin: '0 auto', lineHeight: '1.85' }}>
             {category.detailDescription}
           </p>
+          {category.id === 'complete-squad' && (() => {
+            const count = category.people.filter(p => !p.isPlaceholder).length;
+            return (
+              <div style={{ marginTop: '1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.6rem', backgroundColor: `${category.accentColor}18`, border: `1px solid ${category.accentColor}40`, borderRadius: '999px', padding: '0.45rem 1.25rem' }}>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: category.accentColor }}>Risers So Far</span>
+                <span style={{ width: '1px', height: '14px', backgroundColor: `${category.accentColor}40` }} />
+                <span style={{ fontSize: '20px', fontWeight: '900', color: '#f1f5f9' }}>{count}</span>
+                <span style={{ fontSize: '11px', color: '#475569', fontStyle: 'italic' }}>Work in Progress</span>
+              </div>
+            );
+          })()}
           <div style={{ marginTop: '1.75rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem' }}>
             <div style={{ width: '32px', height: '2px', backgroundColor: category.accentColor, borderRadius: '1px' }} />
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: category.accentColor }} />
