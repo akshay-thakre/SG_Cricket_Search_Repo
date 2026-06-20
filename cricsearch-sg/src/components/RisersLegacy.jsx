@@ -65,7 +65,7 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Shailesh Thakur',       role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gajendra Agarwal',      role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Ahsan Nabi Dar',        role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Abhijeet Joshi',        role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
     ],
@@ -100,9 +100,9 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Vikram Singh Salaria',  role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Pradipta Mishra',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kintul Mistry',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kapil Arora',           role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
+      { name: 'Kapil Arora',           role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: 'Kapil_FC' },
+      { name: 'Sheetanshu Srivastava', role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Ahsan Nabi Dar',        role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Santhosh Dommety',      role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gururaj Banakar',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
@@ -124,9 +124,9 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Gaurav Khandelwal',     role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Amol Babu',             role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kintul Mistry',         role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kapil Arora',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',         role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
+      { name: 'Kapil Arora',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'Kapil_FC' },
+      { name: 'Sheetanshu Srivastava', role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Vivek Singh',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
@@ -143,7 +143,7 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Santosh Dommety',       role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gaurav Khandelwal',     role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Vivek Bhat',            role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Akhil Kukreja',         role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Zubin Patel',           role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
@@ -195,7 +195,7 @@ const LEGACY_CATEGORIES = [
     cardTribute:      'A tribute story will be added here to celebrate an active contributor carrying the Changi Risers identity forward today.',
     detailDescription:'Celebrating the present-day Risers who continue to carry the club identity forward on and off the field.',
     people: [
-      { name: 'Kintul Mistry',        role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',        role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
       { name: 'Vikram Singh Salaria', role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Pradipta Mishra',      role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gajendra Agrawal',     role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
@@ -289,12 +289,37 @@ function SectionHeading({ eyebrow, title, body, light = false }) {
 // ── Category Detail View ───────────────────────────────────────────────────────
 
 function CategoryDetailView({ category, onBack }) {
+  const [lightboxIdx, setLightboxIdx] = useState(null);
+
+  const lightboxPhotos = category.people
+    .filter(p => p.photo)
+    .map(p => ({
+      id:        p.name,
+      title:     p.name,
+      alt:       p.name,
+      caption:   p.role,
+      image:     cloudinaryUrl(p.photo, 'w_900,f_auto,q_auto'),
+      thumbnail: cloudinaryUrl(p.photo, 'w_200,h_200,c_fill,f_auto,q_auto'),
+    }));
+
+  const openLightbox = (person) => {
+    const idx = lightboxPhotos.findIndex(p => p.id === person.name);
+    if (idx !== -1) setLightboxIdx(idx);
+  };
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (
     <div style={{ backgroundColor: '#0f172a', minHeight: '80vh', color: '#fff' }}>
+      {lightboxIdx !== null && (
+        <LightboxModal
+          photos={lightboxPhotos}
+          startIndex={lightboxIdx}
+          onClose={() => setLightboxIdx(null)}
+        />
+      )}
 
       {/* Back bar */}
       <div style={{ backgroundColor: '#0a1120', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0.9rem 1.5rem' }}>
@@ -367,12 +392,20 @@ function CategoryDetailView({ category, onBack }) {
                   {/* Photo area — shows Cloudinary image when available, initial avatar when not */}
                   <div style={{ height: '150px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${category.accentColor}18` }}>
                     {person.photo ? (
-                      <img
-                        src={cloudinaryUrl(person.photo, 'w_200,h_200,c_fill,f_auto,q_auto')}
-                        alt={person.name}
-                        loading="lazy"
-                        style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${category.accentColor}50` }}
-                      />
+                      <button
+                        onClick={() => openLightbox(person)}
+                        aria-label={`View photo of ${person.name}`}
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', borderRadius: '50%' }}
+                      >
+                        <img
+                          src={cloudinaryUrl(person.photo, 'w_200,h_200,c_fill,f_auto,q_auto')}
+                          alt={person.name}
+                          loading="lazy"
+                          style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${category.accentColor}50`, display: 'block', transition: 'transform 0.15s', }}
+                          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
+                          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                        />
+                      </button>
                     ) : (
                       <>
                         <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: category.accentColor + '15', border: `2px dashed ${category.accentColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', fontWeight: '700', color: category.accentColor }}>
