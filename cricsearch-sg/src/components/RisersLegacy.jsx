@@ -65,7 +65,7 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Shailesh Thakur',       role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gajendra Agarwal',      role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Ahsan Nabi Dar',        role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Abhijeet Joshi',        role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
     ],
@@ -100,9 +100,9 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Vikram Singh Salaria',  role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Pradipta Mishra',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kintul Mistry',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kapil Arora',           role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',         role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
+      { name: 'Kapil Arora',           role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: 'Kapil_FC' },
+      { name: 'Sheetanshu Srivastava', role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Ahsan Nabi Dar',        role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Santhosh Dommety',      role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gururaj Banakar',       role: 'Match Winner', tribute: 'A tribute story will be added here.', photo: null },
@@ -124,9 +124,9 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Gaurav Khandelwal',     role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Amol Babu',             role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kintul Mistry',         role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kapil Arora',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',         role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
+      { name: 'Kapil Arora',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'Kapil_FC' },
+      { name: 'Sheetanshu Srivastava', role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Vivek Singh',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
@@ -143,7 +143,7 @@ const LEGACY_CATEGORIES = [
     people: [
       { name: 'Santosh Dommety',       role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gaurav Khandelwal',     role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Vivek Bhat',            role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Akhil Kukreja',         role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Zubin Patel',           role: 'Overseas Riser', tribute: 'A tribute story will be added here.', photo: null },
@@ -195,7 +195,7 @@ const LEGACY_CATEGORIES = [
     cardTribute:      'A tribute story will be added here to celebrate an active contributor carrying the Changi Risers identity forward today.',
     detailDescription:'Celebrating the present-day Risers who continue to carry the club identity forward on and off the field.',
     people: [
-      { name: 'Kintul Mistry',        role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Kintul Mistry',        role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
       { name: 'Vikram Singh Salaria', role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Pradipta Mishra',      role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Gajendra Agrawal',     role: 'Current Core Player', tribute: 'A tribute story will be added here.', photo: null },
