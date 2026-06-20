@@ -21,22 +21,32 @@ import { cloudinaryUrl } from '../config/cloudinary';
 
 // Lightbox (large) versions — w_900
 const IMAGES = {
-  trophyMoment2:  cloudinaryUrl('trophy_moment_2',   'w_900,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('Trophy_Moment_1',   'w_900,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('farewell_moment',   'w_900,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('Match_Day_Moment_1','w_900,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('dressing_room_1',   'w_900,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('overseas_riser_1',  'w_900,f_auto,q_auto'),
+  trophyMoment2:   cloudinaryUrl('trophy_moment_2',       'w_900,f_auto,q_auto'),
+  trophyMoment:    cloudinaryUrl('Trophy_Moment_1',       'w_900,f_auto,q_auto'),
+  farewellMoment:  cloudinaryUrl('farewell_moment',       'w_900,f_auto,q_auto'),
+  farewellAB:      cloudinaryUrl('Farewell_AB_eo35my',    'w_900,f_auto,q_auto'),
+  matchDayMoment:  cloudinaryUrl('Match_Day_Moment_1',    'w_900,f_auto,q_auto'),
+  dressingRoom:    cloudinaryUrl('dressing_room_1',       'w_900,f_auto,q_auto'),
+  overseasRiser:   cloudinaryUrl('overseas_riser_1',      'w_900,f_auto,q_auto'),
+  memoryOld:       cloudinaryUrl('Memory_Old_zccldv',     'w_900,f_auto,q_auto'),
+  memoryOld1:      cloudinaryUrl('Memory_Old1_wwinas',    'w_900,f_auto,q_auto'),
+  memoryOld2:      cloudinaryUrl('Memory_Old2_gab4xk',    'w_900,f_auto,q_auto'),
+  memoryOld3:      cloudinaryUrl('Memory_Old3_lpwvgv',    'w_900,f_auto,q_auto'),
 };
 
 // Thumbnail (grid card) versions — w_400
 const THUMBS = {
-  trophyMoment2:  cloudinaryUrl('trophy_moment_2',   'w_400,c_fill,f_auto,q_auto'),
-  trophyMoment:   cloudinaryUrl('Trophy_Moment_1',   'w_400,c_fill,f_auto,q_auto'),
-  farewellMoment: cloudinaryUrl('farewell_moment',   'w_400,c_fill,f_auto,q_auto'),
-  matchDayMoment: cloudinaryUrl('Match_Day_Moment_1','w_400,c_fill,f_auto,q_auto'),
-  dressingRoom:   cloudinaryUrl('dressing_room_1',   'w_400,c_fill,f_auto,q_auto'),
-  overseasRiser:  cloudinaryUrl('overseas_riser_1',  'w_400,c_fill,f_auto,q_auto'),
+  trophyMoment2:   cloudinaryUrl('trophy_moment_2',       'w_400,c_fill,f_auto,q_auto'),
+  trophyMoment:    cloudinaryUrl('Trophy_Moment_1',       'w_400,c_fill,f_auto,q_auto'),
+  farewellMoment:  cloudinaryUrl('farewell_moment',       'w_400,c_fill,f_auto,q_auto'),
+  farewellAB:      cloudinaryUrl('Farewell_AB_eo35my',    'w_400,c_fill,f_auto,q_auto'),
+  matchDayMoment:  cloudinaryUrl('Match_Day_Moment_1',    'w_400,c_fill,f_auto,q_auto'),
+  dressingRoom:    cloudinaryUrl('dressing_room_1',       'w_400,c_fill,f_auto,q_auto'),
+  overseasRiser:   cloudinaryUrl('overseas_riser_1',      'w_400,c_fill,f_auto,q_auto'),
+  memoryOld:       cloudinaryUrl('Memory_Old_zccldv',     'w_400,c_fill,f_auto,q_auto'),
+  memoryOld1:      cloudinaryUrl('Memory_Old1_wwinas',    'w_400,c_fill,f_auto,q_auto'),
+  memoryOld2:      cloudinaryUrl('Memory_Old2_gab4xk',    'w_400,c_fill,f_auto,q_auto'),
+  memoryOld3:      cloudinaryUrl('Memory_Old3_lpwvgv',    'w_400,c_fill,f_auto,q_auto'),
 };
 
 // ── Data — update these arrays/objects to add real content later ──────────────
@@ -282,6 +292,14 @@ const MEMORY_ITEMS = [
     caption: 'Saying goodbye is never easy — but a Suresha always remains a Riser.',
   },
   {
+    id: 'farewell-memory-ab', title: 'Farewell Memory',
+    icon: '✈️',               status: 'available',
+    image:     IMAGES.farewellAB,
+    thumbnail: THUMBS.farewellAB,
+    alt:  'Farewell moment with Changi Risers',
+    caption: 'Another farewell memory — a Riser always remains a Riser.',
+  },
+  {
     id: 'match-day-moment',   title: 'Match-Day Moment',
     icon: '🏏',               status: 'available',
     image:     IMAGES.matchDayMoment,
@@ -304,6 +322,38 @@ const MEMORY_ITEMS = [
     thumbnail: THUMBS.overseasRiser,
     alt:  'Overseas Riser memory',
     caption: 'A memory from an overseas Riser to be added here.',
+  },
+  {
+    id: 'team-photo-old',     title: 'Team Photo',
+    icon: '👥',               status: 'available',
+    image:     IMAGES.memoryOld,
+    thumbnail: THUMBS.memoryOld,
+    alt:  'Changi Risers team photo',
+    caption: 'A Risers team memory from the early days.',
+  },
+  {
+    id: 'team-photo-old-1',   title: 'Team Photo',
+    icon: '👥',               status: 'available',
+    image:     IMAGES.memoryOld1,
+    thumbnail: THUMBS.memoryOld1,
+    alt:  'Changi Risers team photo',
+    caption: 'A Risers team memory from the early days.',
+  },
+  {
+    id: 'team-photo-old-2',   title: 'Team Photo',
+    icon: '👥',               status: 'available',
+    image:     IMAGES.memoryOld2,
+    thumbnail: THUMBS.memoryOld2,
+    alt:  'Changi Risers team photo',
+    caption: 'A Risers team memory from the early days.',
+  },
+  {
+    id: 'team-photo-old-3',   title: 'Team Photo',
+    icon: '👥',               status: 'available',
+    image:     IMAGES.memoryOld3,
+    thumbnail: THUMBS.memoryOld3,
+    alt:  'Changi Risers team photo',
+    caption: 'A Risers team memory from the early days.',
   },
 ];
 
