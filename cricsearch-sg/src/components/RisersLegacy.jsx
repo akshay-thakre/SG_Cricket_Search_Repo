@@ -63,7 +63,7 @@ const LEGACY_CATEGORIES = [
     cardTribute:      'A tribute story will be added here to honour the role in establishing the Changi Risers identity and spirit from the very beginning.',
     detailDescription:'Honouring the early contributors who helped establish the Changi Risers identity, spirit, and foundation.',
     people: [
-      { name: 'Shailesh Thakur',       role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Shailesh Thakur',       role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: 'shailesh_fm' },
       { name: 'Gajendra Agarwal',      role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Sheetanshu Srivastava', role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
       { name: 'Ahsan Nabi Dar',        role: 'Founding Contributor', tribute: 'A tribute story will be added here.', photo: null },
@@ -161,7 +161,7 @@ const LEGACY_CATEGORIES = [
     cardTribute:      'A tribute story will be added here to honour the guidance, experience, and mentorship that shaped younger Risers.',
     detailDescription:'Honouring senior players and mentors whose guidance, experience, and support helped shape younger Risers.',
     people: [
-      { name: 'Chacha', role: 'Mentor / Senior Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Chacha', role: 'Mentor / Senior Riser', tribute: 'A tribute story will be added here.', photo: 'shailesh_fm' },
       { name: 'Vivek',  role: 'Mentor / Senior Riser', tribute: 'A tribute story will be added here.', photo: null },
     ],
   },
