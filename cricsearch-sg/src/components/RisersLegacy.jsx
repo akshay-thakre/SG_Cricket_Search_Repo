@@ -82,9 +82,9 @@ const LEGACY_CATEGORIES = [
     detailDescription:'Recognising the leaders who guided the team, shaped culture, and carried responsibility across seasons.',
     people: [
       { name: 'Gajendra Agarwal',      role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Sheetanshu Srivastava', role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kapil Arora',           role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Kintul Mistry',         role: 'Former & Current Captain', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Sheetanshu Srivastava', role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: 'cricksearch/Former Captain/Sheetu_fc' },
+      { name: 'Kapil Arora',           role: 'Former Captain',           tribute: 'A tribute story will be added here.', photo: 'cricksearch/Former Captain/Kapil_fc' },
+      { name: 'Kintul Mistry',         role: 'Former & Current Captain', tribute: 'A tribute story will be added here.', photo: 'cricksearch/Former Captain/Kintul_fc' },
     ],
   },
   {
