@@ -806,8 +806,19 @@ function MemoriesSection() {
     }
   };
 
+  const watermarkUrl = cloudinaryUrl('Background_watermark_o4gudo', 'w_1200,f_auto,q_auto');
+
   return (
-    <Section bg="#fff">
+    <Section bg="#fff" style={{
+      position: 'relative',
+      backgroundImage: `url(${watermarkUrl})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center center',
+      backgroundSize: 'cover',
+    }}>
+      {/* Watermark overlay — keeps background very subtle */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.88)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
       {lightbox && (
         <LightboxModal
           photos={lightbox.photos}
@@ -879,6 +890,7 @@ function MemoriesSection() {
         <p style={{ margin: 0, fontSize: '13px', color: '#0066cc', fontWeight: '600' }}>
           📷 &nbsp;Real photos and stories will be added here as the gallery grows. Reach out to share your Risers memories.
         </p>
+      </div>
       </div>
     </Section>
   );
