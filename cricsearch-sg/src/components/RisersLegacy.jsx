@@ -930,10 +930,13 @@ function PastPresentFuture() {
         <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '1.25rem' }}>
           Risers Legacy is intended to evolve over time — with player stories, photos, milestones, match memories, and data-backed insights.
         </p>
-        <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '3rem' }}>
+        <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '2rem' }}>
           The goal is to preserve the club's journey, respect those who built it, celebrate those who carry it today, and inspire those who will wear the colours tomorrow.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '3rem' }}>
+        <div style={{ fontSize: 'clamp(15px, 2.5vw, 20px)', fontWeight: '700', color: '#f59e0b', fontStyle: 'italic', padding: '1.25rem 1.75rem', backgroundColor: 'rgba(245,158,11,0.08)', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.22)', lineHeight: '1.4', marginBottom: '2rem' }}>
+          "Past. Present. Future. One Riser Legacy."
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
           {[
             { icon: '📜', label: 'Past',    desc: 'Honour those who built the foundation' },
             { icon: '🏏', label: 'Present', desc: 'Celebrate those carrying the identity today' },
@@ -945,9 +948,6 @@ function PastPresentFuture() {
               <div style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.6' }}>{p.desc}</div>
             </div>
           ))}
-        </div>
-        <div style={{ fontSize: 'clamp(15px, 2.5vw, 20px)', fontWeight: '700', color: '#f59e0b', fontStyle: 'italic', padding: '1.5rem 1.75rem', backgroundColor: 'rgba(245,158,11,0.08)', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.22)', lineHeight: '1.4' }}>
-          "Past. Present. Future. One Riser Legacy."
         </div>
       </div>
     </div>
@@ -1009,7 +1009,6 @@ export function RisersLegacy() {
         <div>
           <HeroSection />
           <WhyThisExists />
-          <StatsWithRespect />
           <PastPresentFuture />
         </div>
       )}
