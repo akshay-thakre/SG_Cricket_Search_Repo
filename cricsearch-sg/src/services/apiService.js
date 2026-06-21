@@ -152,25 +152,41 @@ export async function searchAcrossPlatforms(query, signal) {
 
   let totalFound = 0;
 
-  // SCA has separate firstName/lastName fields — split the query
+  // SCA has separate firstName/lastName fields — build a set of param combinations
+  // to handle middle names and varied registration patterns.
   const parts = query.trim().split(/\s+/);
-  const scaParams = parts.length >= 2
-    ? { firstName: parts[0], lastName: parts.slice(1).join(' ') }
-    : { firstName: query };
+  const scaParamCandidates = [];
 
-  // ── SCA — LIVE ──────────────────────────────────────────────────
+  if (parts.length === 1) {
+    scaParamCandidates.push({ firstName: parts[0] });
+  } else if (parts.length === 2) {
+    scaParamCandidates.push({ firstName: parts[0], lastName: parts[1] });
+  } else {
+    // 3+ words: try multiple splits so middle names don't block a match.
+    // e.g. "Vikram Singh Salaria" → try (Vikram, Singh Salaria) AND (Vikram, Salaria)
+    scaParamCandidates.push({ firstName: parts[0], lastName: parts.slice(1).join(' ') }); // all after first
+    scaParamCandidates.push({ firstName: parts[0], lastName: parts[parts.length - 1] });  // first + last word only
+    scaParamCandidates.push({ firstName: parts[0], lastName: parts[1] });                 // first two words
+  }
+
+  // ── SCA — LIVE (parallel searches, deduplicated) ─────────────────
   let scaLivePlayers = [];
   try {
-    const scaResult = await searchSCAPlayers(scaParams, signal);
-    if (scaResult.players && scaResult.players.length > 0) {
-      const seen = new Set();
-      scaLivePlayers = scaResult.players
-        .filter((p) => {
-          if (!p.id || seen.has(p.id)) return false;
-          seen.add(p.id);
-          return true;
+    const scaResponses = await Promise.all(
+      scaParamCandidates.map((params) =>
+        searchSCAPlayers(params, signal).catch((err) => {
+          if (err.name === 'AbortError') throw err;
+          return { players: [] };
         })
-        .map((p) => ({
+      )
+    );
+
+    const seen = new Set();
+    for (const scaResult of scaResponses) {
+      for (const p of scaResult.players || []) {
+        if (!p.id || seen.has(p.id)) continue;
+        seen.add(p.id);
+        scaLivePlayers.push({
           id: p.id,
           name: p.name,
           team: p.teamName || 'Unknown',
@@ -178,7 +194,8 @@ export async function searchAcrossPlatforms(query, signal) {
           profileUrl: p.profileUrl,
           verified: p.verified,
           source: 'sca',
-        }));
+        });
+      }
     }
   } catch (err) {
     if (err.name === 'AbortError') throw err;

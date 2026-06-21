@@ -125,49 +125,167 @@ function getField(row, ...keys) {
   return null;
 }
 
+function extractBattingRow(r) {
+  const g = (...k) => getField(r, ...k);
+  return {
+    matches:      toInt(g('m', 'mat', 'matches', 'mp')),
+    innings:      toInt(g('inn', 'inns', 'innings', 'i')),
+    notOuts:      toInt(g('no', 'notout', 'nots')),
+    runs:         toInt(g('runs', 'r', 'run')),
+    highestScore: g('hs', 'highest', 'highestscore'),
+    average:      toFloat(g('avg', 'average', 'ave')),
+    strikeRate:   toFloat(g('sr', 'str', 'strikerate')),
+    centuries:    toInt(g('100s', '100', 'centuries')),
+    fifties:      toInt(g('50s', '50', 'fifties')),
+    fours:        toInt(g('4s', '4', 'fours')),
+    sixes:        toInt(g('6s', '6', 'sixes')),
+  };
+}
+
+// Detect whether the first column holds a format/series-type label.
+const FORMAT_COL_NAMES = new Set(['seriestype', 'type', 'format', 'category', 'series']);
+
+function hasFormatColumn(headers) {
+  const base = (headers[0] || '').replace(/_\d+$/, '');
+  return FORMAT_COL_NAMES.has(base);
+}
+
 function extractBatting(tableData) {
   if (!tableData || tableData.rows.length === 0) return null;
-  const r = tableData.rows[0];
-  const g = (...k) => getField(r, ...k);
 
+  if (!hasFormatColumn(tableData.headers) || tableData.rows.length === 1) {
+    // Single-row or no format column — original single-row behavior
+    const b = extractBattingRow(tableData.rows[0]);
+    if (b.matches === null && b.runs === null && b.innings === null) return null;
+    return b;
+  }
+
+  // Multi-format table (1 DAY / T20 / Practice …)
+  // Aggregate totals across all non-Practice formats.
+  const { batting, formats } = aggregateBattingFormats(tableData);
+  if (!batting) return null;
+
+  // Attach per-format breakdown for frontend display
+  batting.formats = formats;
+  return batting;
+}
+
+function aggregateBattingFormats(tableData) {
+  const formats = [];
+  let totalMatches = 0, totalInnings = 0, totalNotOuts = 0, totalRuns = 0;
+  let totalFours = 0, totalSixes = 0, totalFifties = 0, totalCenturies = 0;
+  let maxHSVal = -1, maxHS = null;
+
+  for (const r of tableData.rows) {
+    // First cell holds the series-type label (e.g. "1 DAY", "T20", "Practice")
+    const seriesType = (Object.values(r)[0] || '').trim();
+    if (!seriesType || /^practice$/i.test(seriesType)) continue;
+
+    const b = extractBattingRow(r);
+    if (b.matches === null && b.runs === null) continue;
+
+    formats.push({ seriesType, ...b });
+
+    totalMatches  += b.matches  || 0;
+    totalInnings  += b.innings  || 0;
+    totalNotOuts  += b.notOuts  || 0;
+    totalRuns     += b.runs     || 0;
+    totalFours    += b.fours    || 0;
+    totalSixes    += b.sixes    || 0;
+    totalFifties  += b.fifties  || 0;
+    totalCenturies += b.centuries || 0;
+
+    // Track highest HS across formats (strips trailing * for comparison)
+    const hsNum = parseInt(String(b.highestScore || '0').replace(/[^0-9]/g, ''), 10) || 0;
+    if (hsNum > maxHSVal) { maxHSVal = hsNum; maxHS = b.highestScore; }
+  }
+
+  if (formats.length === 0) return { batting: null, formats: [] };
+
+  const dismissals = totalInnings - totalNotOuts;
   const batting = {
-    matches: toInt(g('m', 'mat', 'matches', 'mp')),
-    innings: toInt(g('inn', 'inns', 'innings', 'i')),
-    notOuts: toInt(g('no', 'notout', 'nots')),
-    runs: toInt(g('runs', 'r', 'run')),
-    highestScore: g('hs', 'highest', 'highestscore'),
-    average: toFloat(g('avg', 'average', 'ave')),
-    strikeRate: toFloat(g('sr', 'str', 'strikerate')),
-    centuries: toInt(g('100s', '100', 'centuries')),
-    fifties: toInt(g('50s', '50', 'fifties')),
-    fours: toInt(g('4s', '4', 'fours')),
-    sixes: toInt(g('6s', '6', 'sixes')),
+    matches:      totalMatches,
+    innings:      totalInnings,
+    notOuts:      totalNotOuts,
+    runs:         totalRuns,
+    highestScore: maxHS,
+    average:      dismissals > 0 ? Math.round((totalRuns / dismissals) * 100) / 100 : null,
+    strikeRate:   null, // can't meaningfully aggregate SRs without ball counts
+    centuries:    totalCenturies,
+    fifties:      totalFifties,
+    fours:        totalFours,
+    sixes:        totalSixes,
   };
 
-  if (batting.matches === null && batting.runs === null && batting.innings === null) return null;
-  return batting;
+  return { batting: totalMatches > 0 ? batting : null, formats };
+}
+
+function extractBowlingRow(r) {
+  const g = (...k) => getField(r, ...k);
+  return {
+    matches:     toInt(g('m', 'mat', 'matches', 'mp')),
+    overs:       toFloat(g('o', 'overs', 'ov')),
+    maidens:     toInt(g('mdns', 'maiden', 'maidens', 'md', 'm_1')),
+    runs:        toInt(g('r', 'runs', 'run', 'runsconced')),
+    wickets:     toInt(g('wkt', 'wkts', 'wickets', 'w', 'wic')),
+    average:     toFloat(g('avg', 'average', 'ave')),
+    economy:     toFloat(g('eco', 'economy', 'econ', 'er')),
+    strikeRate:  toFloat(g('sr', 'strikerate', 'bsr')),
+    bestBowling: g('best', 'bbi', 'bbm', 'bb'),
+  };
 }
 
 function extractBowling(tableData) {
   if (!tableData || tableData.rows.length === 0) return null;
-  const r = tableData.rows[0];
-  const g = (...k) => getField(r, ...k);
+
+  if (!hasFormatColumn(tableData.headers) || tableData.rows.length === 1) {
+    const bwl = extractBowlingRow(tableData.rows[0]);
+    if (bwl.matches === null && bwl.wickets === null) return null;
+    return bwl;
+  }
+
+  // Multi-format table — aggregate totals across non-Practice rows
+  const formats = [];
+  let totalMatches = 0, totalMaidens = 0, totalRuns = 0, totalWickets = 0;
+  let totalOvers = 0;
+  let bestBowling = null, bestWicketsVal = -1;
+
+  for (const r of tableData.rows) {
+    const seriesType = (Object.values(r)[0] || '').trim();
+    if (!seriesType || /^practice$/i.test(seriesType)) continue;
+
+    const bwl = extractBowlingRow(r);
+    if (bwl.matches === null && bwl.wickets === null) continue;
+
+    formats.push({ seriesType, ...bwl });
+
+    totalMatches  += bwl.matches  || 0;
+    totalOvers    += bwl.overs    || 0;
+    totalMaidens  += bwl.maidens  || 0;
+    totalRuns     += bwl.runs     || 0;
+    totalWickets  += bwl.wickets  || 0;
+
+    // Track best bowling across formats (compare wickets taken, e.g. "5/32")
+    const wktsInBest = parseInt(String(bwl.bestBowling || '0').split('/')[0], 10) || 0;
+    if (wktsInBest > bestWicketsVal) { bestWicketsVal = wktsInBest; bestBowling = bwl.bestBowling; }
+  }
+
+  if (formats.length === 0) return null;
 
   const bowling = {
-    matches: toInt(g('m', 'mat', 'matches', 'mp')),
-    overs: toFloat(g('o', 'overs', 'ov')),
-    // 'mdns' handles "Mdns" header; 'm_1' handles duplicate 'M' (when table has M=Matches, M=Maidens)
-    maidens: toInt(g('mdns', 'maiden', 'maidens', 'md', 'm_1')),
-    runs: toInt(g('r', 'runs', 'run', 'runsconced')),
-    wickets: toInt(g('wkt', 'wkts', 'wickets', 'w', 'wic')),
-    average: toFloat(g('avg', 'average', 'ave')),
-    economy: toFloat(g('eco', 'economy', 'econ', 'er')),
-    strikeRate: toFloat(g('sr', 'strikerate', 'bsr')),
-    bestBowling: g('best', 'bbi', 'bbm', 'bb'),
+    matches:     totalMatches,
+    overs:       Math.round(totalOvers * 10) / 10,
+    maidens:     totalMaidens,
+    runs:        totalRuns,
+    wickets:     totalWickets,
+    average:     totalWickets > 0 ? Math.round((totalRuns / totalWickets) * 100) / 100 : null,
+    economy:     totalOvers > 0   ? Math.round((totalRuns / totalOvers)   * 100) / 100 : null,
+    strikeRate:  totalWickets > 0 ? Math.round(((totalOvers * 6) / totalWickets) * 10) / 10 : null,
+    bestBowling,
+    formats,
   };
 
-  if (bowling.matches === null && bowling.wickets === null) return null;
-  return bowling;
+  return totalMatches > 0 ? bowling : null;
 }
 
 /**
