@@ -338,7 +338,7 @@ const MEMORY_ITEMS = [
 
 // ── Layout helpers ─────────────────────────────────────────────────────────────
 
-function Section({ children, bg = '#fff', style = {} }) {
+function Section({ children, bg = '#f4f7fb', style = {} }) {
   return (
     <section style={{ padding: 'clamp(2.5rem, 6vw, 4rem) 1.5rem', backgroundColor: bg, ...style }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>{children}</div>
@@ -581,7 +581,7 @@ function HeroSection() {
 
 function WhyThisExists() {
   return (
-    <Section bg="#fff">
+    <Section bg="#f4f7fb">
       <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>❤️</div>
         <SectionHeading eyebrow="Our Purpose" title="Why This Page Exists" />
@@ -594,7 +594,7 @@ function WhyThisExists() {
         <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9' }}>
           This page exists to honour <strong>everyone who meaningfully contributed to Changi Risers</strong> — not only top performers, but every player, volunteer, and supporter who helped build this club into what it is today.
         </p>
-        <div style={{ marginTop: '2.25rem', padding: '1.5rem 1.75rem', backgroundColor: '#f0f7ff', borderRadius: '12px', borderLeft: '4px solid #0066cc', textAlign: 'left' }}>
+        <div style={{ marginTop: '2.25rem', padding: '1.5rem 1.75rem', backgroundColor: '#ebf3fb', borderRadius: '12px', borderLeft: '4px solid #0066cc', textAlign: 'left' }}>
           <p style={{ fontSize: '15px', color: '#1e40af', fontStyle: 'italic', margin: 0, lineHeight: '1.8', fontWeight: '500' }}>
             "A club's legacy is not written by wins alone. It is written by the people who showed up, believed in each other, and made every match worth playing."
           </p>
@@ -606,7 +606,7 @@ function WhyThisExists() {
 
 function JourneySoFar() {
   return (
-    <Section bg="#f5f8fc">
+    <Section bg="#edf2f8">
       <SectionHeading
         eyebrow="Club History"
         title="The Journey So Far"
@@ -616,8 +616,8 @@ function JourneySoFar() {
         <div style={{ position: 'absolute', left: '0.6rem', top: '0.8rem', bottom: '0.8rem', width: '2px', background: 'linear-gradient(to bottom, #0066cc 0%, #d0dae8 100%)' }} />
         {TIMELINE_ITEMS.map((item, i) => (
           <div key={i} style={{ position: 'relative', marginBottom: i < TIMELINE_ITEMS.length - 1 ? '2rem' : 0 }}>
-            <div style={{ position: 'absolute', left: '-2.05rem', top: '0.3rem', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: item.color, border: '3px solid #f5f8fc', boxShadow: `0 0 0 2px ${item.color}` }} />
-            <div style={{ backgroundColor: '#fff', borderRadius: '10px', padding: '1rem 1.25rem', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(6,28,84,0.05)', borderLeft: `3px solid ${item.color}` }}>
+            <div style={{ position: 'absolute', left: '-2.05rem', top: '0.3rem', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: item.color, border: '3px solid #edf2f8', boxShadow: `0 0 0 2px ${item.color}` }} />
+            <div style={{ backgroundColor: '#f8fafd', borderRadius: '10px', padding: '1rem 1.25rem', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(6,28,84,0.05)', borderLeft: `3px solid ${item.color}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
                 <span style={{ fontSize: '18px' }}>{item.icon}</span>
                 <span style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>{item.era}</span>
@@ -809,7 +809,7 @@ function MemoriesSection() {
   const watermarkUrl = cloudinaryUrl('Background_watermark_o4gudo', 'w_1200,f_auto,q_auto');
 
   return (
-    <Section bg="#fff" style={{
+    <Section bg="#f4f7fb" style={{
       position: 'relative',
       backgroundImage: `url(${watermarkUrl})`,
       backgroundRepeat: 'no-repeat',
@@ -843,7 +843,7 @@ function MemoriesSection() {
               style={{
                 borderRadius: '12px', overflow: 'hidden',
                 border: `1px solid ${isAvailable ? '#d0dae8' : '#e2e8f0'}`,
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#f8fafd',
                 boxShadow: isAvailable ? '0 2px 10px rgba(6,28,84,0.1)' : '0 2px 8px rgba(6,28,84,0.04)',
               }}
             >
@@ -853,7 +853,7 @@ function MemoriesSection() {
                   aria-label={`View ${item.title}`}
                   style={{ display: 'block', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                 >
-                  <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6', overflow: 'hidden' }}>
+                  <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#dde6f0', overflow: 'hidden' }}>
                     <img
                       src={thumbnail}
                       alt={altText}
@@ -871,7 +871,7 @@ function MemoriesSection() {
                   </div>
                 </button>
               ) : (
-                <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#e8eef6' }}>
+                <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#dde6f0' }}>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                     <span style={{ fontSize: '30px', opacity: 0.4 }}>{item.icon}</span>
                     <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
@@ -886,7 +886,7 @@ function MemoriesSection() {
           );
         })}
       </div>
-      <div style={{ marginTop: '1.75rem', padding: '1.1rem 1.5rem', backgroundColor: '#f0f7ff', borderRadius: '10px', border: '1px dashed #93c5fd', textAlign: 'center' }}>
+      <div style={{ marginTop: '1.75rem', padding: '1.1rem 1.5rem', backgroundColor: '#ebf3fb', borderRadius: '10px', border: '1px dashed #93c5fd', textAlign: 'center' }}>
         <p style={{ margin: 0, fontSize: '13px', color: '#0066cc', fontWeight: '600' }}>
           📷 &nbsp;Real photos and stories will be added here as the gallery grows. Reach out to share your Risers memories.
         </p>
@@ -898,11 +898,11 @@ function MemoriesSection() {
 
 function StatsWithRespect() {
   return (
-    <Section bg="#f5f8fc">
+    <Section bg="#edf2f8">
       <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>📊</div>
         <SectionHeading eyebrow="Stats & Story" title="Stats With Respect" body="Numbers are a part of the story — not the whole story." />
-        <div style={{ backgroundColor: '#fff', borderRadius: '14px', padding: '2rem 2.25rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
+        <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: '2rem 2.25rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
           <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9', marginBottom: '1.1rem' }}>
             The numbers on this site are not meant to reduce a player to statistics. They exist to <strong>preserve effort, contribution, and memories</strong>.
           </p>
@@ -993,7 +993,7 @@ export function RisersLegacy() {
   return (
     <div>
       {/* Internal tab navigation */}
-      <div style={{ backgroundColor: '#fff', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
           {LEGACY_TABS.map(tab => (
             <button

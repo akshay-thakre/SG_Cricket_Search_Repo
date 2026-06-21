@@ -97,7 +97,7 @@ export default function CricSearchApp() {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ backgroundColor: '#fff', borderBottom: '2px solid #e2e8f0' }}>
+      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex' }}>
           {[
             { id: 'legacy', label: '🏆 Everything about Changi Risers' },
@@ -154,7 +154,7 @@ export default function CricSearchApp() {
           <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: '800', color: '#1e293b', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>
             Stats Can Mislead, Commitment Cannot
           </div>
-          <div style={{ backgroundColor: '#fff', borderRadius: '14px', padding: '1.75rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
+          <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: '1.75rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
             <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9', marginBottom: '1rem' }}>
               The numbers on this site are not meant to reduce a player to statistics. They exist to <strong>preserve effort, contribution, and memories</strong>.
             </p>
