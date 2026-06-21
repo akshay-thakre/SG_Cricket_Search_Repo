@@ -10,7 +10,7 @@ export default function CricSearchApp() {
   const [error, setError]               = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking');
   const [searchQuery, setSearchQuery]   = useState('');
-  const [activePage, setActivePage]     = useState('search');
+  const [activePage, setActivePage]     = useState('legacy');
   const abortControllerRef = useRef(null);
 
   useEffect(() => {
@@ -147,6 +147,37 @@ export default function CricSearchApp() {
         )}
 
         <MultiPlatformSearchBar onSearch={handleSearch} onClear={handleClear} initialQuery={searchQuery} />
+
+        {/* Stats Can Mislead, Commitment Cannot */}
+        <div style={{ maxWidth: '700px', margin: '1.75rem auto 0', textAlign: 'center' }}>
+          <div style={{ fontSize: '36px', marginBottom: '1rem' }}>📊</div>
+          <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: '800', color: '#1e293b', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>
+            Stats Can Mislead, Commitment Cannot
+          </div>
+          <div style={{ backgroundColor: '#fff', borderRadius: '14px', padding: '1.75rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
+            <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9', marginBottom: '1rem' }}>
+              The numbers on this site are not meant to reduce a player to statistics. They exist to <strong>preserve effort, contribution, and memories</strong>.
+            </p>
+            <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9', marginBottom: '1rem' }}>
+              Every run, wicket, catch, match, and season is part of the Changi Risers story.
+            </p>
+            <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9' }}>
+              Behind every number is a player who showed up, gave their best, and added a page to the Changi Risers chapter.
+            </p>
+            <div style={{ marginTop: '1.25rem', paddingTop: '1.1rem', borderTop: '1px solid #e9eef5', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
+              {[
+                { icon: '🏏', label: 'Every run matters' },
+                { icon: '🎯', label: 'Every wicket counts' },
+                { icon: '🤝', label: 'Every match remembered' },
+              ].map((item, i) => (
+                <div key={i}>
+                  <div style={{ fontSize: '22px', marginBottom: '0.3rem' }}>{item.icon}</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>{item.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {loading && (
           <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
