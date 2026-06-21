@@ -148,8 +148,35 @@ export default function CricSearchApp() {
 
         <MultiPlatformSearchBar onSearch={handleSearch} onClear={handleClear} initialQuery={searchQuery} />
 
-        {/* Stats Can Mislead, Commitment Cannot */}
-        <div style={{ maxWidth: '700px', margin: '1.75rem auto 0', textAlign: 'center' }}>
+        {loading && (
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div style={{ fontSize: '40px', marginBottom: '1rem', display: 'inline-block', animation: 'spin 1s linear infinite' }}>🏏</div>
+            <div style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-primary)' }}>Searching live cricket databases...</div>
+            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: 'var(--text-muted)' }}>Querying SCA — stats will load automatically after results are found</div>
+          </div>
+        )}
+
+        {error && (
+          <div style={{
+            padding: '1.5rem', backgroundColor: 'var(--danger-bg)', border: '1px solid var(--danger-border)',
+            borderRadius: 'var(--radius-lg)', marginTop: '1.5rem', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '0.5rem' }}>❌</div>
+            <div style={{ fontWeight: '600', color: 'var(--danger)', marginBottom: '0.5rem' }}>Search Error</div>
+            <div style={{ color: '#7f1d1d', fontSize: '14px' }}>{error}</div>
+            <button
+              onClick={() => handleSearch(searchQuery)}
+              className="btn btn-primary"
+              style={{ marginTop: '1rem' }}
+            >
+              Retry Search
+            </button>
+          </div>
+        )}
+
+        {searchResults && !loading && <AggregatedResults searchResults={searchResults} />}
+
+        <div style={{ maxWidth: '700px', margin: '2rem auto 0', textAlign: 'center' }}>
           <div style={{ fontSize: '36px', marginBottom: '1rem' }}>📊</div>
           <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: '800', color: '#1e293b', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>
             Stats Can Mislead, Commitment Cannot
@@ -178,34 +205,6 @@ export default function CricSearchApp() {
             </div>
           </div>
         </div>
-
-        {loading && (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-            <div style={{ fontSize: '40px', marginBottom: '1rem', display: 'inline-block', animation: 'spin 1s linear infinite' }}>🏏</div>
-            <div style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-primary)' }}>Searching live cricket databases...</div>
-            <div style={{ fontSize: '13px', marginTop: '0.5rem', color: 'var(--text-muted)' }}>Querying SCA — stats will load automatically after results are found</div>
-          </div>
-        )}
-
-        {error && (
-          <div style={{
-            padding: '1.5rem', backgroundColor: 'var(--danger-bg)', border: '1px solid var(--danger-border)',
-            borderRadius: 'var(--radius-lg)', marginTop: '1.5rem', textAlign: 'center',
-          }}>
-            <div style={{ fontSize: '28px', marginBottom: '0.5rem' }}>❌</div>
-            <div style={{ fontWeight: '600', color: 'var(--danger)', marginBottom: '0.5rem' }}>Search Error</div>
-            <div style={{ color: '#7f1d1d', fontSize: '14px' }}>{error}</div>
-            <button
-              onClick={() => handleSearch(searchQuery)}
-              className="btn btn-primary"
-              style={{ marginTop: '1rem' }}
-            >
-              Retry Search
-            </button>
-          </div>
-        )}
-
-        {searchResults && !loading && <AggregatedResults searchResults={searchResults} />}
       </div>
       )}
 
