@@ -100,8 +100,8 @@ export default function CricSearchApp() {
       <div style={{ backgroundColor: '#fff', borderBottom: '2px solid #e2e8f0' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex' }}>
           {[
-            { id: 'search', label: '🔍 Player Search' },
             { id: 'legacy', label: '🏆 Everything about Changi Risers' },
+            { id: 'search', label: '🔍 Player Search' },
           ].map(tab => (
             <button
               key={tab.id}
