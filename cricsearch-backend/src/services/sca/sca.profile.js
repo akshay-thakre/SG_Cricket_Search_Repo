@@ -202,6 +202,21 @@ function aggregateBattingFormats(tableData) {
 
   if (formats.length === 0) return { batting: null, formats: [] };
 
+  // Compute total balls from per-format (runs / strikeRate * 100) so we can
+  // derive a correct aggregate strike rate rather than leaving it null.
+  let totalBalls = 0;
+  let ballsAvailable = true;
+  for (const f of formats) {
+    if (f.runs != null && f.strikeRate) {
+      totalBalls += Math.round((f.runs / f.strikeRate) * 100);
+    } else {
+      ballsAvailable = false;
+    }
+  }
+  const aggregateSR = (ballsAvailable && totalBalls > 0)
+    ? Math.round((totalRuns / totalBalls) * 100 * 100) / 100
+    : null;
+
   const dismissals = totalInnings - totalNotOuts;
   const batting = {
     matches:      totalMatches,
@@ -210,7 +225,7 @@ function aggregateBattingFormats(tableData) {
     runs:         totalRuns,
     highestScore: maxHS,
     average:      dismissals > 0 ? Math.round((totalRuns / dismissals) * 100) / 100 : null,
-    strikeRate:   null, // can't meaningfully aggregate SRs without ball counts
+    strikeRate:   aggregateSR,
     centuries:    totalCenturies,
     fifties:      totalFifties,
     fours:        totalFours,
