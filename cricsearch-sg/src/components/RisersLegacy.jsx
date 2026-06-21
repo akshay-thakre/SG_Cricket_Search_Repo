@@ -39,6 +39,7 @@ const IMAGES = {
   memoryOld1:         cloudinaryUrl('Memory_Old1_wwinas',           'w_900,f_auto,q_auto'),
   memoryOld2:         cloudinaryUrl('Memory_Old2_gab4xk',           'w_900,f_auto,q_auto'),
   memoryOld3:         cloudinaryUrl('Memory_Old3_lpwvgv',           'w_900,f_auto,q_auto'),
+  yplTeamFamily:      cloudinaryUrl('YPL_teamnfamily_o2euyw',        'w_900,f_auto,q_auto'),
 };
 
 // Thumbnail (grid card) versions — w_400
@@ -61,6 +62,7 @@ const THUMBS = {
   memoryOld1:         cloudinaryUrl('Memory_Old1_wwinas',           'w_400,c_fill,f_auto,q_auto'),
   memoryOld2:         cloudinaryUrl('Memory_Old2_gab4xk',           'w_400,c_fill,f_auto,q_auto'),
   memoryOld3:         cloudinaryUrl('Memory_Old3_lpwvgv',           'w_400,c_fill,f_auto,q_auto'),
+  yplTeamFamily:      cloudinaryUrl('YPL_teamnfamily_o2euyw',        'w_400,c_fill,f_auto,q_auto'),
 };
 
 // ── Data — update these arrays/objects to add real content later ──────────────
@@ -148,7 +150,7 @@ const LEGACY_CATEGORIES = [
     detailDescription:'Respecting those who strengthened bonding, culture, trust, and togetherness within the Risers family.',
     people: [
       { name: 'Gaurav Khandelwal',     role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Amol Babu',             role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Amol Babu',             role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'Amolbabu_ippt6f' },
       { name: 'Kintul Mistry',         role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'kintul_FC' },
       { name: 'Kapil Arora',           role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'Kapil_FC' },
       { name: 'Sheetanshu Srivastava', role: 'Team Builder', tribute: 'A tribute story will be added here.', photo: 'sheetu_fc' },
@@ -202,7 +204,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Arvind Bajaj',          role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'arvindbajaj_mw1_cnsduv' },
       { name: 'Vipin Jha',             role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'vipin_mw1_mjpav5' },
       { name: 'Gaurav Khandelwal',     role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Amol Babu',             role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Amol Babu',             role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'Amolbabu_ippt6f' },
       { name: 'Vivek Singh',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'viveksingh_cc_tfkeyj' },
       { name: 'Vivek Bhat',            role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'vivekbhat_OR_sitksv' },
       { name: 'Zubin Patel',           role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
@@ -218,7 +220,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Rishit Mehta',          role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Vineet Kulkarni',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Ramyajit Brahma',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Shrikanth Bhoyar',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Shrikanth Bhoyar',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'Shrikanth_Bhoyar_fxanvy' },
       { name: 'Abdul',                 role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Rohan Rangarajan',      role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Yogesh Kulkarni',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
@@ -238,7 +240,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Shrikant Krishnan',     role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Kiran',                 role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Napo',                  role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
-      { name: 'Suresha',               role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Suresha',               role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: 'Suresha_zvmy4b' },
       { name: 'Ayush Damani',          role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Vinay Rohira',          role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Shrikant Akkina',       role: 'Changi Riser', tribute: 'A tribute story will be added here.', photo: null },
@@ -267,7 +269,7 @@ const LEGACY_CATEGORIES = [
     cardTribute:      'A tribute story will be added here for someone who contributed behind the scenes — organising, supporting, and making things happen.',
     detailDescription:'Recognising those who contributed behind the scenes — organising, supporting, helping, and making things happen.',
     people: [
-      { name: 'Amol Babu',            role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
+      { name: 'Amol Babu',            role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: 'Amolbabu_ippt6f' },
       { name: 'Samveg Jain',          role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
       { name: 'Vikram Singh Salaria', role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: 'vicky_mw1_jtjrmz' },
       { name: 'Pramod Gururaj',       role: 'Silent Contributor', tribute: 'A tribute story will be added here.', photo: null },
@@ -343,6 +345,7 @@ const MEMORY_ITEMS = [
       { image: IMAGES.randomCelebration3, thumbnail: THUMBS.randomCelebration3, alt: 'Changi Risers celebration moment',      caption: 'Risers celebrate — on and off the field.',           title: 'Celebration' },
       { image: IMAGES.postTeamFamily,     thumbnail: THUMBS.postTeamFamily,     alt: 'Changi Risers post-match team family',  caption: 'Post-match family time — the Risers bond beyond cricket.', title: 'Team Family' },
       { image: IMAGES.yearEndParty,       thumbnail: THUMBS.yearEndParty,       alt: 'Changi Risers year-end party',          caption: 'Year-end party — toasting another great season together.', title: 'Year-End Party' },
+      { image: IMAGES.yplTeamFamily,      thumbnail: THUMBS.yplTeamFamily,      alt: 'YPL team and family moment',            caption: 'YPL — where cricket meets family.',                   title: 'YPL Team & Family' },
     ],
   },
   {
