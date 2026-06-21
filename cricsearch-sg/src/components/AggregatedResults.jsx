@@ -914,6 +914,34 @@ function PlayerCard({ player, platformName, isLast }) {
         {/* ── DETAILED BATTING (collapsible) ── */}
         {!statsLoading && hasBatting && (
           <ExpandableSection label="🏏 Full Batting" accentColor="var(--data-blue)">
+            {/* Per-format rows (1 DAY / T20 etc.) when available */}
+            {stats.batting.formats && stats.batting.formats.length > 1 && (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  By Format
+                </div>
+                {stats.batting.formats.map((f) => (
+                  <div key={f.seriesType} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
+                    padding: '0.35rem 0.5rem', marginBottom: '0.3rem',
+                    backgroundColor: 'var(--surface-muted)', borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)', fontSize: '12px',
+                  }}>
+                    <span style={{ fontWeight: '700', color: 'var(--data-blue)', minWidth: '52px' }}>{f.seriesType}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{f.matches}M</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{f.innings} inns</span>
+                    <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{f.runs} runs</span>
+                    {f.average != null && <span style={{ color: 'var(--text-secondary)' }}>avg {fmt(f.average)}</span>}
+                    {f.highestScore && <span style={{ color: 'var(--text-secondary)' }}>HS {f.highestScore}</span>}
+                    {f.fifties != null && <span style={{ color: 'var(--text-secondary)' }}>{f.fifties}×50</span>}
+                    {f.centuries != null && f.centuries > 0 && <span style={{ color: 'var(--data-amber)' }}>{f.centuries}×100</span>}
+                  </div>
+                ))}
+                <div style={{ borderTop: '1px solid var(--border)', marginTop: '0.5rem', paddingTop: '0.5rem', fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  All Formats Combined
+                </div>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
               <StatBox label="Innings" value={stats.batting.innings} small />
               <StatBox label="NO" value={stats.batting.notOuts} small />
@@ -930,6 +958,32 @@ function PlayerCard({ player, platformName, isLast }) {
         {/* ── DETAILED BOWLING (collapsible) ── */}
         {!statsLoading && hasBowling && (
           <ExpandableSection label="⚡ Full Bowling" accentColor="var(--data-purple)">
+            {/* Per-format rows when available */}
+            {stats.bowling.formats && stats.bowling.formats.length > 1 && (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  By Format
+                </div>
+                {stats.bowling.formats.map((f) => (
+                  <div key={f.seriesType} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap',
+                    padding: '0.35rem 0.5rem', marginBottom: '0.3rem',
+                    backgroundColor: 'var(--surface-muted)', borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)', fontSize: '12px',
+                  }}>
+                    <span style={{ fontWeight: '700', color: 'var(--data-purple)', minWidth: '52px' }}>{f.seriesType}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{f.matches}M</span>
+                    <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{f.wickets} wkts</span>
+                    {f.overs != null && <span style={{ color: 'var(--text-secondary)' }}>{f.overs} ov</span>}
+                    {f.economy != null && <span style={{ color: 'var(--text-secondary)' }}>econ {fmt(f.economy)}</span>}
+                    {f.bestBowling && <span style={{ color: 'var(--text-secondary)' }}>BB {f.bestBowling}</span>}
+                  </div>
+                ))}
+                <div style={{ borderTop: '1px solid var(--border)', marginTop: '0.5rem', paddingTop: '0.5rem', fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  All Formats Combined
+                </div>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.4rem' }}>
               <StatBox label="Overs" value={stats.bowling.overs} small />
               <StatBox label="Mdns" value={stats.bowling.maidens} small />
