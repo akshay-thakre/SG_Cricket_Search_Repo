@@ -632,23 +632,24 @@ function WhyThisExists() {
 
 function JourneySoFar() {
   return (
-    <Section bg="#edf2f8">
+    <Section bg="#0a1628">
       <SectionHeading
         eyebrow="Club History"
         title="The Journey So Far"
         body="From the very first match to the platform you are reading right now — the Changi Risers story has been built one season at a time."
+        light
       />
       <div style={{ maxWidth: '660px', margin: '0 auto', position: 'relative', paddingLeft: 'clamp(1.75rem, 5vw, 2.5rem)' }}>
-        <div style={{ position: 'absolute', left: '0.6rem', top: '0.8rem', bottom: '0.8rem', width: '2px', background: 'linear-gradient(to bottom, #0066cc 0%, #d0dae8 100%)' }} />
+        <div style={{ position: 'absolute', left: '0.6rem', top: '0.8rem', bottom: '0.8rem', width: '2px', background: 'linear-gradient(to bottom, #3b82f6 0%, rgba(59,130,246,0.1) 100%)' }} />
         {TIMELINE_ITEMS.map((item, i) => (
           <div key={i} style={{ position: 'relative', marginBottom: i < TIMELINE_ITEMS.length - 1 ? '2rem' : 0 }}>
-            <div style={{ position: 'absolute', left: '-2.05rem', top: '0.3rem', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: item.color, border: '3px solid #edf2f8', boxShadow: `0 0 0 2px ${item.color}` }} />
-            <div style={{ backgroundColor: '#f8fafd', borderRadius: '10px', padding: '1rem 1.25rem', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(6,28,84,0.05)', borderLeft: `3px solid ${item.color}` }}>
+            <div style={{ position: 'absolute', left: '-2.05rem', top: '0.3rem', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: item.color, border: '3px solid #0a1628', boxShadow: `0 0 0 2px ${item.color}` }} />
+            <div style={{ backgroundColor: '#111e35', borderRadius: '10px', padding: '1rem 1.25rem', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 2px 12px rgba(0,0,0,0.3)', borderLeft: `3px solid ${item.color}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
                 <span style={{ fontSize: '18px' }}>{item.icon}</span>
-                <span style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>{item.era}</span>
+                <span style={{ fontWeight: '700', fontSize: '15px', color: '#e2e8f0' }}>{item.era}</span>
               </div>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.7' }}>{item.description}</p>
+              <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8', lineHeight: '1.7' }}>{item.description}</p>
             </div>
           </div>
         ))}
