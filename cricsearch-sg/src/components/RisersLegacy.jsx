@@ -991,11 +991,92 @@ function PastPresentFuture() {
   );
 }
 
+// ── Risers Jerseys section ─────────────────────────────────────────────────────
+
+const RISERS_JERSEYS = [
+  { publicId: '1_Jersey_dotvwu',  label: 'Jersey 1', caption: 'Risers colours through the years' },
+  { publicId: '2_jersey_ymsmq0',  label: 'Jersey 2', caption: 'Risers colours through the years' },
+  { publicId: '3_jersey_et4daj',  label: 'Jersey 3', caption: 'Risers colours through the years' },
+  { publicId: '4_jersey_gtpozf',  label: 'Jersey 4', caption: 'Risers colours through the years' },
+  { publicId: '5_jersey_piisuo',  label: 'Jersey 5', caption: 'Risers colours through the years' },
+  { publicId: '6_jersey_kxikki',  label: 'Jersey 6', caption: 'Risers colours through the years' },
+];
+
+function JerseySection() {
+  const [lightbox, setLightbox] = useState(null); // { photos, startIndex }
+
+  const photos = RISERS_JERSEYS.map((j) => ({
+    image:     cloudinaryUrl(j.publicId, 'f_auto,q_auto,w_1200'),
+    thumbnail: cloudinaryUrl(j.publicId, 'f_auto,q_auto,w_400'),
+    alt:       j.label,
+    title:     j.label,
+    caption:   j.caption,
+  }));
+
+  return (
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      {/* Section header */}
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ fontSize: '36px', marginBottom: '0.5rem' }}>👕</div>
+        <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: '#1e293b', margin: '0 0 0.5rem' }}>
+          Risers Colours Through the Years
+        </h2>
+        <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>
+          Every jersey tells a chapter of the Changi Risers story.
+        </p>
+      </div>
+
+      {/* Responsive grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gap: '1.5rem',
+      }}>
+        {RISERS_JERSEYS.map((jersey, idx) => (
+          <div
+            key={jersey.publicId}
+            onClick={() => setLightbox({ photos, startIndex: idx })}
+            style={{
+              cursor: 'pointer',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+              background: '#fff',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.10)'; }}
+          >
+            <img
+              src={cloudinaryUrl(jersey.publicId, 'f_auto,q_auto,w_600')}
+              alt={jersey.label}
+              style={{ width: '100%', display: 'block', aspectRatio: '4/3', objectFit: 'cover' }}
+            />
+            <div style={{ padding: '0.75rem 1rem' }}>
+              <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '14px' }}>{jersey.label}</div>
+              <div style={{ color: '#64748b', fontSize: '12px', marginTop: '2px' }}>{jersey.caption}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {lightbox && (
+        <LightboxModal
+          photos={lightbox.photos}
+          startIndex={lightbox.startIndex}
+          onClose={() => setLightbox(null)}
+        />
+      )}
+    </div>
+  );
+}
+
 // ── Root export ────────────────────────────────────────────────────────────────
 
 const LEGACY_TABS = [
   { id: 'legacy',   label: 'Risers Legacy' },
   { id: 'journey',  label: 'The Riser Journey' },
+  { id: 'jerseys',  label: 'Risers Jerseys' },
   { id: 'wall',     label: 'The Riser Wall' },
   { id: 'memories', label: 'Memories' },
 ];
@@ -1050,6 +1131,7 @@ export function RisersLegacy() {
         </div>
       )}
       {activeTab === 'journey'  && <JourneySoFar />}
+      {activeTab === 'jerseys'  && <JerseySection />}
       {activeTab === 'wall'     && <LegendsWall onSelectCategory={(id) => { setSelectedCategoryId(id); setActiveTab('wall'); }} />}
       {activeTab === 'memories' && <MemoriesSection />}
     </div>
