@@ -1687,7 +1687,7 @@ function SCACorpSeasonEntry({ season, isLast }) {
     <div style={{
       marginBottom: isLast ? 0 : '1rem',
       paddingBottom: isLast ? 0 : '1rem',
-      borderBottom: isLast ? 'none' : '1px solid #e2e8f0',
+      borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.08)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
         <span style={{
@@ -1700,7 +1700,7 @@ function SCACorpSeasonEntry({ season, isLast }) {
 
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
         {batting && (
-          <div style={{ fontSize: '12px', color: '#374151' }}>
+          <div style={{ fontSize: '12px', color: '#94a3b8' }}>
             🏏 <strong>{batting.runs}</strong> runs
             {batting.avg != null && <span style={{ color: '#64748b' }}> · avg {fmt(batting.avg)}</span>}
             {batting.hs > 0 && <span style={{ color: '#64748b' }}> · HS {batting.hs}</span>}
@@ -1708,7 +1708,7 @@ function SCACorpSeasonEntry({ season, isLast }) {
           </div>
         )}
         {bowling && bowling.wkts > 0 && (
-          <div style={{ fontSize: '12px', color: '#374151' }}>
+          <div style={{ fontSize: '12px', color: '#94a3b8' }}>
             ⚽ <strong>{bowling.wkts}</strong> wkts
             {bowling.bbf && <span style={{ color: '#64748b' }}> · BB {bowling.bbf}</span>}
             {bowling.econ != null && <span style={{ color: '#64748b' }}> · econ {fmt(bowling.econ)}</span>}
@@ -1783,12 +1783,12 @@ function SCACorpSeasonDetail({ season }) {
 function ScoreCard({ label, score, color, show }) {
   if (!show) return null;
   return (
-    <div style={{ padding: '0.6rem', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+    <div style={{ padding: '0.6rem', backgroundColor: '#1a2d4a', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.35rem' }}>
         <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>{label}</span>
         <span style={{ fontSize: '20px', fontWeight: '800', color }}>{score}</span>
       </div>
-      <div style={{ backgroundColor: '#f1f5f9', borderRadius: '4px', height: '5px', overflow: 'hidden' }}>
+      <div style={{ backgroundColor: '#0a1628', borderRadius: '4px', height: '5px', overflow: 'hidden' }}>
         <div style={{ width: `${score}%`, backgroundColor: color, height: '100%', borderRadius: '4px' }} />
       </div>
     </div>
@@ -1820,9 +1820,9 @@ function InsightBlock({ title, accentColor, children }) {
 
 function MiniStat({ label, value }) {
   return (
-    <div style={{ textAlign: 'center', padding: '0.35rem 0.5rem', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px solid #e9eef5' }}>
+    <div style={{ textAlign: 'center', padding: '0.35rem 0.5rem', backgroundColor: '#1a2d4a', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
       <div style={{ fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-      <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginTop: '1px' }}>{value ?? '—'}</div>
+      <div style={{ fontSize: '14px', fontWeight: '700', color: '#e2e8f0', marginTop: '1px' }}>{value ?? '—'}</div>
     </div>
   );
 }
@@ -1835,8 +1835,8 @@ function InsightsPanel({ insights }) {
 
   return (
     <div style={{
-      marginTop: '0.75rem', backgroundColor: '#f8fafc',
-      border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem',
+      marginTop: '0.75rem', backgroundColor: '#111e35',
+      border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '1.25rem',
     }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.1rem', alignItems: 'center' }}>
         <InsightChip icon="🎯" label="Suggested Role" value={suggestedRole} color="var(--data-blue)" />
@@ -1904,7 +1904,7 @@ function InsightsPanel({ insights }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <InsightBlock title="Strengths" accentColor="#16a34a">
           {strengths.map((s, i) => (
-            <div key={i} style={{ fontSize: '12px', color: '#374151', marginBottom: '0.3rem', display: 'flex', gap: '0.4rem' }}>
+            <div key={i} style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '0.3rem', display: 'flex', gap: '0.4rem' }}>
               <span style={{ color: '#16a34a', fontWeight: '700' }}>✓</span>
               <span>{s}</span>
             </div>
@@ -1912,7 +1912,7 @@ function InsightsPanel({ insights }) {
         </InsightBlock>
         <InsightBlock title="Areas to Improve" accentColor="#f59e0b">
           {improvements.map((imp, i) => (
-            <div key={i} style={{ fontSize: '12px', color: '#374151', marginBottom: '0.3rem', display: 'flex', gap: '0.4rem' }}>
+            <div key={i} style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '0.3rem', display: 'flex', gap: '0.4rem' }}>
               <span style={{ color: '#f59e0b', fontWeight: '700' }}>↑</span>
               <span>{imp}</span>
             </div>
