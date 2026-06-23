@@ -1020,34 +1020,44 @@ const RISERS_JERSEYS = [
   { publicId: '6_jersey_kxikki',  label: 'Jersey 6', caption: 'Risers colours through the years' },
 ];
 
-function JerseyArrow() {
+function JerseyNavBtn({ direction, onClick, disabled }) {
+  const isUp = direction === 'up';
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.25rem 0' }}>
-      {/* Top stem */}
-      <div style={{ width: '1px', height: '36px', background: 'linear-gradient(to bottom, transparent, rgba(245,158,11,0.5))' }} />
-      {/* Animated circle with chevron */}
-      <div
-        className="jersey-arrow-bounce"
-        style={{
-          width: '38px', height: '38px', borderRadius: '50%',
-          border: '1.5px solid rgba(245,158,11,0.35)',
-          backgroundColor: 'rgba(245,158,11,0.06)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 3v10M3 8l5 5 5-5" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-      {/* Bottom stem */}
-      <div style={{ width: '1px', height: '36px', background: 'linear-gradient(to bottom, rgba(245,158,11,0.5), transparent)' }} />
-    </div>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={isUp ? 'Previous jersey' : 'Next jersey'}
+      className={disabled ? '' : 'jersey-nav-pulse'}
+      style={{
+        width: '52px', height: '52px', borderRadius: '50%',
+        border: `1.5px solid ${disabled ? 'rgba(245,158,11,0.12)' : 'rgba(245,158,11,0.5)'}`,
+        backgroundColor: disabled ? 'transparent' : 'rgba(245,158,11,0.08)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: disabled ? 'default' : 'pointer',
+        transition: 'border-color 0.2s, background-color 0.2s',
+        flexShrink: 0,
+        outline: 'none',
+      }}
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        {isUp
+          ? <path d="M9 14V4M4 9l5-5 5 5" stroke={disabled ? 'rgba(245,158,11,0.2)' : '#f59e0b'} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          : <path d="M9 4v10M4 9l5 5 5-5" stroke={disabled ? 'rgba(245,158,11,0.2)' : '#f59e0b'} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        }
+      </svg>
+    </button>
   );
 }
 
 function JerseySection() {
-  const [lightbox, setLightbox] = useState(null); // { photos, startIndex }
+  const [currentIdx, setCurrentIdx]   = useState(0);
+  const [animKey, setAnimKey]         = useState(0);
+  const [direction, setDirection]     = useState('down'); // 'down' = forward, 'up' = backward
+  const [exiting, setExiting]         = useState(false);
+  const [lightbox, setLightbox]       = useState(null);
+
+  const total  = RISERS_JERSEYS.length;
+  const jersey = RISERS_JERSEYS[currentIdx];
 
   const photos = RISERS_JERSEYS.map((j) => ({
     image:     cloudinaryUrl(j.publicId, 'f_auto,q_auto,w_1200'),
@@ -1057,88 +1067,128 @@ function JerseySection() {
     caption:   j.caption,
   }));
 
+  const navigate = (newIdx, dir) => {
+    if (exiting) return;
+    setDirection(dir);
+    setExiting(true);
+    setTimeout(() => {
+      setCurrentIdx(newIdx);
+      setAnimKey(k => k + 1);
+      setExiting(false);
+    }, 260);
+  };
+
+  const goNext = () => { if (currentIdx < total - 1) navigate(currentIdx + 1, 'down'); };
+  const goPrev = () => { if (currentIdx > 0)         navigate(currentIdx - 1, 'up'); };
+
+  // CSS animation class for the entering card
+  const enterClass = direction === 'down' ? 'jersey-enter-up' : 'jersey-enter-down';
+  // CSS animation class for the exiting card
+  const exitClass  = direction === 'down' ? 'jersey-exit-up'  : 'jersey-exit-down';
+
   return (
     <div style={{ backgroundColor: '#040a18', minHeight: '100%' }}>
-      <div style={{ maxWidth: '680px', margin: '0 auto', padding: 'clamp(2rem, 5vw, 3rem) 1.5rem clamp(2rem, 5vw, 3.5rem)' }}>
+      <div style={{
+        maxWidth: '640px', margin: '0 auto',
+        padding: 'clamp(2rem, 5vw, 3rem) 1.5rem clamp(2rem, 5vw, 3.5rem)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem',
+      }}>
 
-        {/* Section header */}
-        <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
-          <div style={{ fontSize: '38px', marginBottom: '0.75rem' }}>👕</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: '#f1f5f9', margin: '0 0 0.5rem', letterSpacing: '-0.01em' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '36px', marginBottom: '0.6rem' }}>👕</div>
+          <h2 style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: '800', color: '#f1f5f9', margin: '0 0 0.4rem', letterSpacing: '-0.01em' }}>
             Risers Colours Through the Years
           </h2>
-          <p style={{ color: '#64748b', fontSize: '14px', margin: 0, lineHeight: '1.6' }}>
+          <p style={{ color: '#64748b', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>
             Every jersey tells a chapter of the Changi Risers story.
           </p>
         </div>
 
-        {/* First arrow — from header into jerseys */}
-        <JerseyArrow />
+        {/* Progress dots */}
+        <div style={{ display: 'flex', gap: '7px', alignItems: 'center' }}>
+          {RISERS_JERSEYS.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: i === currentIdx ? '20px' : '7px',
+                height: '7px',
+                borderRadius: '4px',
+                backgroundColor: i === currentIdx ? '#f59e0b' : 'rgba(245,158,11,0.2)',
+                transition: 'width 0.3s ease, background-color 0.3s ease',
+              }}
+            />
+          ))}
+        </div>
 
-        {/* Jersey journey */}
-        {RISERS_JERSEYS.map((jersey, idx) => (
-          <div key={jersey.publicId}>
+        {/* Up arrow */}
+        <JerseyNavBtn direction="up" onClick={goPrev} disabled={currentIdx === 0} />
+
+        {/* Jersey card — key changes on each navigation to trigger CSS animation */}
+        <div style={{ width: '100%', position: 'relative' }}>
+          <div
+            key={animKey}
+            className={exiting ? exitClass : enterClass}
+            style={{ width: '100%' }}
+          >
             {/* Chapter label */}
-            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
               <span style={{
-                fontSize: '10px', fontWeight: '800', letterSpacing: '0.2em',
+                fontSize: '10px', fontWeight: '800', letterSpacing: '0.22em',
                 textTransform: 'uppercase', color: '#f59e0b',
               }}>
                 {jersey.label}
               </span>
+              <span style={{ color: 'rgba(245,158,11,0.35)', fontSize: '10px', marginLeft: '0.5rem', letterSpacing: '0.1em' }}>
+                {currentIdx + 1} / {total}
+              </span>
             </div>
 
-            {/* Jersey image card */}
+            {/* Image */}
             <div
-              onClick={() => setLightbox({ photos, startIndex: idx })}
+              onClick={() => setLightbox({ photos, startIndex: currentIdx })}
               style={{
                 cursor: 'pointer',
-                borderRadius: '14px',
+                borderRadius: '16px',
                 overflow: 'hidden',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 backgroundColor: '#0f172a',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                transition: 'box-shadow 0.2s',
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.015)';
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.65)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = '';
-                e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.5)';
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 14px 56px rgba(0,0,0,0.75)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 8px 40px rgba(0,0,0,0.6)'; }}
             >
               <img
                 src={cloudinaryUrl(jersey.publicId, 'f_auto,q_auto,w_800')}
                 alt={jersey.label}
                 style={{ width: '100%', display: 'block', objectFit: 'cover' }}
               />
-              {/* Tap hint overlay */}
               <div style={{
-                padding: '0.6rem 1rem',
-                display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+                padding: '0.55rem 1rem',
+                display: 'flex', justifyContent: 'flex-end',
                 borderTop: '1px solid rgba(255,255,255,0.05)',
               }}>
-                <span style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.06em', fontWeight: '600' }}>
+                <span style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.07em', fontWeight: '600' }}>
                   TAP TO EXPAND ↗
                 </span>
               </div>
             </div>
-
-            {/* Arrow between jerseys — not after the last one */}
-            {idx < RISERS_JERSEYS.length - 1 && <JerseyArrow />}
           </div>
-        ))}
+        </div>
 
-        {lightbox && (
-          <LightboxModal
-            photos={lightbox.photos}
-            startIndex={lightbox.startIndex}
-            onClose={() => setLightbox(null)}
-          />
-        )}
+        {/* Down arrow */}
+        <JerseyNavBtn direction="down" onClick={goNext} disabled={currentIdx === total - 1} />
+
       </div>
+
+      {lightbox && (
+        <LightboxModal
+          photos={lightbox.photos}
+          startIndex={lightbox.startIndex}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </div>
   );
 }

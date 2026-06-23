@@ -263,13 +263,35 @@ body {
   background-color: var(--surface-muted);
 }
 
-/* ── Jersey journey arrow bounce ── */
-@keyframes arrow-bounce {
-  0%, 100% { transform: translateY(0); opacity: 1; }
-  50%       { transform: translateY(6px); opacity: 0.7; }
+/* ── Jersey carousel transitions ── */
+@keyframes jersey-enter-up {
+  from { opacity: 0; transform: translateY(50px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
-.jersey-arrow-bounce {
-  animation: arrow-bounce 2s ease-in-out infinite;
+@keyframes jersey-enter-down {
+  from { opacity: 0; transform: translateY(-50px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+@keyframes jersey-exit-up {
+  from { opacity: 1; transform: translateY(0)     scale(1); }
+  to   { opacity: 0; transform: translateY(-40px) scale(0.97); }
+}
+@keyframes jersey-exit-down {
+  from { opacity: 1; transform: translateY(0)    scale(1); }
+  to   { opacity: 0; transform: translateY(40px) scale(0.97); }
+}
+.jersey-enter-up   { animation: jersey-enter-up   0.42s cubic-bezier(0.22,1,0.36,1) both; }
+.jersey-enter-down { animation: jersey-enter-down 0.42s cubic-bezier(0.22,1,0.36,1) both; }
+.jersey-exit-up    { animation: jersey-exit-up    0.28s cubic-bezier(0.4,0,1,1) both; }
+.jersey-exit-down  { animation: jersey-exit-down  0.28s cubic-bezier(0.4,0,1,1) both; }
+
+/* Nav arrow idle pulse */
+@keyframes nav-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.25); }
+  50%       { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+}
+.jersey-nav-pulse {
+  animation: nav-pulse 2.4s ease-in-out infinite;
 }
 
 /* ── Spinner ── */
