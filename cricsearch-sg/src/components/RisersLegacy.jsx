@@ -607,21 +607,21 @@ function HeroSection() {
 
 function WhyThisExists() {
   return (
-    <Section bg="#f4f7fb">
+    <Section bg="#0a1628">
       <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>❤️</div>
-        <SectionHeading eyebrow="Our Purpose" title="Why This Page Exists" />
-        <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9', marginBottom: '1.25rem' }}>
+        <SectionHeading eyebrow="Our Purpose" title="Why This Page Exists" light />
+        <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1.25rem' }}>
           Changi Risers Cricket is more than a team name. It is a journey built by players, captains, organisers, supporters, mentors, and friends who contributed across seasons.
         </p>
-        <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9', marginBottom: '1.25rem' }}>
+        <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1.25rem' }}>
           Some continue to play. Some have moved overseas. Some may no longer be active — but their role in shaping the club deserves to be remembered with respect.
         </p>
-        <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9' }}>
-          This page exists to honour <strong>everyone who meaningfully contributed to Changi Risers</strong> — not only top performers, but every player, volunteer, and supporter who helped build this club into what it is today.
+        <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9' }}>
+          This page exists to honour <strong style={{ color: '#e2e8f0' }}>everyone who meaningfully contributed to Changi Risers</strong> — not only top performers, but every player, volunteer, and supporter who helped build this club into what it is today.
         </p>
-        <div style={{ marginTop: '2.25rem', padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.75rem)', backgroundColor: '#ebf3fb', borderRadius: '12px', borderLeft: '4px solid #0066cc', textAlign: 'left' }}>
-          <p style={{ fontSize: '15px', color: '#1e40af', fontStyle: 'italic', margin: 0, lineHeight: '1.8', fontWeight: '500' }}>
+        <div style={{ marginTop: '2.25rem', padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.75rem)', backgroundColor: 'rgba(59,130,246,0.08)', borderRadius: '12px', borderLeft: '4px solid #3b82f6', textAlign: 'left' }}>
+          <p style={{ fontSize: '15px', color: '#93c5fd', fontStyle: 'italic', margin: 0, lineHeight: '1.8', fontWeight: '500' }}>
             "A club's legacy is not written by wins alone. It is written by the people who showed up, believed in each other, and made every match worth playing."
           </p>
         </div>
