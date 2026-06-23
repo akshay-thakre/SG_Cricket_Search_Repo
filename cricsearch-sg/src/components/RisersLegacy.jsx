@@ -1230,7 +1230,7 @@ export function RisersLegacy() {
   return (
     <div>
       {/* Internal tab navigation */}
-      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', position: 'relative' }}>
+      <div style={{ backgroundColor: '#111e35', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
         <div
           ref={legacyTabScrollRef}
           onScroll={handleLegacyTabScroll}
@@ -1244,10 +1244,10 @@ export function RisersLegacy() {
                 style={{
                   padding: '0.9rem 1.1rem',
                   border: 'none',
-                  borderBottom: `2px solid ${activeTab === tab.id ? '#0066cc' : 'transparent'}`,
-                  marginBottom: '-2px',
+                  borderBottom: `2px solid ${activeTab === tab.id ? '#60a5fa' : 'transparent'}`,
+                  marginBottom: '-1px',
                   backgroundColor: 'transparent',
-                  color: activeTab === tab.id ? '#0066cc' : '#64748b',
+                  color: activeTab === tab.id ? '#60a5fa' : '#94a3b8',
                   fontWeight: activeTab === tab.id ? '700' : '500',
                   fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
                   WebkitTapHighlightColor: 'transparent',
@@ -1262,7 +1262,7 @@ export function RisersLegacy() {
         {!legacyTabAtEnd && (
           <div style={{
             position: 'absolute', right: 0, top: 0, bottom: 0, width: '56px',
-            background: 'linear-gradient(to right, transparent, #f4f7fb)',
+            background: 'linear-gradient(to right, transparent, #111e35)',
             pointerEvents: 'none', zIndex: 2,
           }} />
         )}
