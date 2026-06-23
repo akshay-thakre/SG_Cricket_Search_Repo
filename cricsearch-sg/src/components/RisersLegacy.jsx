@@ -785,26 +785,48 @@ function LightboxModal({ photos, startIndex, onClose }) {
           </button>
         </div>
 
-        {/* Prev arrow + image + next arrow */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
-          {photos.length > 1 && (
-            <button onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={!hasPrev} aria-label="Previous photo" style={navBtn(!hasPrev)}>‹</button>
-          )}
+        {/* Image with overlaid prev/next arrows */}
+        <div style={{ position: 'relative', width: '100%' }}>
           <div style={{
-            flex: 1, borderRadius: '14px', overflow: 'hidden',
+            borderRadius: '12px', overflow: 'hidden',
             boxShadow: '0 4px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)',
-            backgroundColor: '#0f172a',
+            backgroundColor: '#040a18',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <img
               src={photo.image}
               alt={photo.alt || photo.title}
               loading="lazy"
-              style={{ display: 'block', width: '100%', maxHeight: 'calc(100vh - 230px)', objectFit: 'contain' }}
+              style={{
+                display: 'block',
+                width: '100%',
+                height: 'auto',
+                maxHeight: 'calc(100vh - 160px)',
+                objectFit: 'contain',
+              }}
             />
           </div>
           {photos.length > 1 && (
-            <button onClick={() => setIdx(i => Math.min(photos.length - 1, i + 1))} disabled={!hasNext} aria-label="Next photo" style={navBtn(!hasNext)}>›</button>
+            <>
+              <button
+                onClick={() => setIdx(i => Math.max(0, i - 1))}
+                disabled={!hasPrev}
+                aria-label="Previous photo"
+                style={{
+                  ...navBtn(!hasPrev),
+                  position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)',
+                }}
+              >‹</button>
+              <button
+                onClick={() => setIdx(i => Math.min(photos.length - 1, i + 1))}
+                disabled={!hasNext}
+                aria-label="Next photo"
+                style={{
+                  ...navBtn(!hasNext),
+                  position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
+                }}
+              >›</button>
+            </>
           )}
         </div>
 
@@ -1014,59 +1036,62 @@ function JerseySection() {
   }));
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* Section header */}
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <div style={{ fontSize: '36px', marginBottom: '0.5rem' }}>👕</div>
-        <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: '#1e293b', margin: '0 0 0.5rem' }}>
-          Risers Colours Through the Years
-        </h2>
-        <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>
-          Every jersey tells a chapter of the Changi Risers story.
-        </p>
-      </div>
+    <div style={{ backgroundColor: '#040a18', minHeight: '100%' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(1.5rem, 4vw, 2.5rem) 1.5rem' }}>
+        {/* Section header */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ fontSize: '36px', marginBottom: '0.5rem' }}>👕</div>
+          <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: '#f1f5f9', margin: '0 0 0.5rem' }}>
+            Risers Colours Through the Years
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '15px', margin: 0 }}>
+            Every jersey tells a chapter of the Changi Risers story.
+          </p>
+        </div>
 
-      {/* Responsive grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: '1.5rem',
-      }}>
-        {RISERS_JERSEYS.map((jersey, idx) => (
-          <div
-            key={jersey.publicId}
-            onClick={() => setLightbox({ photos, startIndex: idx })}
-            style={{
-              cursor: 'pointer',
-              borderRadius: '12px',
-              overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-              background: '#fff',
-              transition: 'transform 0.15s, box-shadow 0.15s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.10)'; }}
-          >
-            <img
-              src={cloudinaryUrl(jersey.publicId, 'f_auto,q_auto,w_600')}
-              alt={jersey.label}
-              style={{ width: '100%', display: 'block', aspectRatio: '4/3', objectFit: 'cover' }}
-            />
-            <div style={{ padding: '0.75rem 1rem' }}>
-              <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '14px' }}>{jersey.label}</div>
-              <div style={{ color: '#64748b', fontSize: '12px', marginTop: '2px' }}>{jersey.caption}</div>
+        {/* Responsive grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+          gap: '1.25rem',
+        }}>
+          {RISERS_JERSEYS.map((jersey, idx) => (
+            <div
+              key={jersey.publicId}
+              onClick={() => setLightbox({ photos, startIndex: idx })}
+              style={{
+                cursor: 'pointer',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.40)',
+                background: '#0f172a',
+                border: '1px solid rgba(255,255,255,0.07)',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.55)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.40)'; }}
+            >
+              <img
+                src={cloudinaryUrl(jersey.publicId, 'f_auto,q_auto,w_600')}
+                alt={jersey.label}
+                style={{ width: '100%', display: 'block', aspectRatio: '4/3', objectFit: 'cover' }}
+              />
+              <div style={{ padding: '0.75rem 1rem' }}>
+                <div style={{ fontWeight: '700', color: '#e2e8f0', fontSize: '14px' }}>{jersey.label}</div>
+                <div style={{ color: '#64748b', fontSize: '12px', marginTop: '2px' }}>{jersey.caption}</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {lightbox && (
-        <LightboxModal
-          photos={lightbox.photos}
-          startIndex={lightbox.startIndex}
-          onClose={() => setLightbox(null)}
-        />
-      )}
+        {lightbox && (
+          <LightboxModal
+            photos={lightbox.photos}
+            startIndex={lightbox.startIndex}
+            onClose={() => setLightbox(null)}
+          />
+        )}
+      </div>
     </div>
   );
 }
