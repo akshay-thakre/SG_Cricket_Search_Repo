@@ -105,7 +105,7 @@ export default function CricSearchApp() {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', position: 'relative' }}>
+      <div style={{ backgroundColor: '#0d1b2e', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
         <div
           ref={topTabScrollRef}
           onScroll={handleTopTabScroll}
@@ -122,10 +122,10 @@ export default function CricSearchApp() {
                 style={{
                   padding: '0.9rem 1.25rem',
                   border: 'none',
-                  borderBottom: `2px solid ${activePage === tab.id ? '#0066cc' : 'transparent'}`,
+                  borderBottom: `2px solid ${activePage === tab.id ? '#60a5fa' : 'transparent'}`,
                   marginBottom: '-2px',
                   backgroundColor: 'transparent',
-                  color: activePage === tab.id ? '#0066cc' : '#64748b',
+                  color: activePage === tab.id ? '#60a5fa' : '#94a3b8',
                   fontWeight: activePage === tab.id ? '700' : '500',
                   fontSize: '13px', cursor: 'pointer',
                   whiteSpace: 'nowrap',
@@ -141,7 +141,7 @@ export default function CricSearchApp() {
         {!topTabAtEnd && (
           <div style={{
             position: 'absolute', right: 0, top: 0, bottom: 0, width: '56px',
-            background: 'linear-gradient(to right, transparent, #f4f7fb)',
+            background: 'linear-gradient(to right, transparent, #0d1b2e)',
             pointerEvents: 'none', zIndex: 2,
           }} />
         )}
