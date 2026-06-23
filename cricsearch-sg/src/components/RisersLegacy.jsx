@@ -619,7 +619,7 @@ function WhyThisExists() {
         <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9' }}>
           This page exists to honour <strong>everyone who meaningfully contributed to Changi Risers</strong> — not only top performers, but every player, volunteer, and supporter who helped build this club into what it is today.
         </p>
-        <div style={{ marginTop: '2.25rem', padding: '1.5rem 1.75rem', backgroundColor: '#ebf3fb', borderRadius: '12px', borderLeft: '4px solid #0066cc', textAlign: 'left' }}>
+        <div style={{ marginTop: '2.25rem', padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.75rem)', backgroundColor: '#ebf3fb', borderRadius: '12px', borderLeft: '4px solid #0066cc', textAlign: 'left' }}>
           <p style={{ fontSize: '15px', color: '#1e40af', fontStyle: 'italic', margin: 0, lineHeight: '1.8', fontWeight: '500' }}>
             "A club's legacy is not written by wins alone. It is written by the people who showed up, believed in each other, and made every match worth playing."
           </p>
@@ -637,7 +637,7 @@ function JourneySoFar() {
         title="The Journey So Far"
         body="From the very first match to the platform you are reading right now — the Changi Risers story has been built one season at a time."
       />
-      <div style={{ maxWidth: '660px', margin: '0 auto', position: 'relative', paddingLeft: '2.5rem' }}>
+      <div style={{ maxWidth: '660px', margin: '0 auto', position: 'relative', paddingLeft: 'clamp(1.75rem, 5vw, 2.5rem)' }}>
         <div style={{ position: 'absolute', left: '0.6rem', top: '0.8rem', bottom: '0.8rem', width: '2px', background: 'linear-gradient(to bottom, #0066cc 0%, #d0dae8 100%)' }} />
         {TIMELINE_ITEMS.map((item, i) => (
           <div key={i} style={{ position: 'relative', marginBottom: i < TIMELINE_ITEMS.length - 1 ? '2rem' : 0 }}>
@@ -927,7 +927,7 @@ function StatsWithRespect() {
       <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>📊</div>
         <SectionHeading eyebrow="Stats & Story" title="Stats With Respect" body="Numbers are a part of the story — not the whole story." />
-        <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: '2rem 2.25rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
+        <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: 'clamp(1.25rem, 4vw, 2rem) clamp(1rem, 4vw, 2.25rem)', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
           <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9', marginBottom: '1.1rem' }}>
             The numbers on this site are not meant to reduce a player to statistics. They exist to <strong>preserve effort, contribution, and memories</strong>.
           </p>
@@ -937,7 +937,7 @@ function StatsWithRespect() {
           <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9' }}>
             Behind every number is a player who showed up, gave their best, and added a page to the Changi Risers chapter.
           </p>
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #e9eef5', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #e9eef5', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '1rem', textAlign: 'center' }}>
             {[
               { icon: '🏏', label: 'Every run matters' },
               { icon: '🎯', label: 'Every wicket counts' },
@@ -970,10 +970,10 @@ function PastPresentFuture() {
         <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '2rem' }}>
           The goal is to preserve the club's journey, respect those who built it, celebrate those who carry it today, and inspire those who will wear the colours tomorrow.
         </p>
-        <div style={{ fontSize: 'clamp(15px, 2.5vw, 20px)', fontWeight: '700', color: '#f59e0b', fontStyle: 'italic', padding: '1.25rem 1.75rem', backgroundColor: 'rgba(245,158,11,0.08)', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.22)', lineHeight: '1.4', marginBottom: '2rem' }}>
+        <div style={{ fontSize: 'clamp(15px, 2.5vw, 20px)', fontWeight: '700', color: '#f59e0b', fontStyle: 'italic', padding: 'clamp(1rem, 3vw, 1.25rem) clamp(1rem, 3vw, 1.75rem)', backgroundColor: 'rgba(245,158,11,0.08)', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.22)', lineHeight: '1.4', marginBottom: '2rem' }}>
           "Past. Present. Future. One Riser Legacy."
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
           {[
             { icon: '📜', label: 'Past',    desc: 'Honour those who built the foundation' },
             { icon: '🏏', label: 'Present', desc: 'Celebrate those carrying the identity today' },
@@ -1100,7 +1100,7 @@ export function RisersLegacy() {
     <div>
       {/* Internal tab navigation */}
       <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
           {LEGACY_TABS.map(tab => (
             <button
               key={tab.id}
