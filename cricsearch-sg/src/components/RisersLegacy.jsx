@@ -110,6 +110,7 @@ const LEGACY_CATEGORIES = [
       { name: 'Gajendra Agarwal',      role: 'Former Captain',           photo: 'Gajendra_fc_o4xaqe' },
       { name: 'Sheetanshu Srivastava', role: 'Former Captain',           photo: 'sheetu_fc' },
       { name: 'Kapil Arora',           role: 'Former Captain',           photo: 'Kapil_FC' },
+      { name: 'Gaurav Khandelwal',     role: 'Former Captain',           photo: 'Gaurav_Khandelwal_xqgfes' },
       { name: 'Kintul Mistry',         role: 'Former & Current Captain', photo: 'kintul_FC' },
     ],
   },
