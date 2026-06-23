@@ -934,11 +934,6 @@ function MemoriesSection() {
           );
         })}
       </div>
-      <div style={{ marginTop: '1.75rem', padding: '1.1rem 1.5rem', backgroundColor: '#ebf3fb', borderRadius: '10px', border: '1px dashed #93c5fd', textAlign: 'center' }}>
-        <p style={{ margin: 0, fontSize: '13px', color: '#0066cc', fontWeight: '600' }}>
-          📷 &nbsp;Real photos and stories will be added here as the gallery grows. Reach out to share your Risers memories.
-        </p>
-      </div>
       </div>
     </Section>
   );
