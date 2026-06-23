@@ -79,7 +79,7 @@ export default function CricSearchApp() {
                 <span style={{ color: 'var(--primary)', fontSize: '22px' }}>🏏</span>
                 <span>Changi Risers Cricket | Club &amp; Stats</span>
               </h1>
-              <div style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)', marginTop: '0.2rem', paddingLeft: '30px' }}>
+              <div className="app-header-subtitle" style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)', marginTop: '0.2rem', paddingLeft: '30px' }}>
                 Singapore Cricket Player Search — Live Data
               </div>
             </div>
@@ -97,8 +97,8 @@ export default function CricSearchApp() {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', display: 'flex' }}>
+      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
           {[
             { id: 'legacy', label: '🏆 Everything about Changi Risers' },
             { id: 'search', label: '🔍 Player Search' },
@@ -181,7 +181,7 @@ export default function CricSearchApp() {
           <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: '800', color: '#1e293b', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>
             Stats Can Mislead, Commitment Cannot
           </div>
-          <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: '1.75rem 2rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
+          <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: 'clamp(1.25rem, 4vw, 1.75rem) clamp(1rem, 4vw, 2rem)', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
             <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9', marginBottom: '1rem' }}>
               The numbers on this site are not meant to reduce a player to statistics. They exist to <strong>preserve effort, contribution, and memories</strong>.
             </p>
@@ -191,7 +191,7 @@ export default function CricSearchApp() {
             <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9' }}>
               Behind every number is a player who showed up, gave their best, and added a page to the Changi Risers chapter.
             </p>
-            <div style={{ marginTop: '1.25rem', paddingTop: '1.1rem', borderTop: '1px solid #e9eef5', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
+            <div style={{ marginTop: '1.25rem', paddingTop: '1.1rem', borderTop: '1px solid #e9eef5', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '1rem', textAlign: 'center' }}>
               {[
                 { icon: '🏏', label: 'Every run matters' },
                 { icon: '🎯', label: 'Every wicket counts' },
@@ -209,23 +209,25 @@ export default function CricSearchApp() {
       )}
 
       {/* Footer */}
-      <div style={{
+      <footer style={{
         backgroundColor: 'var(--surface-dark)',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
-        padding: '2rem 1.5rem', marginTop: '3rem', textAlign: 'center',
+        borderTop: '1px solid rgba(255,255,255,0.10)',
+        marginTop: '3rem',
       }}>
-        <div style={{ fontSize: '12px', color: 'var(--text-on-dark-muted)' }}>
-          Changi Risers Cricket | Club &amp; Stats &bull; Singapore Cricket Search &bull; Live data from SCA
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem)', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-on-dark-muted)', letterSpacing: '0.02em' }}>
+            Changi Risers Cricket | Club &amp; Stats &bull; Singapore Cricket Search &bull; Live data from SCA
+          </div>
+          <div style={{ marginTop: '1rem', fontSize: '11px', color: 'rgba(203,213,225,0.65)', fontStyle: 'italic', lineHeight: '1.75' }}>
+            Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
+          </div>
+          <div style={{ marginTop: '0.85rem', fontSize: '11px', color: 'rgba(203,213,225,0.65)', lineHeight: '1.8' }}>
+            This platform uses AI-driven insights to standardize player stats, reduce bias, and enable fair, transparent decision-making.
+            It supports both the skipper and Changi Risers management with reliable, data-backed insights.
+            By fostering trust, healthy competition, and a performance mindset, it helps the Risers achieve consistent success.
+          </div>
         </div>
-        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: 'rgba(203,213,225,0.7)', fontStyle: 'italic', maxWidth: '700px', margin: '0.75rem auto 0' }}>
-          Certain figures are applicable for players who have represented Team Changi Risers, Cognizant Corporate and Assassins at one point of time.
-        </div>
-        <div style={{ marginTop: '0.75rem', fontSize: '11px', color: 'rgba(203,213,225,0.7)', maxWidth: '700px', margin: '0.75rem auto 0', lineHeight: '1.7' }}>
-          This platform uses AI-driven insights to standardize player stats, reduce bias, and enable fair, transparent decision-making.
-          It supports both the skipper and Changi Risers management with reliable, data-backed insights.
-          By fostering trust, healthy competition, and a performance mindset, it helps the Risers achieve consistent success.
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }
