@@ -1196,10 +1196,10 @@ function JerseySection() {
 // ── Root export ────────────────────────────────────────────────────────────────
 
 const LEGACY_TABS = [
-  { id: 'legacy',   label: 'Risers Legacy' },
-  { id: 'journey',  label: 'The Riser Journey' },
-  { id: 'jerseys',  label: 'Risers Jerseys' },
-  { id: 'wall',     label: 'The Riser Wall' },
+  { id: 'legacy',   label: 'Legacy' },
+  { id: 'journey',  label: 'Journey' },
+  { id: 'jerseys',  label: 'Jerseys' },
+  { id: 'wall',     label: 'Setup' },
   { id: 'memories', label: 'Memories' },
 ];
 
