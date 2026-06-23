@@ -263,6 +263,15 @@ body {
   background-color: var(--surface-muted);
 }
 
+/* ── Jersey journey arrow bounce ── */
+@keyframes arrow-bounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50%       { transform: translateY(6px); opacity: 0.7; }
+}
+.jersey-arrow-bounce {
+  animation: arrow-bounce 2s ease-in-out infinite;
+}
+
 /* ── Spinner ── */
 @keyframes spin {
   from { transform: rotate(0deg); }

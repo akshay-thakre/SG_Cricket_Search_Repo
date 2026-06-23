@@ -1020,6 +1020,32 @@ const RISERS_JERSEYS = [
   { publicId: '6_jersey_kxikki',  label: 'Jersey 6', caption: 'Risers colours through the years' },
 ];
 
+function JerseyArrow() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.25rem 0' }}>
+      {/* Top stem */}
+      <div style={{ width: '1px', height: '36px', background: 'linear-gradient(to bottom, transparent, rgba(245,158,11,0.5))' }} />
+      {/* Animated circle with chevron */}
+      <div
+        className="jersey-arrow-bounce"
+        style={{
+          width: '38px', height: '38px', borderRadius: '50%',
+          border: '1.5px solid rgba(245,158,11,0.35)',
+          backgroundColor: 'rgba(245,158,11,0.06)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 3v10M3 8l5 5 5-5" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      {/* Bottom stem */}
+      <div style={{ width: '1px', height: '36px', background: 'linear-gradient(to bottom, rgba(245,158,11,0.5), transparent)' }} />
+    </div>
+  );
+}
+
 function JerseySection() {
   const [lightbox, setLightbox] = useState(null); // { photos, startIndex }
 
@@ -1033,48 +1059,77 @@ function JerseySection() {
 
   return (
     <div style={{ backgroundColor: '#040a18', minHeight: '100%' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(1.5rem, 4vw, 2.5rem) 1.5rem' }}>
+      <div style={{ maxWidth: '680px', margin: '0 auto', padding: 'clamp(2rem, 5vw, 3rem) 1.5rem clamp(2rem, 5vw, 3.5rem)' }}>
+
         {/* Section header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '36px', marginBottom: '0.5rem' }}>👕</div>
-          <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: '#f1f5f9', margin: '0 0 0.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
+          <div style={{ fontSize: '38px', marginBottom: '0.75rem' }}>👕</div>
+          <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: '#f1f5f9', margin: '0 0 0.5rem', letterSpacing: '-0.01em' }}>
             Risers Colours Through the Years
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '15px', margin: 0 }}>
+          <p style={{ color: '#64748b', fontSize: '14px', margin: 0, lineHeight: '1.6' }}>
             Every jersey tells a chapter of the Changi Risers story.
           </p>
         </div>
 
-        {/* Responsive grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '1.25rem',
-        }}>
-          {RISERS_JERSEYS.map((jersey, idx) => (
+        {/* First arrow — from header into jerseys */}
+        <JerseyArrow />
+
+        {/* Jersey journey */}
+        {RISERS_JERSEYS.map((jersey, idx) => (
+          <div key={jersey.publicId}>
+            {/* Chapter label */}
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              <span style={{
+                fontSize: '10px', fontWeight: '800', letterSpacing: '0.2em',
+                textTransform: 'uppercase', color: '#f59e0b',
+              }}>
+                {jersey.label}
+              </span>
+            </div>
+
+            {/* Jersey image card */}
             <div
-              key={jersey.publicId}
               onClick={() => setLightbox({ photos, startIndex: idx })}
               style={{
                 cursor: 'pointer',
-                borderRadius: '12px',
+                borderRadius: '14px',
                 overflow: 'hidden',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.40)',
-                background: '#0f172a',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
                 border: '1px solid rgba(255,255,255,0.07)',
-                transition: 'transform 0.15s, box-shadow 0.15s',
+                backgroundColor: '#0f172a',
+                transition: 'transform 0.2s, box-shadow 0.2s',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.55)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.40)'; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.015)';
+                e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.65)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = '';
+                e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.5)';
+              }}
             >
               <img
-                src={cloudinaryUrl(jersey.publicId, 'f_auto,q_auto,w_600')}
+                src={cloudinaryUrl(jersey.publicId, 'f_auto,q_auto,w_800')}
                 alt={jersey.label}
-                style={{ width: '100%', display: 'block', aspectRatio: '4/3', objectFit: 'cover' }}
+                style={{ width: '100%', display: 'block', objectFit: 'cover' }}
               />
+              {/* Tap hint overlay */}
+              <div style={{
+                padding: '0.6rem 1rem',
+                display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+                borderTop: '1px solid rgba(255,255,255,0.05)',
+              }}>
+                <span style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.06em', fontWeight: '600' }}>
+                  TAP TO EXPAND ↗
+                </span>
+              </div>
             </div>
-          ))}
-        </div>
+
+            {/* Arrow between jerseys — not after the last one */}
+            {idx < RISERS_JERSEYS.length - 1 && <JerseyArrow />}
+          </div>
+        ))}
 
         {lightbox && (
           <LightboxModal
