@@ -1236,7 +1236,7 @@ export function RisersLegacy() {
           onScroll={handleLegacyTabScroll}
           style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
         >
-          <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
+          <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '0.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
             {LEGACY_TABS.map(tab => (
               <button
                 key={tab.id}
