@@ -105,7 +105,7 @@ export default function CricSearchApp() {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ backgroundColor: '#0d1b2e', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
+      <div style={{ backgroundColor: '#0a1628', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
         <div
           ref={topTabScrollRef}
           onScroll={handleTopTabScroll}
@@ -141,7 +141,7 @@ export default function CricSearchApp() {
         {!topTabAtEnd && (
           <div style={{
             position: 'absolute', right: 0, top: 0, bottom: 0, width: '56px',
-            background: 'linear-gradient(to right, transparent, #0d1b2e)',
+            background: 'linear-gradient(to right, transparent, #0a1628)',
             pointerEvents: 'none', zIndex: 2,
           }} />
         )}
@@ -201,20 +201,20 @@ export default function CricSearchApp() {
 
         <div style={{ maxWidth: '700px', margin: '2rem auto 0', textAlign: 'center' }}>
           <div style={{ fontSize: '36px', marginBottom: '1rem' }}>📊</div>
-          <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: '800', color: '#1e293b', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>
+          <div style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: '800', color: '#e2e8f0', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>
             Stats Can Mislead, Commitment Cannot
           </div>
-          <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: 'clamp(1.25rem, 4vw, 1.75rem) clamp(1rem, 4vw, 2rem)', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
-            <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9', marginBottom: '1rem' }}>
-              The numbers on this site are not meant to reduce a player to statistics. They exist to <strong>preserve effort, contribution, and memories</strong>.
+          <div style={{ backgroundColor: '#111e35', borderRadius: '14px', padding: 'clamp(1.25rem, 4vw, 1.75rem) clamp(1rem, 4vw, 2rem)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 2px 12px rgba(0,0,0,0.30)', textAlign: 'left' }}>
+            <p style={{ fontSize: '15px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1rem' }}>
+              The numbers on this site are not meant to reduce a player to statistics. They exist to <strong style={{ color: '#e2e8f0' }}>preserve effort, contribution, and memories</strong>.
             </p>
-            <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '15px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1rem' }}>
               Every run, wicket, catch, match, and season is part of the Changi Risers story.
             </p>
-            <p style={{ fontSize: '15px', color: '#374151', lineHeight: '1.9' }}>
+            <p style={{ fontSize: '15px', color: '#94a3b8', lineHeight: '1.9' }}>
               Behind every number is a player who showed up, gave their best, and added a page to the Changi Risers chapter.
             </p>
-            <div style={{ marginTop: '1.25rem', paddingTop: '1.1rem', borderTop: '1px solid #e9eef5', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '1rem', textAlign: 'center' }}>
+            <div style={{ marginTop: '1.25rem', paddingTop: '1.1rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '1rem', textAlign: 'center' }}>
               {[
                 { icon: '🏏', label: 'Every run matters' },
                 { icon: '🎯', label: 'Every wicket counts' },

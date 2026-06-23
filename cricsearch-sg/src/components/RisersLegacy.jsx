@@ -364,7 +364,7 @@ const MEMORY_ITEMS = [
 
 // ── Layout helpers ─────────────────────────────────────────────────────────────
 
-function Section({ children, bg = '#f4f7fb', style = {} }) {
+function Section({ children, bg = '#0a1628', style = {} }) {
   return (
     <section style={{ padding: 'clamp(2.5rem, 6vw, 4rem) 1.5rem', backgroundColor: bg, ...style }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>{children}</div>
@@ -380,11 +380,11 @@ function SectionHeading({ eyebrow, title, body, light = false }) {
           {eyebrow}
         </div>
       )}
-      <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: '800', color: light ? '#f1f5f9' : '#1e293b', margin: '0 0 0.75rem 0', lineHeight: '1.25', letterSpacing: '-0.01em' }}>
+      <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: '800', color: light ? '#f1f5f9' : '#e2e8f0', margin: '0 0 0.75rem 0', lineHeight: '1.25', letterSpacing: '-0.01em' }}>
         {title}
       </h2>
       {body && (
-        <p style={{ fontSize: '15px', color: light ? '#cbd5e1' : '#64748b', maxWidth: '620px', margin: '0 auto', lineHeight: '1.75' }}>
+        <p style={{ fontSize: '15px', color: light ? '#cbd5e1' : '#94a3b8', maxWidth: '620px', margin: '0 auto', lineHeight: '1.75' }}>
           {body}
         </p>
       )}
@@ -418,7 +418,7 @@ function CategoryDetailView({ category, onBack }) {
   }, []);
 
   return (
-    <div style={{ backgroundColor: '#0f172a', minHeight: '80vh', color: '#fff' }}>
+    <div style={{ backgroundColor: '#0a1628', minHeight: '80vh', color: '#fff' }}>
       {lightboxIdx !== null && (
         <LightboxModal
           photos={lightboxPhotos}
@@ -501,13 +501,13 @@ function CategoryDetailView({ category, onBack }) {
               }
               return (
                 <div key={i} style={{
-                  backgroundColor: '#1e293b', borderRadius: '14px',
+                  backgroundColor: '#111e35', borderRadius: '14px',
                   border: `1px solid ${category.accentColor}28`,
                   overflow: 'hidden', display: 'flex', flexDirection: 'column',
                   boxShadow: `0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px ${category.accentColor}10`,
                 }}>
                   {/* Photo area — shows Cloudinary image when available, initial avatar when not */}
-                  <div style={{ height: '150px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${category.accentColor}18` }}>
+                  <div style={{ height: '150px', backgroundColor: '#0a1628', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${category.accentColor}18` }}>
                     {person.photo ? (
                       <button
                         onClick={() => openLightbox(person)}
@@ -575,7 +575,7 @@ function CategoryDetailView({ category, onBack }) {
 function HeroSection() {
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a6e 55%, #0f172a 100%)',
+      background: 'linear-gradient(135deg, #0a1628 0%, #1e3a6e 55%, #0a1628 100%)',
       padding: 'clamp(3rem, 9vw, 6rem) 1.5rem',
       textAlign: 'center', position: 'relative', overflow: 'hidden',
     }}>
@@ -660,7 +660,7 @@ function JourneySoFar() {
 
 function LegendsWall({ onSelectCategory }) {
   return (
-    <Section bg="#0f172a">
+    <Section bg="#0a1628">
       <SectionHeading
         eyebrow="The Riser Wall"
         title="The Riser Wall"
@@ -669,8 +669,8 @@ function LegendsWall({ onSelectCategory }) {
       />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(235px, 1fr))', gap: '1.25rem' }}>
         {LEGACY_CATEGORIES.map((cat) => (
-          <div key={cat.id} style={{ backgroundColor: '#1e293b', borderRadius: '14px', border: `1px solid ${cat.accentColor}30`, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
-            <div style={{ height: '140px', backgroundColor: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${cat.accentColor}20` }}>
+          <div key={cat.id} style={{ backgroundColor: '#111e35', borderRadius: '14px', border: `1px solid ${cat.accentColor}30`, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
+            <div style={{ height: '140px', backgroundColor: '#0a1628', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderBottom: `1px solid ${cat.accentColor}20` }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: cat.accentColor + '18', border: `2px dashed ${cat.accentColor}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>
                 {cat.icon}
               </div>
@@ -792,7 +792,7 @@ function LightboxModal({ photos, startIndex, onClose }) {
           <div style={{
             borderRadius: '12px', overflow: 'hidden',
             boxShadow: '0 4px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)',
-            backgroundColor: '#040a18',
+            backgroundColor: '#0a1628',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <img
@@ -858,7 +858,7 @@ function MemoriesSection() {
   const watermarkUrl = cloudinaryUrl('Background_watermark_o4gudo', 'w_1200,f_auto,q_auto');
 
   return (
-    <Section bg="#f4f7fb" style={{
+    <Section bg="#0a1628" style={{
       position: 'relative',
       backgroundImage: `url(${watermarkUrl})`,
       backgroundRepeat: 'no-repeat',
@@ -866,7 +866,7 @@ function MemoriesSection() {
       backgroundSize: 'cover',
     }}>
       {/* Watermark overlay — keeps background very subtle */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.88)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,22,40,0.85)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
       {lightbox && (
         <LightboxModal
@@ -892,7 +892,7 @@ function MemoriesSection() {
               style={{
                 borderRadius: '12px', overflow: 'hidden',
                 border: `1px solid ${isAvailable ? '#d0dae8' : '#e2e8f0'}`,
-                backgroundColor: '#f8fafd',
+                backgroundColor: '#111e35',
                 boxShadow: isAvailable ? '0 2px 10px rgba(6,28,84,0.1)' : '0 2px 8px rgba(6,28,84,0.04)',
               }}
             >
@@ -902,7 +902,7 @@ function MemoriesSection() {
                   aria-label={`View ${item.title}`}
                   style={{ display: 'block', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                 >
-                  <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#dde6f0', overflow: 'hidden' }}>
+                  <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#1a2d4a', overflow: 'hidden' }}>
                     <img
                       src={thumbnail}
                       alt={altText}
@@ -920,7 +920,7 @@ function MemoriesSection() {
                   </div>
                 </button>
               ) : (
-                <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#dde6f0' }}>
+                <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#1a2d4a' }}>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                     <span style={{ fontSize: '30px', opacity: 0.4 }}>{item.icon}</span>
                     <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
@@ -928,7 +928,7 @@ function MemoriesSection() {
                 </div>
               )}
               <div style={{ padding: '0.8rem 0.9rem' }}>
-                <div style={{ fontWeight: '700', fontSize: '13px', color: '#1e293b', marginBottom: '0.2rem' }}>{item.title}</div>
+                <div style={{ fontWeight: '700', fontSize: '13px', color: '#e2e8f0', marginBottom: '0.2rem' }}>{item.title}</div>
                 <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: '1.5' }}>{item.photos ? item.photos[0].caption : item.caption}</div>
               </div>
             </div>
@@ -942,21 +942,21 @@ function MemoriesSection() {
 
 function StatsWithRespect() {
   return (
-    <Section bg="#edf2f8">
+    <Section bg="#0a1628">
       <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>📊</div>
         <SectionHeading eyebrow="Stats & Story" title="Stats With Respect" body="Numbers are a part of the story — not the whole story." />
-        <div style={{ backgroundColor: '#f8fafd', borderRadius: '14px', padding: 'clamp(1.25rem, 4vw, 2rem) clamp(1rem, 4vw, 2.25rem)', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(6,28,84,0.06)', textAlign: 'left' }}>
-          <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9', marginBottom: '1.1rem' }}>
+        <div style={{ backgroundColor: '#111e35', borderRadius: '14px', padding: 'clamp(1.25rem, 4vw, 2rem) clamp(1rem, 4vw, 2.25rem)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 2px 12px rgba(0,0,0,0.30)', textAlign: 'left' }}>
+          <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1.1rem' }}>
             The numbers on this site are not meant to reduce a player to statistics. They exist to <strong>preserve effort, contribution, and memories</strong>.
           </p>
-          <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9', marginBottom: '1.1rem' }}>
+          <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1.1rem' }}>
             Every run, wicket, catch, match, and season is part of the Changi Risers story.
           </p>
-          <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.9' }}>
+          <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9' }}>
             Behind every number is a player who showed up, gave their best, and added a page to the Changi Risers chapter.
           </p>
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #e9eef5', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '1rem', textAlign: 'center' }}>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '1rem', textAlign: 'center' }}>
             {[
               { icon: '🏏', label: 'Every run matters' },
               { icon: '🎯', label: 'Every wicket counts' },
@@ -976,7 +976,7 @@ function StatsWithRespect() {
 
 function PastPresentFuture() {
   return (
-    <div style={{ background: 'linear-gradient(135deg, #1a3a6e 0%, #0f172a 100%)', padding: 'clamp(3.5rem, 8vw, 6rem) 1.5rem', textAlign: 'center', color: '#fff' }}>
+    <div style={{ background: 'linear-gradient(135deg, #1a3a6e 0%, #0a1628 100%)', padding: 'clamp(3.5rem, 8vw, 6rem) 1.5rem', textAlign: 'center', color: '#fff' }}>
       <div style={{ maxWidth: '700px', margin: '0 auto' }}>
         <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>🚀</div>
         <div style={{ fontSize: '10px', fontWeight: '800', color: '#93c5fd', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Looking Ahead</div>
@@ -1088,7 +1088,7 @@ function JerseySection() {
   const exitClass  = direction === 'down' ? 'jersey-exit-up'  : 'jersey-exit-down';
 
   return (
-    <div style={{ backgroundColor: '#040a18', minHeight: '100%' }}>
+    <div style={{ backgroundColor: '#0a1628', minHeight: '100%' }}>
       <div style={{
         maxWidth: '640px', margin: '0 auto',
         padding: 'clamp(2rem, 5vw, 3rem) 1.5rem clamp(2rem, 5vw, 3.5rem)',
@@ -1154,7 +1154,7 @@ function JerseySection() {
                 overflow: 'hidden',
                 boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
                 border: '1px solid rgba(255,255,255,0.08)',
-                backgroundColor: '#0f172a',
+                backgroundColor: '#0a1628',
                 transition: 'box-shadow 0.2s',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 14px 56px rgba(0,0,0,0.75)'; }}

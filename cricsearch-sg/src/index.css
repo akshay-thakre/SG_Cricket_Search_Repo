@@ -6,15 +6,15 @@
 
 :root {
   /* Brand palette */
-  --app-bg: #F8FAFC;
-  --surface: #FFFFFF;
-  --surface-muted: #F1F5F9;
-  --surface-dark: #0F172A;
-  --surface-dark-2: #1E293B;
+  --app-bg: #0a1628;
+  --surface: #111e35;
+  --surface-muted: #1a2d4a;
+  --surface-dark: #0a1628;
+  --surface-dark-2: #111e35;
 
   /* Text */
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
   --text-muted: #64748B;
   --text-on-dark: #FFFFFF;
   --text-on-dark-muted: #CBD5E1;
@@ -56,14 +56,14 @@
   --info-border: #BFDBFE;
 
   /* Borders */
-  --border: #E2E8F0;
-  --border-strong: #CBD5E1;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.15);
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 10px 28px rgba(15, 23, 42, 0.12);
-  --shadow-hero: 0 16px 48px rgba(15, 23, 42, 0.30);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.50);
+  --shadow-hero: 0 16px 48px rgba(0, 0, 0, 0.60);
 
   /* Radius */
   --radius-sm: 6px;
@@ -313,11 +313,11 @@ body {
   flex: 1;
   padding: 0.875rem 1.25rem;
   border-radius: var(--radius-md);
-  border: 2px solid rgba(255,255,255,0.25);
+  border: 2px solid rgba(255,255,255,0.15);
   font-size: 15px;
   font-weight: 500;
-  background-color: rgba(255,255,255,0.96);
-  color: var(--text-primary);
+  background-color: #1a2d4a;
+  color: #e2e8f0;
   min-width: 0;
   min-height: 44px;
   transition: border-color 0.2s, box-shadow 0.2s;
