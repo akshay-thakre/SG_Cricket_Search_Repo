@@ -1084,6 +1084,14 @@ const LEGACY_TABS = [
 export function RisersLegacy() {
   const [activeTab, setActiveTab]                   = useState('legacy');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [legacyTabAtEnd, setLegacyTabAtEnd]         = useState(false);
+  const legacyTabScrollRef = useRef(null);
+
+  const handleLegacyTabScroll = () => {
+    const el = legacyTabScrollRef.current;
+    if (!el) return;
+    setLegacyTabAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 6);
+  };
 
   // Category detail view replaces the whole page (back returns to 'wall' tab)
   if (selectedCategoryId) {
@@ -1099,27 +1107,42 @@ export function RisersLegacy() {
   return (
     <div>
       {/* Internal tab navigation */}
-      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
-          {LEGACY_TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                padding: '0.85rem 1.25rem',
-                border: 'none',
-                borderBottom: `2px solid ${activeTab === tab.id ? '#0066cc' : 'transparent'}`,
-                marginBottom: '-2px',
-                backgroundColor: 'transparent',
-                color: activeTab === tab.id ? '#0066cc' : '#64748b',
-                fontWeight: activeTab === tab.id ? '700' : '500',
-                fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', position: 'relative' }}>
+        <div
+          ref={legacyTabScrollRef}
+          onScroll={handleLegacyTabScroll}
+          style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
+        >
+          <div style={{ maxWidth: '1100px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
+            {LEGACY_TABS.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: '0.9rem 1.1rem',
+                  border: 'none',
+                  borderBottom: `2px solid ${activeTab === tab.id ? '#0066cc' : 'transparent'}`,
+                  marginBottom: '-2px',
+                  backgroundColor: 'transparent',
+                  color: activeTab === tab.id ? '#0066cc' : '#64748b',
+                  fontWeight: activeTab === tab.id ? '700' : '500',
+                  fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
+        {/* Right-edge fade — hidden once scrolled to end */}
+        {!legacyTabAtEnd && (
+          <div style={{
+            position: 'absolute', right: 0, top: 0, bottom: 0, width: '56px',
+            background: 'linear-gradient(to right, transparent, #f4f7fb)',
+            pointerEvents: 'none', zIndex: 2,
+          }} />
+        )}
       </div>
 
       {/* Tab content */}
