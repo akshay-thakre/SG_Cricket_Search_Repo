@@ -1072,10 +1072,6 @@ function JerseySection() {
                 alt={jersey.label}
                 style={{ width: '100%', display: 'block', aspectRatio: '4/3', objectFit: 'cover' }}
               />
-              <div style={{ padding: '0.75rem 1rem' }}>
-                <div style={{ fontWeight: '700', color: '#e2e8f0', fontSize: '14px' }}>{jersey.label}</div>
-                <div style={{ color: '#64748b', fontSize: '12px', marginTop: '2px' }}>{jersey.caption}</div>
-              </div>
             </div>
           ))}
         </div>
