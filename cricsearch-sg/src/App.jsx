@@ -11,7 +11,15 @@ export default function CricSearchApp() {
   const [backendStatus, setBackendStatus] = useState('checking');
   const [searchQuery, setSearchQuery]   = useState('');
   const [activePage, setActivePage]     = useState('legacy');
+  const [topTabAtEnd, setTopTabAtEnd]   = useState(false);
   const abortControllerRef = useRef(null);
+  const topTabScrollRef    = useRef(null);
+
+  const handleTopTabScroll = () => {
+    const el = topTabScrollRef.current;
+    if (!el) return;
+    setTopTabAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 6);
+  };
 
   useEffect(() => {
     checkHealth()
@@ -97,31 +105,46 @@ export default function CricSearchApp() {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
-          {[
-            { id: 'legacy', label: '🏆 Everything about Changi Risers' },
-            { id: 'search', label: '🔍 Player Search' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActivePage(tab.id)}
-              style={{
-                padding: '0.8rem 1.25rem',
-                border: 'none',
-                borderBottom: `2px solid ${activePage === tab.id ? '#0066cc' : 'transparent'}`,
-                marginBottom: '-2px',
-                backgroundColor: 'transparent',
-                color: activePage === tab.id ? '#0066cc' : '#64748b',
-                fontWeight: activePage === tab.id ? '700' : '500',
-                fontSize: '13px', cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div style={{ backgroundColor: '#f4f7fb', borderBottom: '2px solid #e2e8f0', position: 'relative' }}>
+        <div
+          ref={topTabScrollRef}
+          onScroll={handleTopTabScroll}
+          style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
+        >
+          <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem', display: 'flex', minWidth: 'max-content' }}>
+            {[
+              { id: 'legacy', label: '🏆 Everything about Changi Risers' },
+              { id: 'search', label: '🔍 Player Search' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActivePage(tab.id)}
+                style={{
+                  padding: '0.9rem 1.25rem',
+                  border: 'none',
+                  borderBottom: `2px solid ${activePage === tab.id ? '#0066cc' : 'transparent'}`,
+                  marginBottom: '-2px',
+                  backgroundColor: 'transparent',
+                  color: activePage === tab.id ? '#0066cc' : '#64748b',
+                  fontWeight: activePage === tab.id ? '700' : '500',
+                  fontSize: '13px', cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
+        {/* Right-edge fade — hidden once scrolled to end */}
+        {!topTabAtEnd && (
+          <div style={{
+            position: 'absolute', right: 0, top: 0, bottom: 0, width: '56px',
+            background: 'linear-gradient(to right, transparent, #f4f7fb)',
+            pointerEvents: 'none', zIndex: 2,
+          }} />
+        )}
       </div>
 
       {activePage === 'legacy' && <RisersLegacy />}
