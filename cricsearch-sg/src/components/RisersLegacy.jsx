@@ -854,7 +854,8 @@ function MemoriesSection() {
     }
   };
 
-  const watermarkUrl = cloudinaryUrl('Background_watermark_o4gudo', 'w_1200,f_auto,q_auto');
+  const watermarkMd = cloudinaryUrl('Background_watermark_o4gudo', 'w_1200,c_fill,f_auto,q_auto');
+  const watermarkLg = cloudinaryUrl('Background_watermark_o4gudo', 'w_1920,c_fill,f_auto,q_auto');
 
   const renderCard = (item) => {
     const isAvailable = item.status === 'available';
@@ -917,42 +918,58 @@ function MemoriesSection() {
     <>
       <style>{`
         .memories-section {
-          padding: clamp(2.5rem, 6vw, 4rem) 1.5rem;
+          padding-top: clamp(2.5rem, 6vw, 4rem);
+          padding-bottom: clamp(2.5rem, 6vw, 4rem);
           background-color: #0a1628;
-          background-image: url(${watermarkUrl});
-          background-repeat: no-repeat;
-          background-position: center center;
-          background-size: cover;
           position: relative;
         }
         .memories-overlay {
           position: absolute;
           inset: 0;
-          background-color: rgba(10,22,40,0.55);
+          background-color: rgba(10,22,40,0.50);
           pointer-events: none;
           z-index: 0;
         }
         .memories-inner {
           position: relative;
           z-index: 1;
+        }
+        .memories-heading-wrap {
           max-width: 1100px;
           margin: 0 auto;
+          padding: 0 1.5rem;
         }
         .memories-layout {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
+          padding: 0 0.75rem;
         }
         .memories-col {
-          width: 290px;
+          width: clamp(210px, 22vw, 300px);
           flex-shrink: 0;
           display: flex;
           flex-direction: column;
           gap: 1rem;
         }
+        @media (min-width: 769px) {
+          .memories-section {
+            background-image: url(${watermarkMd});
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+          }
+        }
+        @media (min-width: 1200px) {
+          .memories-section {
+            background-image: url(${watermarkLg});
+          }
+        }
         @media (max-width: 768px) {
           .memories-section {
-            background-image: none;
+            background-image: none !important;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
           }
           .memories-overlay {
             display: none;
@@ -960,6 +977,7 @@ function MemoriesSection() {
           .memories-layout {
             flex-direction: column;
             align-items: center;
+            padding: 0;
             gap: 1rem;
           }
           .memories-col {
@@ -978,12 +996,14 @@ function MemoriesSection() {
               onClose={() => setLightbox(null)}
             />
           )}
-          <SectionHeading
-            eyebrow="Club Memories"
-            title="Memories Down the Lane"
-            body="A gallery of team photos, match moments, farewells, and shared memories that define the Changi Risers journey. Tap any photo to view it."
-            light
-          />
+          <div className="memories-heading-wrap">
+            <SectionHeading
+              eyebrow="Club Memories"
+              title="Memories Down the Lane"
+              body="A gallery of team photos, match moments, farewells, and shared memories that define the Changi Risers journey. Tap any photo to view it."
+              light
+            />
+          </div>
           <div className="memories-layout">
             <div className="memories-col">
               {leftItems.map(renderCard)}
