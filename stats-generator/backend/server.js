@@ -409,16 +409,27 @@ app.post('/api/push-github', (req, res) => {
     const compConfig = config[competition];
     if (!compConfig) return res.status(400).json({ error: `Unknown competition: ${competition}` });
 
-    const today = new Date().toISOString().slice(0, 10);
-    const logs  = [];
+    const today      = new Date().toISOString().slice(0, 10);
+    const logs       = [];
+    const targetPath = path.join(REPO_ROOT, compConfig.targetRepoPath);
 
     const run = (cmd) => {
       logs.push(`$ ${cmd}`);
       execSync(cmd, { cwd: REPO_ROOT, stdio: 'pipe' });
     };
 
-    run('git pull origin main');
-    logs.push('  ✓ pull done');
+    // Save generated content before syncing — fetch+reset clears untracked conflicts
+    if (!fs.existsSync(targetPath)) {
+      return res.status(400).json({ error: 'Generated file not found. Please generate first.' });
+    }
+    const generatedContent = fs.readFileSync(targetPath, 'utf8');
+
+    run('git fetch origin main');
+    run('git reset --hard FETCH_HEAD');
+    logs.push('  ✓ synced with remote');
+
+    // Restore the generated file and commit
+    fs.writeFileSync(targetPath, generatedContent, 'utf8');
     run(`git add "${compConfig.targetRepoPath}"`);
     run(`git commit -m "Update ${competition} stats JSON - ${today}"`);
     logs.push('  ✓ commit created');
