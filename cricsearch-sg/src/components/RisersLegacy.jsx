@@ -428,7 +428,7 @@ function CategoryDetailView({ category, onBack }) {
       )}
 
       {/* Back bar */}
-      <div style={{ backgroundColor: '#0a1120', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0.9rem 1.5rem' }}>
+      <div style={{ backgroundColor: '#0a1628', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0.9rem 1.5rem' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <button
             onClick={onBack}
@@ -570,7 +570,7 @@ function CategoryDetailView({ category, onBack }) {
 function HeroSection() {
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #0a1628 0%, #1e3a6e 55%, #0a1628 100%)',
+      backgroundColor: '#0a1628',
       padding: 'clamp(3rem, 9vw, 6rem) 1.5rem',
       textAlign: 'center', position: 'relative', overflow: 'hidden',
     }}>
@@ -975,7 +975,7 @@ function StatsWithRespect() {
 
 function PastPresentFuture() {
   return (
-    <div style={{ background: 'linear-gradient(135deg, #1a3a6e 0%, #0a1628 100%)', padding: 'clamp(3.5rem, 8vw, 6rem) 1.5rem', textAlign: 'center', color: '#fff' }}>
+    <div style={{ backgroundColor: '#0a1628', padding: 'clamp(3.5rem, 8vw, 6rem) 1.5rem', textAlign: 'center', color: '#fff' }}>
       <div style={{ maxWidth: '700px', margin: '0 auto' }}>
         <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>🚀</div>
         <div style={{ fontSize: '10px', fontWeight: '800', color: '#93c5fd', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Looking Ahead</div>
