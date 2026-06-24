@@ -3,6 +3,7 @@ import { searchAcrossPlatforms, checkHealth } from './services/apiService';
 import { AggregatedResults } from './components/AggregatedResults';
 import { MultiPlatformSearchBar } from './components/MultiPlatformSearchBar';
 import { RisersLegacy } from './components/RisersLegacy';
+import { VersionBadge } from './components/VersionBadge';
 
 export default function CricSearchApp() {
   const [searchResults, setSearchResults] = useState(null);
@@ -251,6 +252,7 @@ export default function CricSearchApp() {
           </div>
         </div>
       </footer>
+      <VersionBadge />
     </div>
   );
 }

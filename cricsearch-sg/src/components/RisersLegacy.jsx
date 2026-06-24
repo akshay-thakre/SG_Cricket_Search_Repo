@@ -844,7 +844,7 @@ function LightboxModal({ photos, startIndex, onClose }) {
 // ── Memories section ───────────────────────────────────────────────────────────
 
 function MemoriesSection() {
-  const [lightbox, setLightbox] = useState(null); // { photos, startIndex }
+  const [lightbox, setLightbox] = useState(null);
 
   const openLightbox = (item) => {
     if (item.photos) {
@@ -856,86 +856,146 @@ function MemoriesSection() {
 
   const watermarkUrl = cloudinaryUrl('Background_watermark_o4gudo', 'w_1200,f_auto,q_auto');
 
-  return (
-    <Section bg="#0a1628" style={{
-      position: 'relative',
-      backgroundImage: `url(${watermarkUrl})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center center',
-      backgroundSize: 'cover',
-    }}>
-      {/* Watermark overlay — keeps background very subtle */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,22,40,0.85)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'relative', zIndex: 1 }}>
-      {lightbox && (
-        <LightboxModal
-          photos={lightbox.photos}
-          startIndex={lightbox.startIndex}
-          onClose={() => setLightbox(null)}
-        />
-      )}
-      <SectionHeading
-        eyebrow="Club Memories"
-        title="Memories Down the Lane"
-        body="A gallery of team photos, match moments, farewells, and shared memories that define the Changi Risers journey. Tap any photo to view it."
-      />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.1rem' }}>
-        {MEMORY_ITEMS.map((item) => {
-          const isAvailable = item.status === 'available';
-          const thumbnail = item.photos ? item.photos[0].thumbnail : item.thumbnail;
-          const altText   = item.photos ? item.photos[0].alt : (item.alt || item.title);
-          const count     = item.photos ? item.photos.length : null;
-          return (
-            <div
-              key={item.id}
-              style={{
-                borderRadius: '12px', overflow: 'hidden',
-                border: `1px solid ${isAvailable ? '#d0dae8' : '#e2e8f0'}`,
-                backgroundColor: '#111e35',
-                boxShadow: isAvailable ? '0 2px 10px rgba(6,28,84,0.1)' : '0 2px 8px rgba(6,28,84,0.04)',
-              }}
-            >
-              {isAvailable ? (
-                <button
-                  onClick={() => openLightbox(item)}
-                  aria-label={`View ${item.title}`}
-                  style={{ display: 'block', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-                >
-                  <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#1a2d4a', overflow: 'hidden' }}>
-                    <img
-                      src={thumbnail}
-                      alt={altText}
-                      loading="lazy"
-                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
-                    {count && count > 1 && (
-                      <div style={{ position: 'absolute', top: '0.45rem', left: '0.5rem', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
-                        {count} photos
-                      </div>
-                    )}
-                    <div style={{ position: 'absolute', bottom: '0.45rem', right: '0.5rem', backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
-                      View ↗
-                    </div>
-                  </div>
-                </button>
-              ) : (
-                <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#1a2d4a' }}>
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                    <span style={{ fontSize: '30px', opacity: 0.4 }}>{item.icon}</span>
-                    <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
-                  </div>
+  const renderCard = (item) => {
+    const isAvailable = item.status === 'available';
+    const thumbnail   = item.photos ? item.photos[0].thumbnail : item.thumbnail;
+    const altText     = item.photos ? item.photos[0].alt : (item.alt || item.title);
+    const count       = item.photos ? item.photos.length : null;
+    return (
+      <div
+        key={item.id}
+        style={{
+          borderRadius: '12px', overflow: 'hidden',
+          border: `1px solid ${isAvailable ? '#d0dae8' : '#e2e8f0'}`,
+          backgroundColor: '#111e35',
+          boxShadow: isAvailable ? '0 2px 10px rgba(6,28,84,0.1)' : '0 2px 8px rgba(6,28,84,0.04)',
+        }}
+      >
+        {isAvailable ? (
+          <button
+            onClick={() => openLightbox(item)}
+            aria-label={`View ${item.title}`}
+            style={{ display: 'block', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#1a2d4a', overflow: 'hidden' }}>
+              <img
+                src={thumbnail}
+                alt={altText}
+                loading="lazy"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+              {count && count > 1 && (
+                <div style={{ position: 'absolute', top: '0.45rem', left: '0.5rem', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
+                  {count} photos
                 </div>
               )}
-              <div style={{ padding: '0.8rem 0.9rem' }}>
-                <div style={{ fontWeight: '700', fontSize: '13px', color: '#e2e8f0', marginBottom: '0.2rem' }}>{item.title}</div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: '1.5' }}>{item.photos ? item.photos[0].caption : item.caption}</div>
+              <div style={{ position: 'absolute', bottom: '0.45rem', right: '0.5rem', backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: '600', letterSpacing: '0.03em' }}>
+                View ↗
               </div>
             </div>
-          );
-        })}
+          </button>
+        ) : (
+          <div style={{ position: 'relative', paddingBottom: '62.5%', backgroundColor: '#1a2d4a' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '30px', opacity: 0.4 }}>{item.icon}</span>
+              <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Photo coming soon</span>
+            </div>
+          </div>
+        )}
+        <div style={{ padding: '0.8rem 0.9rem' }}>
+          <div style={{ fontWeight: '700', fontSize: '13px', color: '#e2e8f0', marginBottom: '0.2rem' }}>{item.title}</div>
+          <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: '1.5' }}>{item.photos ? item.photos[0].caption : item.caption}</div>
+        </div>
       </div>
-      </div>
-    </Section>
+    );
+  };
+
+  const leftItems  = MEMORY_ITEMS.filter((_, i) => i % 2 === 0);
+  const rightItems = MEMORY_ITEMS.filter((_, i) => i % 2 !== 0);
+
+  return (
+    <>
+      <style>{`
+        .memories-section {
+          padding: clamp(2.5rem, 6vw, 4rem) 1.5rem;
+          background-color: #0a1628;
+          background-image: url(${watermarkUrl});
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: cover;
+          position: relative;
+        }
+        .memories-overlay {
+          position: absolute;
+          inset: 0;
+          background-color: rgba(10,22,40,0.55);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .memories-inner {
+          position: relative;
+          z-index: 1;
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+        .memories-layout {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+        .memories-col {
+          width: 290px;
+          flex-shrink: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        @media (max-width: 768px) {
+          .memories-section {
+            background-image: none;
+          }
+          .memories-overlay {
+            display: none;
+          }
+          .memories-layout {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+          }
+          .memories-col {
+            width: 100%;
+            max-width: 420px;
+          }
+        }
+      `}</style>
+      <section className="memories-section">
+        <div className="memories-overlay" />
+        <div className="memories-inner">
+          {lightbox && (
+            <LightboxModal
+              photos={lightbox.photos}
+              startIndex={lightbox.startIndex}
+              onClose={() => setLightbox(null)}
+            />
+          )}
+          <SectionHeading
+            eyebrow="Club Memories"
+            title="Memories Down the Lane"
+            body="A gallery of team photos, match moments, farewells, and shared memories that define the Changi Risers journey. Tap any photo to view it."
+            light
+          />
+          <div className="memories-layout">
+            <div className="memories-col">
+              {leftItems.map(renderCard)}
+            </div>
+            <div style={{ flex: 1 }} />
+            <div className="memories-col">
+              {rightItems.map(renderCard)}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 
