@@ -431,10 +431,26 @@ app.post('/api/push-github', (req, res) => {
     // Restore the generated file and commit
     fs.writeFileSync(targetPath, generatedContent, 'utf8');
     run(`git add "${compConfig.targetRepoPath}"`);
-    run(`git commit -m "Update ${competition} stats JSON - ${today}"`);
-    logs.push('  ✓ commit created');
-    run('git push origin main');
-    logs.push('  ✓ push done');
+
+    // git commit exits 1 with "nothing to commit" when content is unchanged — treat as success
+    let committed = false;
+    try {
+      execSync(`git commit -m "Update ${competition} stats JSON - ${today}"`, { cwd: REPO_ROOT, stdio: 'pipe' });
+      logs.push('  ✓ commit created');
+      committed = true;
+    } catch (commitErr) {
+      const out = (commitErr.stdout?.toString() || '') + (commitErr.stderr?.toString() || '');
+      if (out.includes('nothing to commit')) {
+        logs.push('  ℹ no changes — stats already up to date on remote');
+      } else {
+        throw commitErr;
+      }
+    }
+
+    if (committed) {
+      run('git push origin main');
+      logs.push('  ✓ push done');
+    }
 
     res.json({ success: true, logs });
   } catch (err) {
