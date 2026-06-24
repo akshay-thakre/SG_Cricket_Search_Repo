@@ -943,7 +943,7 @@ function MemoriesSection() {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          padding: 0 0.75rem;
+          padding: 0 clamp(2rem, 5vw, 5rem);
         }
         .memories-col {
           width: clamp(210px, 22vw, 300px);
