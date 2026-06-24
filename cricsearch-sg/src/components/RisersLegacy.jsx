@@ -595,38 +595,27 @@ function HeroSection() {
         <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '580px', margin: '0 auto 2.5rem', lineHeight: '1.85' }}>
           Honouring the people, memories, milestones, and numbers that shaped Changi Risers Cricket — from the early days to the future ahead.
         </p>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', marginBottom: '2.5rem' }}>
           <div style={{ width: '40px', height: '2px', backgroundColor: '#f59e0b', borderRadius: '1px' }} />
           <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
           <div style={{ width: '40px', height: '2px', backgroundColor: '#f59e0b', borderRadius: '1px' }} />
         </div>
-      </div>
-    </div>
-  );
-}
-
-function WhyThisExists() {
-  return (
-    <Section bg="#0a1628">
-      <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
-        <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>❤️</div>
-        <SectionHeading eyebrow="Our Purpose" title="Why This Page Exists" light />
-        <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1.25rem' }}>
+        <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '640px', margin: '0 auto 1.25rem', lineHeight: '1.9' }}>
           Changi Risers Cricket is more than a team name. It is a journey built by players, captains, organisers, supporters, mentors, and friends who contributed across seasons.
         </p>
-        <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9', marginBottom: '1.25rem' }}>
+        <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '640px', margin: '0 auto 1.25rem', lineHeight: '1.9' }}>
           Some continue to play. Some have moved overseas. Some may no longer be active — but their role in shaping the club deserves to be remembered with respect.
         </p>
-        <p style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.9' }}>
+        <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '640px', margin: '0 auto 1.75rem', lineHeight: '1.9' }}>
           This page exists to honour <strong style={{ color: '#e2e8f0' }}>everyone who meaningfully contributed to Changi Risers</strong> — not only top performers, but every player, volunteer, and supporter who helped build this club into what it is today.
         </p>
-        <div style={{ marginTop: '2.25rem', padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.75rem)', backgroundColor: 'rgba(59,130,246,0.08)', borderRadius: '12px', borderLeft: '4px solid #3b82f6', textAlign: 'left' }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.75rem)', backgroundColor: 'rgba(59,130,246,0.08)', borderRadius: '12px', borderLeft: '4px solid #3b82f6', textAlign: 'left' }}>
           <p style={{ fontSize: '15px', color: '#93c5fd', fontStyle: 'italic', margin: 0, lineHeight: '1.8', fontWeight: '500' }}>
             "A club's legacy is not written by wins alone. It is written by the people who showed up, believed in each other, and made every match worth playing."
           </p>
         </div>
       </div>
-    </Section>
+    </div>
   );
 }
 
@@ -1287,7 +1276,6 @@ export function RisersLegacy() {
       {activeTab === 'legacy' && (
         <div>
           <HeroSection />
-          <WhyThisExists />
           <PastPresentFuture />
         </div>
       )}
