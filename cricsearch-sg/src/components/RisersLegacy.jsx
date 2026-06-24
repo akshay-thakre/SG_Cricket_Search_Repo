@@ -544,11 +544,6 @@ function CategoryDetailView({ category, onBack }) {
             })}
           </div>
 
-          <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '13px', color: '#334155', fontStyle: 'italic' }}>
-              Real names, photos, and tribute stories will be updated here. This list is not exhaustive — more names will be added over time.
-            </p>
-          </div>
 
           {/* Bottom back button */}
           <div style={{ marginTop: '3rem', textAlign: 'center' }}>
