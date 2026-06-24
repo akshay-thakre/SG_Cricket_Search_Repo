@@ -1053,42 +1053,6 @@ function StatsWithRespect() {
   );
 }
 
-function PastPresentFuture() {
-  return (
-    <div style={{ backgroundColor: '#0a1628', padding: 'clamp(3.5rem, 8vw, 6rem) 1.5rem', textAlign: 'center', color: '#fff' }}>
-      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-        <div style={{ fontSize: '40px', marginBottom: '1.25rem' }}>🚀</div>
-        <div style={{ fontSize: '10px', fontWeight: '800', color: '#93c5fd', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Looking Ahead</div>
-        <h2 style={{ fontSize: 'clamp(24px, 4vw, 34px)', fontWeight: '800', margin: '0 0 1.5rem 0', lineHeight: '1.2', color: '#f1f5f9' }}>
-          Past, Present &amp; Future
-        </h2>
-        <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '1.25rem' }}>
-          Risers Legacy is intended to evolve over time — with player stories, photos, milestones, match memories, and data-backed insights.
-        </p>
-        <p style={{ fontSize: '15px', color: '#cbd5e1', lineHeight: '1.9', marginBottom: '2rem' }}>
-          The goal is to preserve the club's journey, respect those who built it, celebrate those who carry it today, and inspire those who will wear the colours tomorrow.
-        </p>
-        <div style={{ fontSize: 'clamp(15px, 2.5vw, 20px)', fontWeight: '700', color: '#f59e0b', fontStyle: 'italic', padding: 'clamp(1rem, 3vw, 1.25rem) clamp(1rem, 3vw, 1.75rem)', backgroundColor: 'rgba(245,158,11,0.08)', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.22)', lineHeight: '1.4', marginBottom: '2rem' }}>
-          "Past. Present. Future. One Riser Legacy."
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
-          {[
-            { icon: '📜', label: 'Past',    desc: 'Honour those who built the foundation' },
-            { icon: '🏏', label: 'Present', desc: 'Celebrate those carrying the identity today' },
-            { icon: '⭐', label: 'Future',  desc: 'Inspire those who will wear the colours tomorrow' },
-          ].map((p, i) => (
-            <div key={i} style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '1.25rem 0.75rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ fontSize: '26px', marginBottom: '0.5rem' }}>{p.icon}</div>
-              <div style={{ fontWeight: '800', fontSize: '14px', color: '#e2e8f0', marginBottom: '0.35rem' }}>{p.label}</div>
-              <div style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.6' }}>{p.desc}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Risers Jerseys section ─────────────────────────────────────────────────────
 
 const RISERS_JERSEYS = [
@@ -1351,7 +1315,6 @@ export function RisersLegacy() {
       {activeTab === 'legacy' && (
         <div>
           <HeroSection />
-          <PastPresentFuture />
         </div>
       )}
       {activeTab === 'journey'  && <JourneySoFar />}
