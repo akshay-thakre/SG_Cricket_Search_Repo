@@ -381,6 +381,7 @@ function CompetitionSection({ compKey, label, accent }) {
 
   async function handlePush() {
     setPushing(true);
+    setErrors([]);
     addLog('Running git push...', 'action');
     try {
       const resp = await fetch('/api/push-github', {
