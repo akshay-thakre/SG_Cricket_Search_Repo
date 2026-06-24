@@ -80,13 +80,13 @@ const TIMELINE_ITEMS = [
 const LEGACY_CATEGORIES = [
   {
     id:               'founding-contributors',
-    cardTitle:        'Founding Contributor',
+    cardTitle:        'Founding Contributors',
     title:            'Founding Contributors',
     contributionType: 'Club Foundation',
     icon:             '🏗️',
     accentColor:      '#0066cc',
     ctaLabel:         'View Founding Contributors',
-    cardTribute:      'A tribute story will be added here to honour the role in establishing the Changi Risers identity and spirit from the very beginning.',
+    cardTribute:      null,
     detailDescription:'Honouring the early contributors who helped establish the Changi Risers identity, spirit, and foundation.',
     people: [
       { name: 'Shailesh Thakur',       role: 'Founding Contributor', photo: 'shailesh_fm' },
@@ -98,13 +98,13 @@ const LEGACY_CATEGORIES = [
   },
   {
     id:               'former-captains',
-    cardTitle:        'Former Captain',
+    cardTitle:        'Former Captains',
     title:            'Former Captains',
     contributionType: 'Leadership & Team Culture',
     icon:             '🎯',
     accentColor:      '#7c3aed',
     ctaLabel:         'View Former Captains',
-    cardTribute:      'A tribute story will be added here to honour leadership, commitment, and contribution to the Risers journey across seasons.',
+    cardTribute:      null,
     detailDescription:'Recognising the leaders who guided the team, shaped culture, and carried responsibility across seasons.',
     people: [
       { name: 'Gajendra Agarwal',      role: 'Former Captain',           photo: 'Gajendra_fc_o4xaqe' },
@@ -116,13 +116,13 @@ const LEGACY_CATEGORIES = [
   },
   {
     id:               'match-winners',
-    cardTitle:        'Match Winner',
+    cardTitle:        'Match Winners',
     title:            'Match Winners',
     contributionType: 'Clutch Performances',
     icon:             '🏆',
     accentColor:      '#d97706',
     ctaLabel:         'View Match Winners',
-    cardTribute:      'A tribute story will be added here to honour the match-defining moments, innings, and spells that won games for the Risers.',
+    cardTribute:      'Cricket is a team game, and every victory is built on the contributions of many. The Match Winners wall honours those whose efforts have helped shape memorable moments for Changi Risers — while acknowledging that every achievement is ultimately made possible by the collective spirit of the team.',
     detailDescription:'Celebrating the players who created defining moments with bat, ball, fielding, and pressure performances.',
     people: [
       { name: 'Vikram Singh Salaria',  role: 'Match Winner', photo: 'vicky_mw1_jtjrmz' },
@@ -141,13 +141,13 @@ const LEGACY_CATEGORIES = [
   },
   {
     id:               'team-builders',
-    cardTitle:        'Team Builder',
+    cardTitle:        'Team Builders',
     title:            'Team Builders',
     contributionType: 'Culture & Bonding',
     icon:             '🤝',
     accentColor:      '#16a34a',
     ctaLabel:         'View Team Builders',
-    cardTribute:      'A tribute story will be added here to honour the effort that went into building team culture, trust, and lasting friendships.',
+    cardTribute:      null,
     detailDescription:'Respecting those who strengthened bonding, culture, trust, and togetherness within the Risers family.',
     people: [
       { name: 'Gaurav Khandelwal',     role: 'Team Builder', photo: 'Gaurav_Khandelwal_xqgfes' },
@@ -160,13 +160,13 @@ const LEGACY_CATEGORIES = [
   },
   {
     id:               'overseas-risers',
-    cardTitle:        'Overseas Riser',
+    cardTitle:        'Overseas Risers',
     title:            'Overseas Risers',
     contributionType: 'Global Riser Community',
     icon:             '✈️',
     accentColor:      '#0891b2',
     ctaLabel:         'View Overseas Risers',
-    cardTribute:      'A tribute story will be added here for a Riser who moved overseas but remains part of the club spirit and legacy forever.',
+    cardTribute:      null,
     detailDescription:'Remembering Risers who moved abroad but remain part of the club\'s journey, memories, and legacy.',
     people: [
       { name: 'Santhosh Dommety',      role: 'Overseas Riser', photo: 'SanthoshDommety_mw1_qi2jdt' },
@@ -264,13 +264,13 @@ const LEGACY_CATEGORIES = [
   },
   {
     id:               'silent-contributors',
-    cardTitle:        'Silent Contributor',
+    cardTitle:        'Silent Contributors',
     title:            'Silent Contributors',
     contributionType: 'Off-Field Dedication',
     icon:             '💪',
     accentColor:      '#475569',
     ctaLabel:         'View Silent Contributors',
-    cardTribute:      'A tribute story will be added here for someone who contributed behind the scenes — organising, supporting, and making things happen.',
+    cardTribute:      null,
     detailDescription:'Recognising those who contributed behind the scenes — organising, supporting, helping, and making things happen.',
     people: [
       { name: 'Amol Babu',            role: 'Silent Contributor', photo: 'Amolbabu_ippt6f' },
@@ -289,7 +289,7 @@ const LEGACY_CATEGORIES = [
     icon:             '⭐',
     accentColor:      '#dc2626',
     ctaLabel:         'View Current Core Players',
-    cardTribute:      'A tribute story will be added here to celebrate an active contributor carrying the Changi Risers identity forward today.',
+    cardTribute:      null,
     detailDescription:'Celebrating the present-day Risers who continue to carry the club identity forward on and off the field.',
     people: [
       { name: 'Kintul Mistry',        role: 'Current Core Player', photo: 'kintul_FC' },
@@ -679,7 +679,22 @@ function LegendsWall({ onSelectCategory }) {
             <div style={{ padding: '1.1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '9px', fontWeight: '800', color: cat.accentColor, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>{cat.contributionType}</div>
               <div style={{ fontWeight: '700', fontSize: '15px', color: '#f1f5f9', marginBottom: '0.6rem' }}>{cat.cardTitle}</div>
-              <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.7', margin: '0 0 1rem 0', flex: 1 }}>{cat.cardTribute}</p>
+              {cat.cardTribute && (
+                cat.id === 'match-winners' ? (
+                  <div style={{
+                    margin: '0 0 1rem 0', flex: 1,
+                    borderLeft: `2px solid ${cat.accentColor}60`,
+                    paddingLeft: '0.75rem',
+                  }}>
+                    <p style={{ fontSize: '11.5px', color: '#94a3b8', lineHeight: '1.75', margin: 0, fontStyle: 'italic' }}>
+                      {cat.cardTribute}
+                    </p>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.7', margin: '0 0 1rem 0', flex: 1 }}>{cat.cardTribute}</p>
+                )
+              )}
+              {!cat.cardTribute && <div style={{ flex: 1 }} />}
               <button
                 onClick={() => onSelectCategory(cat.id)}
                 style={{
