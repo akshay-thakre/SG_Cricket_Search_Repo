@@ -17,7 +17,6 @@ const selectors = require('./sca.selectors');
  * @param {string} [params.lastName]
  * @param {string} [params.teamName]
  * @param {string} [params.playerCCId]
- * @param {string} [params.emailId]
  * @param {string} [params.gender]
  * @param {string} [params.internalClub]
  * @param {string} [params.battingStyle]

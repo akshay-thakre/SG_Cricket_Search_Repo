@@ -18,7 +18,6 @@ const SEARCH_FIELDS = [
   'lastName',
   'teamName',
   'playerCCId',
-  'emailId',
   'gender',
   'internalClub',
   'battingStyle',
