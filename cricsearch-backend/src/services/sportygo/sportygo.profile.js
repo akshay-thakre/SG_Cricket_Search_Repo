@@ -122,7 +122,6 @@ async function fetchSportygoPlayerStats(playerId, clubId) {
     batting,
     bowling,
     meta: {
-      upstreamUrl: profileUrl,
       scrapedAt: new Date().toISOString(),
       blocked: status === 403 || status === 429,
       empty: isEmpty,
