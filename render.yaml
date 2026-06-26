@@ -23,7 +23,7 @@ services:
     rootDir: cricsearch-backend
     region: singapore          # closest to SCA servers and your users
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: node server.js
     healthCheckPath: /api/health
     envVars:
@@ -41,7 +41,7 @@ services:
   - type: static
     name: cricsearch-frontend
     rootDir: cricsearch-sg
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     staticPublishPath: build
     # SPA fallback: serve index.html for all routes so React handles routing
     routes:
