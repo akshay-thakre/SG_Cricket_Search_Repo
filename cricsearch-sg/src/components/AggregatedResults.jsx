@@ -74,7 +74,10 @@ function normalizeForAgg(player, scaStatsMap) {
     const balls = (b && b.runs != null && b.strikeRate)
       ? Math.round((b.runs / b.strikeRate) * 100) : null;
     return {
-      batting: b ? { mat: b.matches||0, inns: b.innings||0, notOuts: b.notOuts||0, runs: b.runs||0, balls: balls||0 } : null,
+      // Keep balls as null when SR is N/A — do NOT fall back to 0.
+      // Coercing null→0 would make SCA runs contribute to the SR numerator
+      // while contributing nothing to the denominator, inflating aggregate SR.
+      batting: b ? { mat: b.matches||0, inns: b.innings||0, notOuts: b.notOuts||0, runs: b.runs||0, balls } : null,
       bowling: bwl ? { overs: bwl.overs||0, runs: bwl.runs||0, wickets: bwl.wickets||0 } : null,
     };
   }
@@ -128,9 +131,23 @@ function normalizeForAgg(player, scaStatsMap) {
 
 function aggregateAll(normalizedList) {
   let mat=0, inns=0, notOuts=0, runs=0, balls=0, overs=0, runsConceded=0, wickets=0;
+  // runsForSR tracks runs only from sources where balls faced is known.
+  // SR must never include runs from sources with unknown balls in the numerator,
+  // as that inflates the result (e.g. SCA live when SR is N/A → balls = null).
+  let runsForSR=0;
   let hasBat=false, hasBowl=false;
   for (const n of normalizedList) {
-    if (n.batting) { hasBat=true; mat+=(Number(n.batting.mat)||0); inns+=(Number(n.batting.inns)||0); notOuts+=(Number(n.batting.notOuts)||0); runs+=(Number(n.batting.runs)||0); balls+=(Number(n.batting.balls)||0); }
+    if (n.batting) {
+      hasBat=true;
+      mat+=(Number(n.batting.mat)||0);
+      inns+=(Number(n.batting.inns)||0);
+      notOuts+=(Number(n.batting.notOuts)||0);
+      runs+=(Number(n.batting.runs)||0);
+      if (n.batting.balls != null) {
+        balls    += (Number(n.batting.balls)||0);
+        runsForSR += (Number(n.batting.runs)||0);
+      }
+    }
     if (n.bowling) { hasBowl=true; overs+=(Number(n.bowling.overs)||0); runsConceded+=(Number(n.bowling.runs)||0); wickets+=(Number(n.bowling.wickets)||0); }
   }
   const dismissals = inns - notOuts;
@@ -138,9 +155,10 @@ function aggregateAll(normalizedList) {
   return {
     hasBat, hasBowl,
     batting: {
-      mat, inns, notOuts, runs, balls,
+      mat, inns, notOuts, runs, balls, runsForSR,
       avg:  dismissals > 0 ? d(runs / dismissals) : '—',
-      sr:   balls > 0      ? d((runs / balls) * 100) : '—',
+      // Use runsForSR (not total runs) so leagues with unknown balls don't inflate SR
+      sr:   balls > 0      ? d((runsForSR / balls) * 100) : '—',
     },
     bowling: {
       overs: d(overs, 1), runs: runsConceded, wickets,
@@ -1949,7 +1967,7 @@ function PlayerInsightsSection({ results, scaStatsMap }) {
     runs:       agg.batting.runs,
     balls:      agg.batting.balls,
     average:    dismissals > 0 ? agg.batting.runs / dismissals : 0,
-    strikeRate: agg.batting.balls > 0 ? (agg.batting.runs / agg.batting.balls) * 100 : 0,
+    strikeRate: agg.batting.balls > 0 ? (agg.batting.runsForSR / agg.batting.balls) * 100 : 0,
     fifties: 0, hundreds: 0, sixes: 0, ducks: 0, highestScore: null,
   } : null;
 
