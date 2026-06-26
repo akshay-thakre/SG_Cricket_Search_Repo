@@ -105,6 +105,9 @@ const SCA_CLUBS = [
   'West Coast Warriors',
 ];
 
+/** Maximum character length for any individual search field value */
+const MAX_FIELD_LENGTH = 100;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/sca/players/search — Main player search
 // ─────────────────────────────────────────────────────────────────────────────
@@ -114,7 +117,13 @@ router.post('/api/sca/players/search', async (req, res) => {
     const params = {};
     for (const field of SEARCH_FIELDS) {
       if (req.body[field] !== undefined && req.body[field] !== null) {
-        params[field] = String(req.body[field]).trim();
+        const value = String(req.body[field]).trim();
+        if (value.length > MAX_FIELD_LENGTH) {
+          return res.status(400).json({
+            error: `Field '${field}' exceeds maximum allowed length of ${MAX_FIELD_LENGTH} characters.`,
+          });
+        }
+        params[field] = value;
       }
     }
 
@@ -133,7 +142,6 @@ router.post('/api/sca/players/search', async (req, res) => {
     console.error('[SCA:search] Error:', err.message);
     return res.status(502).json({
       error: 'Failed to fetch results from SCA.',
-      message: err.message,
       source: 'sca',
     });
   }
@@ -156,7 +164,6 @@ router.get('/api/sca/players/:id/stats', async (req, res) => {
     console.error('[SCA:stats] Error:', err.message);
     return res.status(502).json({
       error: 'Failed to fetch player statistics.',
-      message: err.message,
       source: 'sca',
       profileFetched: false,
     });
@@ -170,7 +177,6 @@ router.get('/api/sca/health', (_req, res) => {
   res.json({
     status: 'ok',
     source: 'sca',
-    method: 'cheerio',
     timestamp: new Date().toISOString(),
   });
 });

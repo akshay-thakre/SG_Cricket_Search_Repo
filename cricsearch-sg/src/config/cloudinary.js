@@ -1,7 +1,8 @@
 // Cloudinary configuration
-// Replace YOUR_CLOUD_NAME with your actual Cloudinary cloud name after signup
+// Set REACT_APP_CLOUDINARY_CLOUD_NAME in your .env file
 
-export const CLOUDINARY_CLOUD_NAME = 'dcfhzuyhe';
+export const CLOUDINARY_CLOUD_NAME =
+  process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || 'dcfhzuyhe';
 export const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
 // Helper function to build a Cloudinary image URL
