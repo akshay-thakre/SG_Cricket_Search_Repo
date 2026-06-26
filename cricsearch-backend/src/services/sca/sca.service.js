@@ -30,7 +30,6 @@ const selectors = require('./sca.selectors');
  *   players: Array<object>,
  *   meta: {
  *     method: string,
- *     upstreamUrl: string,
  *     responseStatus: number,
  *     blocked: boolean,
  *     empty: boolean,
@@ -63,7 +62,6 @@ async function searchPlayers(params = {}) {
     players: result.players,
     meta: {
       method: 'cheerio',
-      upstreamUrl: `${selectors.BASE_URL}${selectors.SEARCH_PATH}`,
       responseStatus: status,
       blocked: false,
       empty: result.empty,

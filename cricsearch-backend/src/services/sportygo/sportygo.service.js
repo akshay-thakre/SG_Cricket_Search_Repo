@@ -38,7 +38,6 @@ async function searchPlayers(params = {}) {
     players,
     meta: {
       method: 'axios-cheerio',
-      upstreamUrl: searchUrl,
       blocked: status === 403 || status === 429,
       empty,
       message: empty
