@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const scaRoutes     = require('./src/routes/sca.routes');
@@ -8,6 +10,15 @@ const yplRoutes     = require('./src/routes/ypl.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+// ── Security headers (helmet) ─────────────────────────────────────────────────
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // API-only server; no HTML served
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 // In production, set ALLOWED_ORIGIN to a comma-separated list of allowed origins
@@ -33,10 +44,35 @@ app.use(
   })
 );
 
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// General limiter: 120 requests per minute per IP
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+// Strict limiter for scraping endpoints to prevent upstream IP bans
+const searchLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many search requests, please slow down.' },
+});
+
+app.use(generalLimiter);
+
 // ── Body parsing ──────────────────────────────────────────────────────────────
-app.use(express.json());
+// Explicit 16 kb limit — search payloads are small; large bodies are rejected
+app.use(express.json({ limit: '16kb' }));
 
 // ── Routes ────────────────────────────────────────────────────────────────────
+// Apply strict rate limiting to live-scraping search endpoints
+app.use('/api/sca/players/search', searchLimiter);
+app.use('/api/sportygo/players/search', searchLimiter);
 app.use(scaRoutes);
 app.use(sportygoRoutes);
 app.use(yplRoutes);
@@ -46,11 +82,10 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     message: 'CricSearch SG backend API is running',
-    env: process.env.NODE_ENV || 'development',
     platforms: {
-      sca:     { status: 'active', method: 'cheerio' },
-      sportygo: { status: 'active', method: 'axios-cheerio' },
-      ypl:     { status: 'active', method: 'static-json', displayName: 'YPL' },
+      sca:     { status: 'active' },
+      sportygo: { status: 'active' },
+      ypl:     { status: 'active', displayName: 'YPL' },
     },
     timestamp: new Date().toISOString(),
   });
@@ -64,7 +99,11 @@ app.use((_req, res) => {
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
   console.error('[server] Unhandled error:', err.message);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
+  res.status(500).json({
+    error: 'Internal server error',
+    // Omit internal details in production to prevent information leakage
+    ...(IS_PROD ? {} : { message: err.message }),
+  });
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
